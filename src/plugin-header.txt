@@ -1,3 +1,4 @@
 //@name usage-Plugin
 //@display-name Usage Plugin
-//@arg usage_example string
+//@arg usage_db string
+//@arg setting string
