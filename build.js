@@ -2,18 +2,89 @@ const esbuild = require('esbuild');
 const fs = require('fs');
 const path = require('path');
 
-// 플러그인 헤더 (src/plugin-header.txt 파일에서 읽어옴)
-function getPluginHeader() {
-  const headerPath = path.join(__dirname, 'src', 'plugin-header.txt');
-  if (fs.existsSync(headerPath)) {
-    return fs.readFileSync(headerPath, 'utf-8');
+// consts.ts와 args.ts에서 정보 추출
+function extractPluginInfo() {
+  try {
+    // consts.ts 읽기
+    const constsPath = path.join(__dirname, 'src', 'consts.ts');
+    const constsContent = fs.readFileSync(constsPath, 'utf-8');
+    
+    // PLUGIN_TITLE과 PLUGIN_VERSION 추출
+    const titleMatch = constsContent.match(/const\s+PLUGIN_TITLE\s*=\s*'([^']+)'/);
+    const versionMatch = constsContent.match(/const\s+PLUGIN_VERSION\s*=\s*'([^']+)'/);
+    const title = titleMatch ? titleMatch[1] : 'Usage Plugin';
+    const version = versionMatch ? versionMatch[1] : 'v0.0.1';
+    
+    // PLUGIN_NAME 동적 생성
+    const pluginName = `${title}-${version}`;
+    
+    // consts.ts에서 상수값들 추출 (DB_ARG, PRICE_ARG, PRICE_TEMP_ARG 등)
+    const constValues = {};
+    const constMatches = constsContent.matchAll(/const\s+(\w+)\s*=\s*'([^']+)'/g);
+    for (const match of constMatches) {
+      constValues[match[1]] = match[2];
+    }
+    
+    // args.ts 읽기
+    const argsPath = path.join(__dirname, 'src', 'consts', 'args.ts');
+    const argsContent = fs.readFileSync(argsPath, 'utf-8');
+    
+    // RISU_ARGS 객체에서 인자 추출
+    const argsMatch = argsContent.match(/export\s+const\s+RISU_ARGS:\s*RisuArg\s*=\s*{([^}]+)}/s);
+    const args = [];
+    
+    if (argsMatch) {
+      const argsBody = argsMatch[1];
+      // [변수명]: RisuArgType.타입 형태 찾기
+      const argMatches = argsBody.match(/\[(\w+)\]:\s*RisuArgType\.(\w+)/g);
+      if (argMatches) {
+        argMatches.forEach(arg => {
+          const match = arg.match(/\[(\w+)\]:\s*RisuArgType\.(\w+)/);
+          if (match) {
+            const argVarName = match[1];
+            const argTypeRisu = match[2];
+            
+            // 변수명에서 실제 값 가져오기
+            const argRealName = constValues[argVarName] || argVarName;
+            
+            // RisuArgType을 실제 타입으로 변환
+            let argType = 'string'; // 기본값
+            if (argTypeRisu === 'Int') {
+              argType = 'int';
+            } else if (argTypeRisu === 'String') {
+              argType = 'string';
+            } 
+            
+            args.push({ name: argRealName, type: argType });
+          }
+        });
+      }
+    }
+    
+    return { pluginName, title, version, args };
+  } catch (error) {
+    console.error('Error extracting plugin info:', error.message);
+    return {
+      pluginName: '',
+      title: '',
+      version: '',
+      args: []
+    };
   }
+}
+
+// 플러그인 헤더 생성
+function getPluginHeader() {
+  const info = extractPluginInfo();
+  let header = `//@name ${info.pluginName}\n`;
+  header += `//@display-name ${info.title}\n`;
   
-  // 기본 헤더
-  return `//@name usage-Plugin
-//@display-name Usage Plugin (TypeScript)
-//@arg example_setting string
-`;
+  // RISU_ARGS에서 추출한 인자들 추가
+  info.args.forEach(arg => {
+    header += `//@arg ${arg.name} ${arg.type}\n`;
+  });
+  
+  return header;
 }
 
 // esbuild 플러그인: 헤더 추가
