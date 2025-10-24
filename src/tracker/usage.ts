@@ -1,3 +1,4 @@
+import { Logger } from "../logger";
 import { BaseFormat } from "../format/base";
 import { getFormat } from "../format/formatter";
 import { PriceManager } from "../manager/pricing";
@@ -35,10 +36,15 @@ export class UsageTracker {
     private modeTracker: ModeTracker = new ModeTracker();
     private fetchWrapper: FetchWrapper = new FetchWrapper();
     private requestInfoMap: Map<RequestData, { type: RequestType, format: BaseFormat }> = new Map();
+    private onRequest: OnRequestCallback;
+    private onResponse: OnResponseCallback;
 
     constructor() {
-        this.fetchWrapper.addOnRequest(this.trackRequest.bind(this));
-        this.fetchWrapper.addOnResponse(this.processResponse.bind(this));
+        this.onRequest = this.trackRequest.bind(this);
+        this.onResponse = this.processResponse.bind(this);
+        
+        this.fetchWrapper.addOnRequest(this.onRequest);
+        this.fetchWrapper.addOnResponse(this.onResponse);
     }
 
     private trackRequest: OnRequestCallback = (data: RequestData) => {
@@ -72,7 +78,11 @@ export class UsageTracker {
     }
 
     destroy() {
-        this.fetchWrapper.removeOnRequest(this.trackRequest.bind(this));
-        this.fetchWrapper.removeOnResponse(this.processResponse.bind(this));
+        this.fetchWrapper.removeOnRequest(this.onRequest);
+        this.fetchWrapper.removeOnResponse(this.onResponse);
+        this.fetchWrapper.destroy();
+        this.modeTracker.destroy();
+        this.requestInfoMap.clear();
+        Logger.log('UsageTracker destroyed.');
     }
 }

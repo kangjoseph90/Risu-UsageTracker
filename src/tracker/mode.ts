@@ -8,22 +8,24 @@ import { parseRequestType } from "../util";
  */
 export class ModeTracker {
     private lastMode = RequestType.Unknown
+    private replacer: ReplacerFunction
 
     constructor() {
-        const replacer: ReplacerFunction = (content: any[], type: string) => {
+        this.replacer = (content: any[], type: string) => {
             this.lastMode = parseRequestType(type);
             Logger.log(`ModeTracker: Detected mode - ${this.lastMode}`);
             return content;
         }
-        const unload = () => {
-            RisuAPI.removeRisuReplacer(ReplacerType.BeforeRequest, replacer);
-        }
 
-        RisuAPI.addRisuReplacer(ReplacerType.BeforeRequest, replacer.bind(this));
-        RisuAPI.onUnload(unload.bind(this));
+        RisuAPI.addRisuReplacer(ReplacerType.BeforeRequest, this.replacer);
     }
 
     getCurrentMode(): RequestType {
         return this.lastMode;
+    }
+
+    destroy() {
+        RisuAPI.removeRisuReplacer(ReplacerType.BeforeRequest, this.replacer);
+        Logger.log('ModeTracker destroyed.');
     }
 }
