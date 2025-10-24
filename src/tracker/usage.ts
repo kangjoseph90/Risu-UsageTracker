@@ -75,6 +75,4 @@ export class UsageTracker {
         this.fetchWrapper.removeOnRequest(this.trackRequest.bind(this));
         this.fetchWrapper.removeOnResponse(this.processResponse.bind(this));
     }
-
-
 }

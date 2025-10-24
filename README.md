@@ -1,60 +1,48 @@
-# Usage Plugin
+# RisuAI UsageTracker Plugin
 
-TypeScript로 개발된 Usage 플러그인입니다.
+API 사용량과 비용을 추적하고 관리하는 RisuAI 플러그인입니다.
 
-## 프로젝트 구조
+## 기능
 
-```
-usage/
-├── src/
-│   ├── index.ts              # 메인 진입점
-│   ├── plugin-header.txt     # 플러그인 헤더
-│   └── types/                # TypeScript 타입 정의
-├── dist/                      # 빌드 결과물
-├── package.json              # 프로젝트 의존성
-├── tsconfig.json            # TypeScript 설정
-├── build.js                 # 빌드 스크립트
-└── README.md                # 이 파일
-```
+- **API 사용량 추적** - 요청/응답 토큰 수 기록
+- **실시간 비용 계산** - 다양한 API의 가격 정보 적용
+- **데이터 저장** - 사용 기록을 로컬에 저장
+- **다중 API 지원** - OpenAI, Anthropic, Google 등
 
-## 개발 시작
+## 설치
 
-### 1. 의존성 설치
+1. `dist/plugin.js` 파일을 RisuAI 플러그인 폴더에 복사합니다.
+2. RisuAI에서 플러그인을 로드합니다.
+
+## 개발
+
+### 설정
+
 ```bash
 npm install
 ```
 
-### 2. 개발 모드 실행 (파일 변경 감시)
-```bash
-npm run dev
-```
+### 빌드
 
-또는
-
-```bash
-npm run watch
-```
-
-### 3. 프로덕션 빌드
 ```bash
 npm run build
 ```
 
-## 빌드 결과
+### 개발 모드 (자동 재빌드)
 
-빌드 완료 후 `dist/plugin.js` 파일이 생성되며, 이 파일이 Risu 플러그인으로 사용됩니다.
+```bash
+npm run dev
+```
 
-## TypeScript 설정
+## 플러그인 구성
 
-- **Target**: ES2020
-- **Module**: CommonJS
-- **Output Format**: IIFE (즉시 실행 함수 표현식)
-- **Bundle**: esbuild를 통한 번들링
+| 폴더 | 설명 |
+|------|------|
+| `src/tracker/` | 사용량/비용 추적 로직 |
+| `src/format/` | API 형식 변환 (OpenAI, Anthropic, Google) |
+| `src/manager/` | 데이터 관리 (사용량, 가격) |
+| `src/ui/` | 사용자 인터페이스 |
 
-## 주요 특징
+## 라이선스
 
-- ✅ TypeScript 지원
-- ✅ 자동 빌드 (watch 모드)
-- ✅ Source maps 생성
-- ✅ 플러그인 헤더 자동 추가
-- ✅ Strict 모드 활성화
+MIT

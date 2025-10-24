@@ -1,38 +1,45 @@
-# Usage Plugin 개발 환경 설정
+# UsageTracker Plugin 개발 설정
 
-이 파일은 LBI 플러그인과 동일한 TypeScript 개발 환경으로 설정되었습니다.
+TypeScript 기반 RisuAI 플러그인 개발 환경입니다.
 
-## 설정된 파일
+## 초기 설정
 
-- ✅ `package.json` - 프로젝트 의존성 및 빌드 스크립트
-- ✅ `tsconfig.json` - TypeScript 컴파일러 설정
-- ✅ `build.js` - esbuild 기반 빌드 스크립트
-- ✅ `src/` - TypeScript 소스 코드 디렉토리
-- ✅ `src/index.ts` - 메인 진입점
-- ✅ `src/plugin-header.txt` - 플러그인 헤더
-- ✅ `README.md` - 개발 가이드
+### 의존성 설치
 
-## 다음 단계
+```bash
+npm install
+```
 
-1. **의존성 설치**
-   ```bash
-   cd usage
-   npm install
-   ```
+### 빌드
 
-2. **개발 모드 시작**
-   ```bash
-   npm run dev
-   ```
+프로덕션 빌드:
 
-3. **`src/index.ts`에서 플러그인 코드 작성**
+```bash
+npm run build
+```
 
-4. **빌드 완료 후 `dist/plugin.js` 사용**
+개발 모드 (자동 재빌드):
 
-## LBI와의 주요 차이점
+```bash
+npm run dev
+```
 
-- 플러그인 이름: `usage-plugin`
-- Global name: `__USAGE_PLUGIN__`
-- 의존성: uuid 포함 (필요에 따라 추가 가능)
+## 구조
 
-모든 설정이 LBI 플러그인과 동일하게 구성되었습니다.
+- `src/` - TypeScript 소스 코드
+- `dist/plugin.js` - 빌드 결과물 (RisuAI에 복사)
+- `build.js` - esbuild 기반 빌드 스크립트
+
+## 플러그인 헤더
+
+`consts.ts`의 `PLUGIN_NAME`과 `args.ts`의 `RISU_ARGS`에서 자동으로 헤더를 생성합니다.
+
+- `//@name` - PLUGIN_TITLE + PLUGIN_VERSION
+- `//@display-name` - PLUGIN_TITLE
+- `//@arg` - RISU_ARGS의 인자들
+
+## 사용
+
+1. 빌드: `npm run build`
+2. `dist/plugin.js`를 RisuAI 플러그인 폴더에 복사
+3. RisuAI에서 플러그인 로드
