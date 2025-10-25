@@ -13,16 +13,11 @@ const formats = [
 ]
 
 export function getFormat(requestData: RequestData, response: Response, data?: string): BaseFormat | null {
-    if(!isLLMRequest(requestData)) {
-        return null;
-    }
-    Logger.log('getFormat: LLM request detected, checking formats.', requestData, data);
     for(const FormatClass of formats) {
         const formatInstance = new FormatClass(requestData, response, data);
         if(formatInstance.checkFormat()) {
             return formatInstance;
         }
     }
-
     return null;
 }

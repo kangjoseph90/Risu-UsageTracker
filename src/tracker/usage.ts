@@ -1,12 +1,12 @@
 import { Logger } from "../logger";
 import { BaseFormat } from "../format/base";
 import { getFormat } from "../format/formatter";
-import { PriceManager } from "../manager/pricing";
+import { PriceManager } from "../manager/price";
 import { UsageManager } from "../manager/usage";
 import { CostInfo, OnRequestCallback, OnResponseCallback, PriceInfo, RequestData, RequestType, UsageInfo, UsageRecord } from "../types";
 import { FetchWrapper } from "./fetch";
 import { ModeTracker } from "./mode";
-import { getRequestUrl } from "../util";
+import { getRequestUrl, isLLMRequest } from "../util";
 
 function getUsageRecord(type: RequestType, modelId: string, url: string, usageInfo: UsageInfo, priceInfo: PriceInfo): UsageRecord {
     const costInfo: CostInfo = calculateCost(usageInfo, priceInfo);
@@ -47,13 +47,21 @@ export class UsageTracker {
     }
 
     private trackRequest: OnRequestCallback = (requestData: RequestData) => {
+        // LLM 요청이 아니면 추적하지 않음
+        if (!isLLMRequest(requestData)) {
+            return;
+        }
+
         const type = this.modeTracker.getCurrentMode();
         this.requestInfoMap.set(requestData, type);
     }
 
     private processResponse: OnResponseCallback = (requestData: RequestData, response: Response, data?: string) => {
+        // LLM 요청만 추적됨
         const type = this.requestInfoMap.get(requestData);
-        if(!type) return;
+        if (!type) return;
+
+        Logger.log('UsageTracker: Processing response for LLM request. type:', type, 'data:', data);
         
         this.requestInfoMap.delete(requestData);
 
@@ -61,21 +69,21 @@ export class UsageTracker {
         if (!url) return;
 
         const format = getFormat(requestData, response, data);
-        if(!format) return;
+        if (!format) return;
         
         Logger.log('UsageTracker: Detected format.', format.constructor.name);
+
         const modelId: string | null = format.getModelId();
         const usageInfo: UsageInfo | null = format.getUsageInfo();
+
         Logger.log('UsageTracker: Extracted modelId and usageInfo.', modelId, usageInfo);
 
-        if(!modelId || !usageInfo) return;
+        if (!modelId || !usageInfo) return;
 
         const priceInfo: PriceInfo = PriceManager.getModelPrice(modelId, url);
         const record: UsageRecord = getUsageRecord(type, modelId, url, usageInfo, priceInfo);
 
         UsageManager.addRecord(record);
-
-        this.requestInfoMap.delete(requestData);
     }
 
     destroy() {

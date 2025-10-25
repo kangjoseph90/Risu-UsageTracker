@@ -13,7 +13,6 @@ export class ModeTracker {
     constructor() {
         this.replacer = (content: any[], type: string) => {
             this.lastMode = parseRequestType(type);
-            Logger.log(`ModeTracker: Detected mode - ${this.lastMode}`);
             return content;
         };
         RisuAPI.addRisuReplacer(ReplacerType.BeforeRequest, this.replacer);
