@@ -35,37 +35,38 @@ function calculateCost(usage: UsageInfo, price: PriceInfo): CostInfo {
 export class UsageTracker {
     private modeTracker: ModeTracker = new ModeTracker();
     private fetchWrapper: FetchWrapper = new FetchWrapper();
-    private requestInfoMap: Map<RequestData, { type: RequestType, format: BaseFormat }> = new Map();
+    private requestInfoMap: Map<RequestData, RequestType> = new Map();
     private onRequest: OnRequestCallback;
     private onResponse: OnResponseCallback;
 
     constructor() {
         this.onRequest = this.trackRequest.bind(this);
         this.onResponse = this.processResponse.bind(this);
-        
         this.fetchWrapper.addOnRequest(this.onRequest);
         this.fetchWrapper.addOnResponse(this.onResponse);
     }
 
-    private trackRequest: OnRequestCallback = (data: RequestData) => {
+    private trackRequest: OnRequestCallback = (requestData: RequestData) => {
         const type = this.modeTracker.getCurrentMode();
-        const format = getFormat(data);
-        if(!format) return;
-        this.requestInfoMap.set(data, { type, format });
+        this.requestInfoMap.set(requestData, type);
     }
 
     private processResponse: OnResponseCallback = (requestData: RequestData, response: Response, data?: string) => {
-        const info = this.requestInfoMap.get(requestData);
-
-        if(!info) return;
-
-        const { type, format } = info;
-        const url = getRequestUrl(requestData);
+        const type = this.requestInfoMap.get(requestData);
+        if(!type) return;
         
+        this.requestInfoMap.delete(requestData);
+
+        const url = getRequestUrl(requestData);
         if (!url) return;
 
-        const modelId: string | null = format.getModelId(response, data);
-        const usageInfo: UsageInfo | null = format.getUsageInfo(response, data);
+        const format = getFormat(requestData, response, data);
+        if(!format) return;
+        
+        Logger.log('UsageTracker: Detected format.', format.constructor.name);
+        const modelId: string | null = format.getModelId();
+        const usageInfo: UsageInfo | null = format.getUsageInfo();
+        Logger.log('UsageTracker: Extracted modelId and usageInfo.', modelId, usageInfo);
 
         if(!modelId || !usageInfo) return;
 
@@ -83,6 +84,5 @@ export class UsageTracker {
         this.fetchWrapper.destroy();
         this.modeTracker.destroy();
         this.requestInfoMap.clear();
-        Logger.log('UsageTracker destroyed.');
     }
 }

@@ -1,12 +1,17 @@
 import { RequestData, UsageInfo } from "../types";
 
-/**
- * checkRequestFormat,
- * getUsageInfo,
- * getModelId,
- */
-export interface BaseFormat {
-    checkRequestFormat(requestData: RequestData): boolean;
-    getUsageInfo(response: Response, data?: string): UsageInfo | null;
-    getModelId(response: Response, data?: string): string | null;
+export abstract class BaseFormat {
+    protected requestData: RequestData;
+    protected response: Response;
+    protected data?: string;
+
+    constructor(requestData: RequestData, response: Response, data?: string) {
+        this.requestData = requestData;
+        this.response = response;
+        this.data = data;
+    }
+
+    abstract checkFormat(): boolean;
+    abstract getUsageInfo(): UsageInfo | null;
+    abstract getModelId(): string | null;
 }

@@ -1,16 +1,49 @@
 import { Logger } from "../logger";
 import { RequestData, UsageInfo } from "../types";
-import { getRequestUrl } from "../util";
+import { getRequestUrl, parseBody } from "../util";
 import { BaseFormat } from "./base";
 
-export class AnthropicFormat implements BaseFormat {
-    checkRequestFormat(requestData: RequestData): boolean {
-        const url = getRequestUrl(requestData);
-        if (!url) return false;
-        return url.includes('anthropic.com') || url.includes('claude');
+export class AnthropicFormat extends BaseFormat {
+    constructor(requestData: RequestData, response: Response, data?: string) {
+        super(requestData, response, data);
     }
 
-    getUsageInfo(response: Response, data?: string): UsageInfo | null {
+    checkFormat(): boolean {
+        try {
+            // 1. 리퀘스트 바디 파싱
+            const requestBody = parseBody(this.requestData.init?.body);
+            if (!requestBody) return false;
+
+            // 2. 리스폰스 바디 파싱 (이미 누적된 완전한 JSON)
+            if (!this.data) return false;
+            
+            let responseJson: any;
+            try {
+                responseJson = JSON.parse(this.data);
+            } catch {
+                return false;
+            }
+
+            // 3. Anthropic 포맷 검증
+            // 리퀘스트: messages, model 키
+            const hasRequestKeys = requestBody.messages && requestBody.model;
+            
+            // 리스폰스: model, content, stop_reason, usage.input_tokens, usage.output_tokens
+            const hasResponseKeys = 
+                responseJson.model &&
+                responseJson.content &&
+                responseJson.stop_reason &&
+                responseJson.usage?.input_tokens !== undefined &&
+                responseJson.usage?.output_tokens !== undefined;
+
+            return hasRequestKeys && hasResponseKeys;
+        } catch (error) {
+            Logger.debug('Anthropic format check failed:', error);
+            return false;
+        }
+    }
+
+    getUsageInfo(): UsageInfo | null {
         try {
             const result: UsageInfo = {
                 inputTokens: 0,
@@ -18,22 +51,14 @@ export class AnthropicFormat implements BaseFormat {
                 outputTokens: 0,
             };
             
-            if (data) {
+            if (this.data) {
                 try {
-                    const lines = data.split('\n');
-                    const lastEventLine = lines
-                        .filter(line => line.startsWith('data: '))
-                        .pop();
+                    const parsed = JSON.parse(this.data);
                     
-                    if (lastEventLine) {
-                        const jsonStr = lastEventLine.replace('data: ', '');
-                        const parsed = JSON.parse(jsonStr);
-                        
-                        // Anthropic 응답에서 usage 정보 추출
-                        if (parsed.usage) {
-                            result.inputTokens = parsed.usage.input_tokens || 0;
-                            result.outputTokens = parsed.usage.output_tokens || 0;
-                        }
+                    if (parsed.usage) {
+                        result.inputTokens = parsed.usage.input_tokens || 0;
+                        result.cachedInputTokens = parsed.usage.cache_read_input_tokens || 0;
+                        result.outputTokens = parsed.usage.output_tokens || 0;
                     }
                 } catch (error) {
                     Logger.debug('Failed to parse Anthropic response data:', error);
@@ -47,23 +72,14 @@ export class AnthropicFormat implements BaseFormat {
         }
     }
 
-    getModelId(response: Response, data?: string): string | null {
+    getModelId(): string | null {
         try {
-            if (data) {
+            if (this.data) {
                 try {
-                    const lines = data.split('\n');
-                    const lastEventLine = lines
-                        .filter(line => line.startsWith('data: '))
-                        .pop();
+                    const parsed = JSON.parse(this.data);
                     
-                    if (lastEventLine) {
-                        const jsonStr = lastEventLine.replace('data: ', '');
-                        const parsed = JSON.parse(jsonStr);
-                        
-                        // Anthropic 응답에서 모델 정보 추출
-                        if (parsed.model) {
-                            return parsed.model;
-                        }
+                    if (parsed.model) {
+                        return parsed.model;
                     }
                 } catch (error) {
                     Logger.debug('Failed to parse Anthropic model ID:', error);

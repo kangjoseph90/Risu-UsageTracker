@@ -15,8 +15,7 @@ export class ModeTracker {
             this.lastMode = parseRequestType(type);
             Logger.log(`ModeTracker: Detected mode - ${this.lastMode}`);
             return content;
-        }
-
+        };
         RisuAPI.addRisuReplacer(ReplacerType.BeforeRequest, this.replacer);
     }
 
@@ -26,6 +25,5 @@ export class ModeTracker {
 
     destroy() {
         RisuAPI.removeRisuReplacer(ReplacerType.BeforeRequest, this.replacer);
-        Logger.log('ModeTracker destroyed.');
     }
 }

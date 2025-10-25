@@ -21,20 +21,20 @@ export class FetchWrapper {
         let modifiedInput: RequestInfo | URL = input;
         let modifiedInit: RequestInit | undefined = init;
 
-        // onRequest 콜백 실행
-        try {
-            for (const callback of this.onRequest) {
-                callback({ input: modifiedInput, init: modifiedInit });
-            }
-        } catch (error) {
-            Logger.error('Error in onRequest callback:', error);
-        }
-
         // request 데이터 저장
         const requestData: RequestData = {
             input: modifiedInput,
             init: modifiedInit,
         };
+
+        // onRequest 콜백 실행
+        try {
+            for (const callback of this.onRequest) {
+                callback(requestData);
+            }
+        } catch (error) {
+            Logger.error('Error in onRequest callback:', error);
+        }
 
         try {
             // 원본 fetch 실행
@@ -45,22 +45,28 @@ export class FetchWrapper {
                            contentType.includes("stream");
 
             if (isStream && response.body) {
-                // 스트림 응답: 원본 response는 그대로 반환하되, 데이터를 동시에 모니터링
-                const originalBody = response.body;
-                const teePromises = this.teeStream(originalBody, response, requestData);
+                // 스트림 응답: tee()로 스트림을 복제
+                const [stream1, stream2] = response.body.tee();
                 
-                // 비동기로 스트림 모니터링 (프론트엔드 데이터 수신을 차단하지 않음)
-                teePromises.catch(error => {
-                    console.error('Error monitoring stream:', error);
+                // 복제된 스트림으로 새 response 생성
+                const monitoredResponse = new Response(stream1, {
+                    status: response.status,
+                    statusText: response.statusText,
+                    headers: response.headers,
                 });
 
-                return response;
+                // 비동기로 스트림 모니터링 (stream2 사용)
+                this.handleStream(stream2, response, requestData).catch(error => {
+                    Logger.error('Error monitoring stream:', error);
+                });
+
+                return monitoredResponse;
             } else {
                 // 일반 응답: clone으로 처리
                 const clonedResponse = response.clone();
-                
+
                 // 비동기로 response 콜백 실행
-                this.handleNonStreamResponse(clonedResponse, requestData).catch(error => {
+                this.handleResponse(clonedResponse, requestData).catch(error => {
                     Logger.error('Error handling response:', error);
                 });
 
@@ -73,11 +79,12 @@ export class FetchWrapper {
         }
     }
 
-    private async teeStream(body: ReadableStream<Uint8Array>, response: Response, requestData: RequestData): Promise<void> {
+    private async handleStream(body: ReadableStream<Uint8Array>, response: Response, requestData: RequestData): Promise<void> {
         try {
             const reader = body.getReader();
             const decoder = new TextDecoder();
-            let accumulatedData = "";
+            let accumulatedText = "";
+            let accumulatedData: any = {};
 
             try {
                 while (true) {
@@ -87,24 +94,65 @@ export class FetchWrapper {
                     
                     if (value) {
                         const chunk = decoder.decode(value, { stream: true });
-                        accumulatedData += chunk;
+                        accumulatedText += chunk;
+
+                        // 개행으로 구분된 라인 처리
+                        const lines = accumulatedText.split('\n');
+                        
+                        // 마지막 라인이 불완전할 수 있으므로 보관
+                        accumulatedText = lines[lines.length - 1];
+                        
+                        // 완전한 라인들 처리
+                        for (let i = 0; i < lines.length - 1; i++) {
+                            const line = lines[i];
+                            
+                            // "data: "로 시작하는 라인 파싱
+                            if (line.startsWith('data: ')) {
+                                const jsonStr = line.replace('data: ', '');
+                                
+                                // [DONE] 제외
+                                if (jsonStr.trim() === '[DONE]') continue;
+                                
+                                try {
+                                    const parsed = JSON.parse(jsonStr);
+                                    // 누적: 가장 마지막 값으로 덮어씀
+                                    accumulatedData = { ...accumulatedData, ...parsed };
+                                } catch (error) {
+                                    Logger.debug('Failed to parse SSE line:', error);
+                                }
+                            }
+                        }
                     }
                 }
 
-                // 스트림 전체 수신 후 콜백 실행
+                // 마지막 불완전한 라인 처리
+                if (accumulatedText && accumulatedText.startsWith('data: ')) {
+                    const jsonStr = accumulatedText.replace('data: ', '');
+                    if (jsonStr.trim() !== '[DONE]') {
+                        try {
+                            const parsed = JSON.parse(jsonStr);
+                            accumulatedData = { ...accumulatedData, ...parsed };
+                        } catch (error) {
+                            Logger.debug('Failed to parse final SSE line:', error);
+                        }
+                    }
+                }
+
+                // 누적된 완전한 데이터로 콜백 실행
+                const finalData = JSON.stringify(accumulatedData);
                 for (const callback of this.onResponse) {
-                    callback(requestData, response, accumulatedData);
+                    callback(requestData, response, finalData);
                 }
             } finally {
                 reader.releaseLock();
             }
         } catch (error) {
-            Logger.error('Error in teeStream:', error);
+            Logger.error('Error in handleStream:', error);
             throw error;
         }
     }
 
-    private async handleNonStreamResponse(response: Response, requestData: RequestData): Promise<void> {
+    private async handleResponse(response: Response, requestData: RequestData): Promise<void> {
         try {
             const contentType = response.headers.get("content-type") || "";
             let responseData: string | undefined;
@@ -120,7 +168,7 @@ export class FetchWrapper {
                 }
             } catch (error) {
                 // 응답을 읽을 수 없는 경우 (이미 소비되었거나 바이너리 등)
-                Logger.debug('Could not read response body:', error);
+                Logger.log('Could not read response body:', error);
             }
 
             // 콜백 실행

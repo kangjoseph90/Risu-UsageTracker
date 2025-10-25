@@ -1,16 +1,48 @@
 import { Logger } from "../logger";
 import { RequestData, UsageInfo } from "../types";
-import { getRequestUrl } from "../util";
+import { getRequestUrl, parseBody } from "../util";
 import { BaseFormat } from "./base";
 
-export class OpenAIFormat implements BaseFormat {
-    checkRequestFormat(requestData: RequestData): boolean {
-        const url = getRequestUrl(requestData);
-        if (!url) return false;
-        return url.includes('openai.com') || url.includes('/v1/');
+export class OpenAIFormat extends BaseFormat {
+    constructor(requestData: RequestData, response: Response, data?: string) {
+        super(requestData, response, data);
     }
 
-    getUsageInfo(response: Response, data?: string): UsageInfo | null {
+    checkFormat(): boolean {
+        try {
+            // 1. 리퀘스트 바디 파싱
+            const requestBody = parseBody(this.requestData.init?.body);
+            if (!requestBody) return false;
+
+            // 2. 리스폰스 바디 파싱 (이미 누적된 완전한 JSON)
+            if (!this.data) return false;
+            
+            let responseJson: any;
+            try {
+                responseJson = JSON.parse(this.data);
+            } catch {
+                return false;
+            }
+
+            // 3. OpenAI 포맷 검증
+            // 리퀘스트: messages, model 키
+            const hasRequestKeys = requestBody.messages && requestBody.model;
+            
+            // 리스폰스: model, choices, usage.prompt_tokens, usage.completion_tokens
+            const hasResponseKeys = 
+                responseJson.model &&
+                responseJson.choices &&
+                responseJson.usage?.prompt_tokens !== undefined &&
+                responseJson.usage?.completion_tokens !== undefined;
+
+            return hasRequestKeys && hasResponseKeys;
+        } catch (error) {
+            Logger.debug('OpenAI format check failed:', error);
+            return false;
+        }
+    }
+
+    getUsageInfo(): UsageInfo | null {
         try {
             const result: UsageInfo = {
                 inputTokens: 0,
@@ -18,27 +50,14 @@ export class OpenAIFormat implements BaseFormat {
                 outputTokens: 0,
             };
 
-            // 응답 데이터 파싱
-            if (data) {
+            if (this.data) {
                 try {
-                    // SSE 형식인 경우 마지막 메시지 파싱
-                    const lines = data.split('\n');
-                    const lastEventLine = lines
-                        .filter(line => line.startsWith('data: '))
-                        .pop();
+                    const parsed = JSON.parse(this.data);
                     
-                    if (lastEventLine) {
-                        const jsonStr = lastEventLine.replace('data: ', '');
-                        // "[DONE]" 메시지인 경우 스킵
-                        if (jsonStr.trim() !== '[DONE]') {
-                            const parsed = JSON.parse(jsonStr);
-                            
-                            // OpenAI 응답에서 usage 정보 추출
-                            if (parsed.usage) {
-                                result.inputTokens = parsed.usage.prompt_tokens || 0;
-                                result.outputTokens = parsed.usage.completion_tokens || 0;
-                            }
-                        }
+                    if (parsed.usage) {
+                        result.inputTokens = parsed.usage.prompt_tokens || 0;
+                        result.cachedInputTokens = parsed.usage.prompt_tokens_details?.cached_tokens || 0;
+                        result.outputTokens = parsed.usage.completion_tokens || 0;
                     }
                 } catch (error) {
                     Logger.debug('Failed to parse OpenAI response data:', error);
@@ -52,24 +71,13 @@ export class OpenAIFormat implements BaseFormat {
         }
     }
 
-    getModelId(response: Response, data?: string): string | null {
+    getModelId(): string | null {
         try {
-            if (data) {
+            if (this.data) {
                 try {
-                    // SSE 형식인 경우 마지막 메시지 파싱
-                    const lines = data.split('\n');
-                    const lastEventLine = lines
-                        .filter(line => line.startsWith('data: '))
-                        .pop();
-                    
-                    if (lastEventLine) {
-                        const jsonStr = lastEventLine.replace('data: ', '');
-                        if (jsonStr.trim() !== '[DONE]') {
-                            const parsed = JSON.parse(jsonStr);
-                            if (parsed.model) {
-                                return parsed.model;
-                            }
-                        }
+                    const parsed = JSON.parse(this.data);
+                    if (parsed.model) {
+                        return parsed.model;
                     }
                 } catch (error) {
                     Logger.debug('Failed to parse OpenAI model ID:', error);

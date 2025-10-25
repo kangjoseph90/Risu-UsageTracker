@@ -1,22 +1,48 @@
 import { Logger } from "../logger";
 import { RequestData, UsageInfo } from "../types";
-import { getRequestUrl } from "../util";
+import { getRequestUrl, parseBody } from "../util";
 import { BaseFormat } from "./base";
 
-export class GoogleFormat implements BaseFormat {
-    /**
-     * Google API 요청인지 확인
-     */
-    checkRequestFormat(requestData: RequestData): boolean {
-        const url = getRequestUrl(requestData);
-        if (!url) return false;
-        return url.includes('googleapis.com') || url.includes('generativelanguage');
+export class GoogleFormat extends BaseFormat {
+    constructor(requestData: RequestData, response: Response, data?: string) {
+        super(requestData, response, data);
     }
 
-    /**
-     * Google API 응답에서 사용 통계 파싱
-     */
-    getUsageInfo(response: Response, data?: string): UsageInfo | null {
+    checkFormat(): boolean {
+        try {
+            // 1. 리퀘스트 바디 파싱
+            const requestBody = parseBody(this.requestData.init?.body);
+            if (!requestBody) return false;
+
+            // 2. 리스폰스 바디 파싱
+            if (!this.data) return false;
+            
+            let responseJson: any;
+            try {
+                responseJson = JSON.parse(this.data);
+            } catch {
+                return false;
+            }
+
+            // 3. Google 포맷 검증
+            // 리퀘스트: contents 키
+            const hasRequestKeys = requestBody.contents !== undefined;
+            
+            // 리스폰스: modelVersion, candidates, usageMetadata.promptTokenCount, usageMetadata.candidatesTokenCount 
+            const hasResponseKeys = 
+                responseJson.candidates &&
+                responseJson.usageMetadata?.promptTokenCount !== undefined &&
+                responseJson.usageMetadata?.candidatesTokenCount !== undefined &&
+                responseJson.modelVersion !== undefined;
+
+            return hasRequestKeys && hasResponseKeys;
+        } catch (error) {
+            Logger.debug('Google format check failed:', error);
+            return false;
+        }
+    }
+
+    getUsageInfo(): UsageInfo | null {
         try {
             const result: UsageInfo = {
                 inputTokens: 0,
@@ -24,15 +50,16 @@ export class GoogleFormat implements BaseFormat {
                 outputTokens: 0,
             };
             
-            // 응답 데이터 파싱
-            if (data) {
+            if (this.data) {
                 try {
-                    const parsed = JSON.parse(data);
+                    const parsed = JSON.parse(this.data);
                     
-                    // Google API 응답에서 usage 정보 추출
                     if (parsed.usageMetadata) {
                         result.inputTokens = parsed.usageMetadata.promptTokenCount || 0;
-                        result.outputTokens = parsed.usageMetadata.candidatesTokenCount || 0;
+                        result.cachedInputTokens = parsed.usageMetadata.cachedContentTokenCount || 0;
+                        result.outputTokens = 
+                            (parsed.usageMetadata.candidatesTokenCount || 0) + 
+                            (parsed.usageMetadata.thoughtsTokenCount || 0);
                     }
                 } catch (error) {
                     Logger.debug('Failed to parse Google response data:', error);
@@ -46,16 +73,12 @@ export class GoogleFormat implements BaseFormat {
         }
     }
 
-    /**
-     * Google API 응답에서 모델 ID 추출
-     */
-    getModelId(response: Response, data?: string): string | null {
+    getModelId(): string | null {
         try {
-            if (data) {
+            if (this.data) {
                 try {
-                    const parsed = JSON.parse(data);
+                    const parsed = JSON.parse(this.data);
                     
-                    // Google API 응답에서 모델 정보 추출
                     if (parsed.modelVersion) {
                         return parsed.modelVersion;
                     }

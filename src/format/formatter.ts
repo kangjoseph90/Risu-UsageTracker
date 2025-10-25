@@ -1,28 +1,28 @@
+import { Logger } from "../logger"
 import { RequestData } from "../types"
+import { isLLMRequest } from "../util"
 import { AnthropicFormat } from "./anthropic"
 import { BaseFormat } from "./base"
 import { GoogleFormat } from "./google"
 import { OpenAIFormat } from "./openai"
 
-const formats: BaseFormat[] = [
-    new AnthropicFormat(), 
-    new OpenAIFormat(), 
-    new GoogleFormat(),
+const formats = [
+    AnthropicFormat,
+    OpenAIFormat,
+    GoogleFormat,
 ]
 
-function isLLMRequest(requestData: RequestData): boolean {
-    return true;
-}
-
-export function getFormat(requestData: RequestData): BaseFormat | null {
+export function getFormat(requestData: RequestData, response: Response, data?: string): BaseFormat | null {
     if(!isLLMRequest(requestData)) {
         return null;
     }
-    
-    for(const format of formats) {
-        if(format.checkRequestFormat(requestData)) {
-            return format;
+    Logger.log('getFormat: LLM request detected, checking formats.', requestData, data);
+    for(const FormatClass of formats) {
+        const formatInstance = new FormatClass(requestData, response, data);
+        if(formatInstance.checkFormat()) {
+            return formatInstance;
         }
     }
+
     return null;
 }

@@ -1,8 +1,11 @@
+import { Logger } from "./logger";
 import { RequestData, RequestType } from "./types";
 
 export {
     parseRequestType,
     getRequestUrl,
+    isLLMRequest,
+    parseBody,
 }
 
 function parseRequestType(mode: string): RequestType {
@@ -13,6 +16,46 @@ function parseRequestType(mode: string): RequestType {
         case 'otherAx':
         case 'submodel': return RequestType.Other;
         default: return RequestType.Unknown;
+    }
+}
+
+function parseBody(body: BodyInit | null | undefined): any | null {
+    if (!body) return null;
+    
+    let bodyStr: string;
+    
+    if (typeof body === 'string') {
+        bodyStr = body;
+    } else if (body instanceof Uint8Array) {
+        try {
+            bodyStr = new TextDecoder().decode(body);
+        } catch (error) {
+            console.error('Failed to decode Uint8Array:', error);
+            return null;
+        }
+    } else if (body instanceof ArrayBuffer) {
+        try {
+            bodyStr = new TextDecoder().decode(new Uint8Array(body));
+        } catch (error) {
+            console.error('Failed to decode ArrayBuffer:', error);
+            return null;
+        }
+    } else {
+        // Blob, FormData, URLSearchParams 등
+        try {
+            bodyStr = body.toString();
+        } catch (error) {
+            console.error('Failed to convert body to string:', error);
+            return null;
+        }
+    }
+
+    // JSON 파싱
+    try {
+        return JSON.parse(bodyStr);
+    } catch (error) {
+        console.error('Failed to parse body as JSON:', error);
+        return null;
     }
 }
 
@@ -61,7 +104,7 @@ function extractRealUrl(requestData: RequestData): string | null {
     }
 }
 
-function parseURL(input: RequestData['input']): string | null {
+function parseURL(input: RequestInfo | URL): string | null {
     if (typeof input === 'string') {
         return input;
     } else if (input instanceof URL) {
@@ -79,4 +122,27 @@ function getRequestUrl(requestData: RequestData): string | null {
     }
     
     return extractRealUrl(requestData);
+}
+
+function isLLMRequest(requestData: RequestData): boolean {
+    const body = requestData.init?.body;
+    if (!body) return false;
+
+    // parseBody로 JSON 파싱
+    const bodyJson = parseBody(body);
+    if (!bodyJson) return false;
+
+    // 조건 1: body에 model 키가 있거나 url에 models가 있어야 함
+    const hasModelKey = 'model' in bodyJson;
+    
+    const url = getRequestUrl(requestData);
+    const hasModelsInUrl = url ? url.includes("models") : false;
+
+    const hasModel = hasModelKey || hasModelsInUrl;
+    
+    // 조건 2: body에 contents, messages, prompt 키 중 하나가 있어야 함
+    const contentKeywords = ["contents", "messages", "prompt"];
+    const hasContent = contentKeywords.some(keyword => keyword in bodyJson);
+
+    return hasModel && hasContent;
 }
