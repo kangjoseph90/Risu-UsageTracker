@@ -1,4 +1,3 @@
-import { Logger } from "./logger";
 import { UsageTracker } from "./tracker/usage";
 import { RisuAPI } from "./risuAPI";
 import { RootUI } from "./ui/root";

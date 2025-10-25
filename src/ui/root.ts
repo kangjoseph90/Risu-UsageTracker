@@ -1,3 +1,8 @@
+import { PLUGIN_NAME } from "../consts";
+import { UsageUI } from "./usage";
+import { PriceUI } from "./price";
+import { PriceManager } from "../manager/price";
+
 export class RootUI {
     private ROOT_ID = 'UsageTracker-RootUI';
     private MODAL_ID = `${this.ROOT_ID}-modal`;
@@ -56,6 +61,7 @@ export class RootUI {
         const button = document.createElement('button');
         button.id = this.OPEN_BUTTON_ID;
         button.className = 'flex gap-2 items-center hover:text-textcolor text-textcolor2';
+
         button.innerHTML = `
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide-icon lucide lucide-bar-chart-3">
                 <path d="M3 3v18h18"/><rect x="7" y="10" width="2" height="11" fill="currentColor"/><rect x="13" y="4" width="2" height="17" fill="currentColor"/><rect x="19" y="8" width="2" height="13" fill="currentColor"/>
@@ -68,6 +74,14 @@ export class RootUI {
         });
 
         lastButton.parentNode?.insertBefore(button, lastButton.nextSibling);
+    }
+
+    /**
+     * 임시 가격이 존재하는지 확인
+     */
+    private checkHasTempPrice(): boolean {
+        const tempPrices = PriceManager.getTemporaryPrice();
+        return Object.keys(tempPrices).length > 0;
     }
 
     /**
@@ -94,13 +108,20 @@ export class RootUI {
                 <div class="flex flex-col p-3 sm:p-6 rounded-lg bg-zinc-900 w-full max-w-4xl h-full">
                     <!-- Header -->
                     <div class="flex justify-between items-center w-full mb-4 flex-shrink-0">
-                        <h2 class="text-lg sm:text-2xl font-semibold text-zinc-100">사용량</h2>
+                        <h2 class="text-lg sm:text-2xl font-semibold text-zinc-100">${PLUGIN_NAME}</h2>
                         <div class="flex items-center gap-2">
                             <button id="${this.USAGE_BUTTON_ID}" class="px-3 py-2 rounded-lg bg-zinc-800 text-zinc-200 transition-colors text-sm font-medium hover:bg-zinc-700" title="사용량 통계">
                                 사용량 통계
                             </button>
-                            <button id="${this.PRICE_BUTTON_ID}" class="px-3 py-2 rounded-lg text-zinc-200 transition-colors text-sm font-medium hover:text-zinc-100" title="가격 정보">
-                                가격 정보
+                            <button id="${this.PRICE_BUTTON_ID}" class="px-3 py-2 rounded-lg text-zinc-200 transition-colors text-sm font-medium hover:text-zinc-100 flex items-center gap-1" title="가격 정보">
+                                <span>가격 정보</span>
+                                <span class="price-warning-icon hidden text-yellow-400">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
+                                        <line x1="12" y1="9" x2="12" y2="13"/>
+                                        <line x1="12" y1="17" x2="12.01" y2="17"/>
+                                    </svg>
+                                </span>
                             </button>
                             <button id="${this.CLOSE_BUTTON_ID}" class="p-2 text-zinc-200 hover:text-white transition-colors" title="닫기">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -123,8 +144,25 @@ export class RootUI {
         this.bindEvents(modal);
         document.body.appendChild(modal);
 
+        // 임시 가격 경고 아이콘 표시
+        this.updatePriceWarningIcon(modal);
+
         // 기본으로 사용량 통계 표시
         this.showUsageUI();
+    }
+
+    /**
+     * 가격 정보 버튼의 경고 아이콘 업데이트
+     */
+    private updatePriceWarningIcon(modal: HTMLElement) {
+        const warningIcon = modal.querySelector('.price-warning-icon');
+        if (warningIcon) {
+            if (this.checkHasTempPrice()) {
+                warningIcon.classList.remove('hidden');
+            } else {
+                warningIcon.classList.add('hidden');
+            }
+        }
     }
 
     /**
@@ -136,7 +174,7 @@ export class RootUI {
 
         const usageButton = modal.querySelector(`#${this.USAGE_BUTTON_ID}`) as HTMLButtonElement;
         const priceButton = modal.querySelector(`#${this.PRICE_BUTTON_ID}`) as HTMLButtonElement;
-        const bodyContainer = modal.querySelector(`#${this.BODY_CONTAINER_ID}`);
+        const bodyContainer = modal.querySelector(`#${this.BODY_CONTAINER_ID}`) as HTMLElement;
 
         if (!bodyContainer) return;
 
@@ -151,12 +189,9 @@ export class RootUI {
         priceButton?.classList.remove('hover:bg-zinc-700');
         priceButton?.classList.add('hover:text-zinc-100');
 
-        // TODO: UsageUI 렌더링
-        bodyContainer.innerHTML = `
-            <div class="text-center text-zinc-300 py-8">
-                사용량 통계가 여기에 표시됩니다
-            </div>
-        `;
+        // UsageUI 렌더링
+        const usageUI = new UsageUI(bodyContainer);
+        usageUI.render();
     }
 
     /**
@@ -168,7 +203,7 @@ export class RootUI {
 
         const usageButton = modal.querySelector(`#${this.USAGE_BUTTON_ID}`) as HTMLButtonElement;
         const priceButton = modal.querySelector(`#${this.PRICE_BUTTON_ID}`) as HTMLButtonElement;
-        const bodyContainer = modal.querySelector(`#${this.BODY_CONTAINER_ID}`);
+        const bodyContainer = modal.querySelector(`#${this.BODY_CONTAINER_ID}`) as HTMLElement;
 
         if (!bodyContainer) return;
 
@@ -183,12 +218,12 @@ export class RootUI {
         usageButton?.classList.remove('hover:bg-zinc-700');
         usageButton?.classList.add('hover:text-zinc-100');
 
-        // TODO: PriceUI 렌더링
-        bodyContainer.innerHTML = `
-            <div class="text-center text-zinc-300 py-8">
-                가격 정보가 여기에 표시됩니다
-            </div>
-        `;
+        // PriceUI 렌더링
+        const priceUI = new PriceUI(bodyContainer, () => {
+            // PriceUI에서 가격 변경 시 경고 아이콘 업데이트
+            this.updatePriceWarningIcon(modal);
+        });
+        priceUI.render();
     }
 
     /**
