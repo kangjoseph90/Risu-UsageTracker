@@ -1,4 +1,6 @@
 export {
+    PLUGIN_TITLE,
+    PLUGIN_VERSION,
     PLUGIN_NAME,
     DB_ARG,
     PRICE_ARG,

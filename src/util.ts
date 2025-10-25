@@ -31,14 +31,14 @@ function parseBody(body: BodyInit | null | undefined): any | null {
         try {
             bodyStr = new TextDecoder().decode(body);
         } catch (error) {
-            console.error('Failed to decode Uint8Array:', error);
+            Logger.error('Failed to decode Uint8Array:', error);
             return null;
         }
     } else if (body instanceof ArrayBuffer) {
         try {
             bodyStr = new TextDecoder().decode(new Uint8Array(body));
         } catch (error) {
-            console.error('Failed to decode ArrayBuffer:', error);
+            Logger.error('Failed to decode ArrayBuffer:', error);
             return null;
         }
     } else {
@@ -46,7 +46,7 @@ function parseBody(body: BodyInit | null | undefined): any | null {
         try {
             bodyStr = body.toString();
         } catch (error) {
-            console.error('Failed to convert body to string:', error);
+            Logger.error('Failed to convert body to string:', error);
             return null;
         }
     }
@@ -55,7 +55,7 @@ function parseBody(body: BodyInit | null | undefined): any | null {
     try {
         return JSON.parse(bodyStr);
     } catch (error) {
-        console.error('Failed to parse body as JSON:', error);
+        Logger.error('Failed to parse body as JSON:', error);
         return null;
     }
 }

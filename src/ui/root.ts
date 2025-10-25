@@ -2,6 +2,7 @@ import { PLUGIN_NAME } from "../consts";
 import { UsageUI } from "./usage";
 import { PriceUI } from "./price";
 import { PriceManager } from "../manager/price";
+import { BackupManager } from "../manager/backup";
 
 export class RootUI {
     private ROOT_ID = 'UsageTracker-RootUI';
@@ -9,6 +10,8 @@ export class RootUI {
     private OPEN_BUTTON_ID = `${this.ROOT_ID}-openButton`;
     private USAGE_BUTTON_ID = `${this.ROOT_ID}-usageButton`;
     private PRICE_BUTTON_ID = `${this.ROOT_ID}-priceButton`;
+    private BACKUP_BUTTON_ID = `${this.ROOT_ID}-backupButton`;
+    private RESTORE_BUTTON_ID = `${this.ROOT_ID}-restoreButton`;
     private CLOSE_BUTTON_ID = `${this.ROOT_ID}-closeButton`;
     private BODY_CONTAINER_ID = `${this.ROOT_ID}-bodyContainer`;
 
@@ -123,6 +126,16 @@ export class RootUI {
                                     </svg>
                                 </span>
                             </button>
+                            <button id="${this.BACKUP_BUTTON_ID}" class="p-2 text-zinc-200 hover:text-white transition-colors" title="백업">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line>
+                                </svg>
+                            </button>
+                            <button id="${this.RESTORE_BUTTON_ID}" class="p-2 text-zinc-200 hover:text-white transition-colors" title="복구">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line>
+                                </svg>
+                            </button>
                             <button id="${this.CLOSE_BUTTON_ID}" class="p-2 text-zinc-200 hover:text-white transition-colors" title="닫기">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
@@ -233,6 +246,8 @@ export class RootUI {
         const closeButton = modal.querySelector(`#${this.CLOSE_BUTTON_ID}`);
         const usageButton = modal.querySelector(`#${this.USAGE_BUTTON_ID}`);
         const priceButton = modal.querySelector(`#${this.PRICE_BUTTON_ID}`);
+        const backupButton = modal.querySelector(`#${this.BACKUP_BUTTON_ID}`);
+        const restoreButton = modal.querySelector(`#${this.RESTORE_BUTTON_ID}`);
 
         // ESC 키로 닫기
         modal.addEventListener('keydown', (e: KeyboardEvent) => {
@@ -262,6 +277,42 @@ export class RootUI {
         priceButton?.addEventListener('click', () => {
             this.showPriceUI();
         });
+
+        // 백업 버튼
+        backupButton?.addEventListener('click', async () => {
+            const confirmed = confirm('현재 모든 데이터를 백업하시겠습니까?');
+            if (confirmed) {
+                const success = await BackupManager.backup();
+                if (success) {
+                    alert('백업이 완료되었습니다.');
+                } else {
+                    alert('백업에 실패했습니다.');
+                }
+            }
+        });
+
+        // 복구 버튼
+        restoreButton?.addEventListener('click', async () => {
+            const confirmed = confirm('백업된 데이터로 복구하시겠습니까?\n현재 데이터가 덮어씌워집니다.');
+            if (confirmed) {
+                const success = await BackupManager.restore();
+                if (success) {
+                    alert('복구가 완료되었습니다.');
+                    // RootUI 새로고침
+                    this.refreshModal();
+                } else {
+                    alert('복구된 백업 데이터가 없습니다.');
+                }
+            }
+        });
+    }
+
+    /**
+     * 모달 새로고침
+     */
+    private refreshModal() {
+        this.closeModal();
+        this.showModal();
     }
 
     /**
