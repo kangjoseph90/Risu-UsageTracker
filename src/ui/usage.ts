@@ -133,6 +133,11 @@ export class UsageUI {
                     ${this.renderRecords(records)}
                 </div>
             </div>
+
+            <!-- Last Updated Footer (Sticky) -->
+            <div class="sticky bottom-0 z-10 bg-zinc-900 border-t border-zinc-700 pt-2 px-3 text-xs text-zinc-400 text-center">
+                마지막 업데이트: ${this.formatLastUpdated(UsageManager.getLastUpdated())}
+            </div>
         `;
 
         this.attachEventListeners();
@@ -945,5 +950,20 @@ export class UsageUI {
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
+    }
+
+    private formatLastUpdated(isoString: string): string {
+        try {
+            const date = new Date(isoString);
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const seconds = String(date.getSeconds()).padStart(2, '0');
+            return `${year}. ${month}. ${day} ${hours}:${minutes}:${seconds}`;
+        } catch (e) {
+            return '업데이트 정보 없음';
+        }
     }
 }

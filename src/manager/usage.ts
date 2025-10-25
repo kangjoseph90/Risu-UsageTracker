@@ -28,11 +28,13 @@ function setDB(db: UsageDB) {
  * addRecord,
  * removeRecord,
  * getRecords,
+ * getLastUpdated,
  */
 export class UsageManager {
     static addRecord(record: UsageRecord) {
         const db = getDB();
         db.records.push(record);
+        db.lastUpdated = new Date().toISOString();
         setDB(db);
     }
 
@@ -52,6 +54,7 @@ export class UsageManager {
         );
         if (index !== -1) {
             db.records.splice(index, 1);
+            db.lastUpdated = new Date().toISOString();
             setDB(db);
             return true;
         }
@@ -64,6 +67,11 @@ export class UsageManager {
             filter.every(fn => fn(record))
         );
         return filtered;
+    }
+
+    static getLastUpdated(): string {
+        const db = getDB();
+        return db.lastUpdated;
     }
 
 }
