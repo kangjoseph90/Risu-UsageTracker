@@ -19,9 +19,10 @@ export const DEFAULT_PROVIDER: ProviderMap = {
     // Cerebras
     "https://api.cerebras.ai/v1/chat/completions": "Cerebras",
 
-    // ZAI
-    "https://api.z.ai/api/coding/paas/v4/chat/completions": "ZAI",
-    "https://api.z.ai/api/anthropic/v1/messages": "ZAI",
+    // Z.AI
+    "https://api.z.ai/api/paas/v4/chat/completions": "Z.AI",
+    "https://api.z.ai/api/coding/paas/v4/chat/completions": "Z.AI",
+    "https://api.z.ai/api/anthropic/v1/messages": "Z.AI",
 
     // Mistral
     "https://api.mistral.ai/v1/chat/completions": "Mistral",

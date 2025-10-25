@@ -36,9 +36,6 @@ export class PriceUI {
             for (let i = 0; i < providers.length; i++) {
                 const provider = providers[i];
                 html += this.renderProviderGroup(provider, confirmedPrices, tempPrices);
-                if (i < providers.length - 1) {
-                    html += `<div class="border-t border-zinc-700"></div>`;
-                }
             }
         }
 

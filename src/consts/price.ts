@@ -36,6 +36,16 @@ export const DEFAULT_PRICE: ProviderPrice = {
         "claude-opus-4-20250514": { inputPrice: 15, cachedInputPrice: 1.5, outputPrice: 75 },
         "claude-opus-4-0": { inputPrice: 15, cachedInputPrice: 1.5, outputPrice: 75 },
     },
+    "Z.AI": {
+        "glm-4.6": { inputPrice: 0.6, cachedInputPrice: 0.11, outputPrice: 2.2 },
+        "glm-4.5": { inputPrice: 0.6, cachedInputPrice: 0.11, outputPrice: 2.2 },
+        "glm-4.5v": { inputPrice: 0.6, cachedInputPrice: 0.11, outputPrice: 1.8 },
+        "glm-4.5-x": { inputPrice: 2.2, cachedInputPrice: 0.45, outputPrice: 8.9 },
+        "glm-4.5-air": { inputPrice: 0.2, cachedInputPrice: 0.03, outputPrice: 1.1 },
+        "glm-4.5-airx": { inputPrice: 1.1, cachedInputPrice: 0.22, outputPrice: 4.5 },
+        "glm-4-32b-0414-128k": { inputPrice: 0.1, outputPrice: 0.1 },
+        "glm-4.5-flash": { inputPrice: 0, cachedInputPrice: 0, outputPrice: 0 },
+    },
     "GoogleAI": {
         "gemini-2.5-pro": { inputPrice: 1.25, cachedInputPrice: 0.125, outputPrice: 10.0 },
         "gemini-2.5-flash": { inputPrice: 0.3, cachedInputPrice: 0.03, outputPrice: 2.5 },
@@ -47,5 +57,5 @@ export const DEFAULT_PRICE: ProviderPrice = {
         "gemini-flash-lite-latest": { inputPrice: 0.1, cachedInputPrice: 0.01, outputPrice: 0.4 },
         "gemini-2.0-flash": { inputPrice: 0.1, cachedInputPrice: 0.025, outputPrice: 0.4 },
         "gemini-2.0-flash-lite": { inputPrice: 0.075, outputPrice: 0.3 },
-    }
+    },
 };

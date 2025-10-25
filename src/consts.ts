@@ -9,7 +9,7 @@ export {
 }
 
 const PLUGIN_TITLE = 'UsageTracker'
-const PLUGIN_VERSION = 'v0.0.1' 
+const PLUGIN_VERSION = 'v0.1.0' 
 const PLUGIN_NAME = `${PLUGIN_TITLE}-${PLUGIN_VERSION}`
 
 /*

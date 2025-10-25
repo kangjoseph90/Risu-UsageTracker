@@ -44,6 +44,7 @@ function setTemporaryPrice(priceData: ProviderPrice): void {
  */
 export class PriceManager {
     static getModelPrice(modelId: string, provider: string): PriceInfo {
+        modelId = modelId.toLowerCase();
         const tempPriceData = getTemporaryPrice();
         const confirmedPriceData = getConfirmedPrice();
         const priceData = { ...confirmedPriceData, ...tempPriceData };
@@ -73,6 +74,7 @@ export class PriceManager {
     }
 
     static setTemporaryPrice(modelId: string, provider: string, priceInfo: PriceInfo): void {
+        modelId = modelId.toLowerCase();
         const tempPrice = getTemporaryPrice();
         if(!tempPrice[provider]) {
             tempPrice[provider] = {};
@@ -83,6 +85,7 @@ export class PriceManager {
     }
 
     static setConfirmedPrice(modelId: string, provider: string, priceInfo: PriceInfo): void {
+        modelId = modelId.toLowerCase();
         const confirmedPrice = getConfirmedPrice();
         if(!confirmedPrice[provider]) {
             confirmedPrice[provider] = {};
@@ -93,6 +96,7 @@ export class PriceManager {
     }
 
     static removeTemporaryModel(modelId: string, provider: string): boolean {
+        modelId = modelId.toLowerCase();
         const tempPrice = getTemporaryPrice();
         if (tempPrice[provider] && tempPrice[provider][modelId]) {
             delete tempPrice[provider][modelId];
@@ -106,6 +110,7 @@ export class PriceManager {
     }
 
     static removeConfirmedModel(modelId: string, provider: string): boolean {
+        modelId = modelId.toLowerCase();
         const confirmedPrice = getConfirmedPrice();
         if (confirmedPrice[provider] && confirmedPrice[provider][modelId]) {
             delete confirmedPrice[provider][modelId];
@@ -119,6 +124,7 @@ export class PriceManager {
     }
 
     static hasTemporaryPrice(modelId: string, provider: string): boolean {
+        modelId = modelId.toLowerCase();
         const tempPrice = getTemporaryPrice();
         return !!(tempPrice[provider] && tempPrice[provider][modelId]);
     }
