@@ -118,7 +118,7 @@ export class UsageUI {
                     <h3 class="text-sm font-semibold text-zinc-100">분류별 통계</h3>
                     <select id="donutChartGroupBy" class="bg-zinc-800 text-zinc-200 border border-zinc-700 rounded px-2 py-1 text-xs">
                         <option value="model">모델별</option>
-                        <option value="url">프로바이더별</option>
+                        <option value="provider">프로바이더별</option>
                         <option value="requestType">타입별</option>
                     </select>
                 </div>
@@ -344,9 +344,12 @@ export class UsageUI {
     }
 
     private applyFilters(records: UsageRecord[], filters: Partial<UIFilters>): UsageRecord[] {
+        const providerMap = ProviderManager.getAllProviders();
+        
         return records.filter(record => {
             if (filters.providers && filters.providers.length > 0) {
-                if (!filters.providers.includes(record.url)) return false;
+                const recordProvider = providerMap[record.url] || record.url;
+                if (!filters.providers.includes(recordProvider)) return false;
             }
             if (filters.models && filters.models.length > 0) {
                 if (!filters.models.includes(record.model)) return false;
@@ -361,15 +364,16 @@ export class UsageUI {
     private aggregateForDonut(records: UsageRecord[], groupBy: string, measureBy: string, filters: Partial<UIFilters>): DonutDataItem[] {
         const filtered = this.applyFilters(records, filters);
         const groups: { [key: string]: DonutDataItem } = {};
+        const providerMap = ProviderManager.getAllProviders();
         
         filtered.forEach(record => {
             let key: string;
             let displayName: string;
             
             switch (groupBy) {
-                case 'url':
-                    key = record.url;
-                    displayName = ProviderManager.getProvider(record.url);
+                case 'provider':
+                    key = providerMap[record.url] || record.url;
+                    displayName = key;
                     break;
                 case 'model':
                     key = record.model;
@@ -792,6 +796,9 @@ export class UsageUI {
 
         const providerMap = ProviderManager.getAllProviders();
 
+        // 프로바이더 이름 기준으로 unique (같은 프로바이더 중복 제거)
+        const uniqueProviders = [...new Set(uniqueProviderUrls.map(url => providerMap[url] || url))].sort();
+
         uniqueModels.forEach(model => {
             const option = document.createElement('option');
             option.value = model;
@@ -799,10 +806,10 @@ export class UsageUI {
             globalFilterModel.appendChild(option);
         });
 
-        uniqueProviderUrls.forEach(url => {
+        uniqueProviders.forEach(providerName => {
             const option = document.createElement('option');
-            option.value = url;
-            option.textContent = providerMap[url] || url;
+            option.value = providerName;
+            option.textContent = providerName;
             globalFilterProvider.appendChild(option);
         });
 
@@ -928,6 +935,7 @@ export class UsageUI {
 
     private buildUsageFilters(filters: UIFilters): UsageFilter[] {
         const usageFilters: UsageFilter[] = [];
+        const providerMap = ProviderManager.getAllProviders();
 
         if (filters.timeRangeMs > 0) {
             const cutoffTime = new Date().getTime() - filters.timeRangeMs;
@@ -939,7 +947,10 @@ export class UsageUI {
         }
 
         if (filters.providers.length > 0) {
-            usageFilters.push((record: UsageRecord) => filters.providers.includes(record.url));
+            usageFilters.push((record: UsageRecord) => {
+                const recordProvider = providerMap[record.url] || record.url;
+                return filters.providers.includes(recordProvider);
+            });
         }
 
         if (filters.requestTypes.length > 0) {
