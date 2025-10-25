@@ -1,4 +1,5 @@
 import { UsageManager } from "../manager/usage";
+import { ProviderManager } from "../manager/provider";
 import { UsageRecord, UsageFilter, RequestType } from "../types";
 
 interface Statistics {
@@ -52,8 +53,8 @@ export class UsageUI {
         const stats = this.calculateStatistics(records);
 
         this.container.innerHTML = `
-            <!-- Global Filters -->
-            <div class="mb-2 p-3 flex-shrink-0">
+            <!-- Global Filters (Sticky) -->
+            <div class="sticky top-0 z-10 bg-zinc-900 border-b border-zinc-700 mb-2 p-3 flex-shrink-0">
                 <div class="flex gap-2 text-xs flex-wrap items-center">
                     <div class="flex gap-2 text-xs flex-wrap items-center">
                         <span class="text-zinc-400">측정값:</span>
@@ -86,12 +87,12 @@ export class UsageUI {
             </div>
 
             <!-- Statistics Summary -->
-            <div id="statisticsSummary" class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+            <div id="statisticsSummary" class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4 p-3">
                 ${this.renderStatisticsSummary(stats)}
             </div>
 
             <!-- Bar Chart -->
-            <div class="mb-6">
+            <div class="mb-6 p-3">
                 <div class="mb-3 flex justify-between items-center">
                     <h3 class="text-sm font-semibold text-zinc-100">시간대별 통계</h3>
                     <select id="barChartXAxis" class="bg-zinc-800 text-zinc-200 border border-zinc-700 rounded px-2 py-1 text-xs">
@@ -111,12 +112,12 @@ export class UsageUI {
             </div>
 
             <!-- Donut Chart -->
-            <div class="mb-6">
+            <div class="mb-6 p-3">
                 <div class="mb-3 flex justify-between items-center">
                     <h3 class="text-sm font-semibold text-zinc-100">분류별 통계</h3>
                     <select id="donutChartGroupBy" class="bg-zinc-800 text-zinc-200 border border-zinc-700 rounded px-2 py-1 text-xs">
                         <option value="model">모델별</option>
-                        <option value="url">URL별</option>
+                        <option value="url">프로바이더별</option>
                         <option value="requestType">타입별</option>
                     </select>
                 </div>
@@ -126,7 +127,7 @@ export class UsageUI {
             </div>
 
             <!-- Recent Records -->
-            <div class="mb-6">
+            <div class="mb-6 p-3">
                 <h3 class="text-sm font-semibold text-zinc-100 mb-2">최근 사용 기록</h3>
                 <div id="recentRecordsContainer" class="space-y-2">
                     ${this.renderRecords(records)}
@@ -209,7 +210,7 @@ export class UsageUI {
             stats.byModel[record.model].outputTokens += record.outputTokens || 0;
 
             // RequestType stats
-            const requestType = record.requestType || 'unknown';
+            const requestType = record.requestType || RequestType.Unknown;
             if (!stats.byRequestType[requestType]) {
                 stats.byRequestType[requestType] = {
                     requests: 0,
@@ -345,7 +346,7 @@ export class UsageUI {
                 if (!filters.models.includes(record.model)) return false;
             }
             if (filters.requestTypes && filters.requestTypes.length > 0) {
-                if (!filters.requestTypes.includes(record.requestType || 'unknown')) return false;
+                if (!filters.requestTypes.includes(record.requestType || RequestType.Unknown)) return false;
             }
             return true;
         });
@@ -357,23 +358,29 @@ export class UsageUI {
         
         filtered.forEach(record => {
             let key: string;
+            let displayName: string;
+            
             switch (groupBy) {
                 case 'url':
                     key = record.url;
+                    displayName = ProviderManager.getProvider(record.url);
                     break;
                 case 'model':
                     key = record.model;
+                    displayName = record.model;
                     break;
                 case 'requestType':
-                    key = record.requestType || 'unknown';
+                    key = record.requestType || RequestType.Unknown;
+                    displayName = key;
                     break;
                 default:
                     key = 'unknown';
+                    displayName = 'unknown';
             }
             
             if (!groups[key]) {
                 groups[key] = {
-                    name: key,
+                    name: displayName,
                     requests: 0,
                     tokens: 0,
                     cost: 0,
@@ -506,7 +513,7 @@ export class UsageUI {
         if (yAxis === 'tokens') {
             legend = `
                 <div style="display: flex; gap: 1rem; font-size: 0.75rem; color: #d4d4d8; margin-top: 0.5rem;">
-                    <div style="display: flex; align-items: center; gap: 0.25rem;"><span style="width: 0.75rem; height: 0.75rem; background-color: #3b82f6; border-radius: 0.25rem; display: inline-block;"></span> 캐시 입력</div>
+                    <div style="display: flex; align-items: center; gap: 0.25rem;"><span style="width: 0.75rem; height: 0.75rem; background-color: #3b82f6; border-radius: 0.25rem; display: inline-block;"></span> 캐시</div>
                     <div style="display: flex; align-items: center; gap: 0.25rem;"><span style="width: 0.75rem; height: 0.75rem; background-color: #8b5cf6; border-radius: 0.25rem; display: inline-block;"></span> 일반 입력</div>
                     <div style="display: flex; align-items: center; gap: 0.25rem;"><span style="width: 0.75rem; height: 0.75rem; background-color: #f97316; border-radius: 0.25rem; display: inline-block;"></span> 출력</div>
                 </div>
@@ -717,6 +724,8 @@ export class UsageUI {
                 minute: '2-digit',
                 second: '2-digit'
             });
+            
+            const providerName = ProviderManager.getProvider(record.url);
 
             return `
                 <div class="p-3 rounded-lg bg-zinc-800 border border-zinc-700 hover:border-zinc-600 transition-colors">
@@ -724,9 +733,9 @@ export class UsageUI {
                         <div style="flex: 1; min-width: 0;">
                             <div style="display: flex; align-items: flex-end; gap: 0.5rem; overflow: hidden;">
                                 <div style="font-size: 0.875rem; font-weight: 500; color: #f1f5f9; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${this.escapeHTML(record.model)}</div>
-                                <div style="font-size: 0.75rem; color: #a1a1aa; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1;">${this.escapeHTML(record.url)}</div>
+                                <div style="font-size: 0.75rem; color: #a1a1aa; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1;">${this.escapeHTML(providerName)}</div>
                             </div>
-                            <div style="font-size: 0.75rem; color: #a1a1aa; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${record.requestType || 'unknown'} • ${dateStr}</div>
+                            <div style="font-size: 0.75rem; color: #a1a1aa; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${record.requestType || RequestType.Unknown} • ${dateStr}</div>
                         </div>
                         <div style="display: flex; gap: 0.75rem; font-size: 0.75rem; flex-shrink: 0; justify-content: flex-end;">
                             <div>
@@ -772,8 +781,8 @@ export class UsageUI {
         // Initialize filter options
         const records = UsageManager.getRecords([]);
         const uniqueModels = [...new Set(records.map(r => r.model))].sort();
-        const uniqueProviders = [...new Set(records.map(r => r.url))].sort();
-        const uniqueRequestTypes = [...new Set(records.map(r => r.requestType || 'unknown'))].sort();
+        const uniqueProviderUrls = [...new Set(records.map(r => r.url))].sort();
+        const uniqueRequestTypes = [...new Set(records.map(r => r.requestType || RequestType.Unknown))].sort();
 
         uniqueModels.forEach(model => {
             const option = document.createElement('option');
@@ -782,10 +791,10 @@ export class UsageUI {
             globalFilterModel.appendChild(option);
         });
 
-        uniqueProviders.forEach(provider => {
+        uniqueProviderUrls.forEach(url => {
             const option = document.createElement('option');
-            option.value = provider;
-            option.textContent = provider;
+            option.value = url;
+            option.textContent = ProviderManager.getProvider(url);
             globalFilterProvider.appendChild(option);
         });
 
@@ -926,7 +935,7 @@ export class UsageUI {
         }
 
         if (filters.requestTypes.length > 0) {
-            usageFilters.push((record: UsageRecord) => filters.requestTypes.includes(record.requestType || 'unknown'));
+            usageFilters.push((record: UsageRecord) => filters.requestTypes.includes(record.requestType || RequestType.Unknown));
         }
 
         return usageFilters;

@@ -116,12 +116,26 @@ function parseURL(input: RequestInfo | URL): string | null {
 }
 
 function getRequestUrl(requestData: RequestData): string | null {
+    let url: string | null = null;
+    
     if (!isProxyRequest(requestData)) {
         const input = requestData.input;
-        return parseURL(input);
+        url = parseURL(input);
+    } else {
+        url = extractRealUrl(requestData);
     }
     
-    return extractRealUrl(requestData);
+    if (!url) return null;
+    
+    // URL에서 쿼리 파라미터 제거 (API 키 등 민감 정보 제거)
+    try {
+        const urlObj = new URL(url);
+        return urlObj.origin + urlObj.pathname;
+    } catch (e) {
+        // URL 파싱 실패 시 원본 반환
+        const queryIndex = url.indexOf('?');
+        return queryIndex > -1 ? url.substring(0, queryIndex) : url;
+    }
 }
 
 function isLLMRequest(requestData: RequestData): boolean {

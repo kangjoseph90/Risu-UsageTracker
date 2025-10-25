@@ -1,4 +1,5 @@
 import { PriceManager } from "../manager/price";
+import { ProviderManager } from "../manager/provider";
 import { ProviderPrice, PriceInfo } from "../types";
 
 export class PriceUI {
@@ -9,7 +10,7 @@ export class PriceUI {
         provider?: string;
         modelId?: string;
         mode?: 'temp' | 'confirmed';
-        field?: 'inputCost' | 'cachedInputCost' | 'outputCost';
+        field?: 'inputPrice' | 'cachedInputPrice' | 'outputPrice';
     } | null = null;
 
     constructor(container: HTMLElement, onChange?: () => void) {
@@ -147,9 +148,9 @@ export class PriceUI {
                         ${warningIcon}
                     </div>
                     <div class="text-xs text-zinc-400 space-y-1 min-w-0">
-                        ${this.renderPriceField('입력', 'inputCost', price.inputCost, modelId, provider, mode)}
-                        ${this.renderPriceField('캐시 입력', 'cachedInputCost', price.cachedInputCost, modelId, provider, mode)}
-                        ${this.renderPriceField('출력', 'outputCost', price.outputCost, modelId, provider, mode)}
+                        ${this.renderPriceField('입력', 'inputPrice', price.inputPrice, modelId, provider, mode)}
+                        ${this.renderPriceField('캐시', 'cachedInputPrice', price.cachedInputPrice, modelId, provider, mode)}
+                        ${this.renderPriceField('출력', 'outputPrice', price.outputPrice, modelId, provider, mode)}
                     </div>
                 </div>
                 <div class="flex gap-1 items-center flex-shrink-0">
@@ -170,7 +171,21 @@ export class PriceUI {
         `;
     }
 
-    private renderPriceField(label: string, field: 'inputCost' | 'cachedInputCost' | 'outputCost', value: number, modelId: string, provider: string, mode: 'temp' | 'confirmed'): string {
+    private renderPriceField(label: string, field: 'inputPrice' | 'cachedInputPrice' | 'outputPrice', value: number | undefined, modelId: string, provider: string, mode: 'temp' | 'confirmed'): string {
+        // cachedInputPrice가 없으면 필드 표시 안 함
+        if (value === undefined) {
+            return `
+                <div class="flex items-center gap-1 min-w-0">
+                    <span class="text-zinc-500">캐시: 지원 안 함</span>
+                    <button class="text-blue-500 hover:text-blue-400 add-cached-price-btn text-xs flex-shrink-0" data-model="${this.escapeHTML(modelId)}" data-provider="${this.escapeHTML(provider)}" data-mode="${mode}" title="추가 입력">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                        </svg>
+                    </button>
+                </div>
+            `;
+        }
+
         const isEditing = this.editingState?.type === 'price' && 
                          this.editingState.provider === provider && 
                          this.editingState.modelId === modelId && 
@@ -200,6 +215,9 @@ export class PriceUI {
                 </div>
             `;
         } else {
+            // 캐시 입력이 활성화된 경우만 비활성화 버튼 표시
+            const showDisableBtn = field === 'cachedInputPrice';
+            
             return `
                 <div class="flex items-center gap-1 min-w-0">
                     <span class="truncate">${label}: $${value.toFixed(4)}/M</span>
@@ -208,6 +226,13 @@ export class PriceUI {
                             <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/>
                         </svg>
                     </button>
+                    ${showDisableBtn ? `
+                    <button class="text-red-600 hover:text-red-500 remove-cached-price-btn text-xs flex-shrink-0" data-model="${this.escapeHTML(modelId)}" data-provider="${this.escapeHTML(provider)}" data-mode="${mode}" title="비활성화">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                        </svg>
+                    </button>
+                    ` : ''}
                 </div>
             `;
         }
@@ -293,7 +318,7 @@ export class PriceUI {
                 const modelId = (e.currentTarget as HTMLElement).getAttribute('data-model');
                 const provider = (e.currentTarget as HTMLElement).getAttribute('data-provider');
                 const mode = (e.currentTarget as HTMLElement).getAttribute('data-mode') as 'temp' | 'confirmed';
-                const field = (e.currentTarget as HTMLElement).getAttribute('data-field') as 'inputCost' | 'cachedInputCost' | 'outputCost';
+                const field = (e.currentTarget as HTMLElement).getAttribute('data-field') as 'inputPrice' | 'cachedInputPrice' | 'outputPrice';
                 
                 if (modelId && provider && field) {
                     this.editingState = { type: 'price', provider, modelId, mode, field };
@@ -318,7 +343,7 @@ export class PriceUI {
                 const modelId = (e.currentTarget as HTMLElement).getAttribute('data-model');
                 const provider = (e.currentTarget as HTMLElement).getAttribute('data-provider');
                 const mode = (e.currentTarget as HTMLElement).getAttribute('data-mode') as 'temp' | 'confirmed';
-                const field = (e.currentTarget as HTMLElement).getAttribute('data-field') as 'inputCost' | 'cachedInputCost' | 'outputCost';
+                const field = (e.currentTarget as HTMLElement).getAttribute('data-field') as 'inputPrice' | 'cachedInputPrice' | 'outputPrice';
                 
                 const input = this.container.querySelector('.price-edit-input') as HTMLInputElement;
                 const newValue = parseFloat(input?.value || '0');
@@ -350,29 +375,74 @@ export class PriceUI {
                 this.render();
             });
         });
+
+        // 캐시 입력 가격 추가 버튼
+        this.container.querySelectorAll('.add-cached-price-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const modelId = (e.currentTarget as HTMLElement).getAttribute('data-model');
+                const provider = (e.currentTarget as HTMLElement).getAttribute('data-provider');
+                const mode = (e.currentTarget as HTMLElement).getAttribute('data-mode') as 'temp' | 'confirmed';
+                
+                if (modelId && provider && mode) {
+                    // 현재 가격 정보 가져오기
+                    const prices = mode === 'temp' ? PriceManager.getTemporaryPrice() : PriceManager.getConfirmedPrice();
+                    const currentPrice = prices[provider]?.[modelId];
+                    
+                    if (currentPrice) {
+                        const updatedPrice = {
+                            ...currentPrice,
+                            cachedInputPrice: currentPrice.inputPrice * 0.1,
+                        };
+                        
+                        if (mode === 'temp') {
+                            PriceManager.setTemporaryPrice(modelId, provider, updatedPrice);
+                        } else {
+                            PriceManager.setConfirmedPrice(modelId, provider, updatedPrice);
+                        }
+                        
+                        this.render();
+                        this.onChange();
+                    }
+                }
+            });
+        });
+
+        // 캐시 입력 가격 비활성화 버튼
+        this.container.querySelectorAll('.remove-cached-price-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const modelId = (e.currentTarget as HTMLElement).getAttribute('data-model');
+                const provider = (e.currentTarget as HTMLElement).getAttribute('data-provider');
+                const mode = (e.currentTarget as HTMLElement).getAttribute('data-mode') as 'temp' | 'confirmed';
+                
+                if (modelId && provider && mode) {
+                    // 현재 가격 정보 가져오기
+                    const prices = mode === 'temp' ? PriceManager.getTemporaryPrice() : PriceManager.getConfirmedPrice();
+                    const currentPrice = prices[provider]?.[modelId];
+                    
+                    if (currentPrice) {
+                        // cachedInputPrice 제거
+                        const updatedPrice = {
+                            inputPrice: currentPrice.inputPrice,
+                            outputPrice: currentPrice.outputPrice,
+                        };
+                        
+                        if (mode === 'temp') {
+                            PriceManager.setTemporaryPrice(modelId, provider, updatedPrice);
+                        } else {
+                            PriceManager.setConfirmedPrice(modelId, provider, updatedPrice);
+                        }
+                        
+                        this.render();
+                        this.onChange();
+                    }
+                }
+            });
+        });
     }
 
     private updateProvider(oldProvider: string, newProvider: string) {
-        const confirmedPrices = PriceManager.getConfirmedPrice();
-        const tempPrices = PriceManager.getTemporaryPrice();
-
-        // confirmed 가격 이동
-        if (confirmedPrices[oldProvider]) {
-            const models = confirmedPrices[oldProvider];
-            for (const modelId in models) {
-                PriceManager.setConfirmedPrice(modelId, newProvider, models[modelId]);
-                PriceManager.removeConfirmedModel(modelId, oldProvider);
-            }
-        }
-
-        // temporary 가격 이동
-        if (tempPrices[oldProvider]) {
-            const models = tempPrices[oldProvider];
-            for (const modelId in models) {
-                PriceManager.setTemporaryPrice(modelId, newProvider, models[modelId]);
-                PriceManager.removeTemporaryModel(modelId, oldProvider);
-            }
-        }
+        PriceManager.renameProvider(oldProvider, newProvider);
+        ProviderManager.renameProvider(oldProvider, newProvider);
     }
 
     private escapeHTML(text: string): string {

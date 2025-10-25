@@ -15,6 +15,7 @@ export {
     OnRequestCallback,
     OnResponseCallback,
     RequestData,
+    ProviderMap,
 }
 
 enum RisuArgType {
@@ -42,9 +43,9 @@ enum RequestType {
 }
 
 interface PriceInfo { // per 1M tokens
-    inputCost: number, 
-    cachedInputCost: number,
-    outputCost: number,
+    inputPrice: number, 
+    cachedInputPrice?: number,
+    outputPrice: number,
 }
 
 interface ModelPrice {
@@ -52,7 +53,7 @@ interface ModelPrice {
 }
 
 interface ProviderPrice {
-    [urlPattern: string]: ModelPrice;  
+    [provider: string]: ModelPrice;  
 }
 
 interface UsageInfo {
@@ -89,3 +90,6 @@ interface RequestData {
 type OnRequestCallback = (requestData: RequestData) => void;
 type OnResponseCallback = (requestData: RequestData, response: Response, data?: string) => void;
 
+interface ProviderMap {
+    [url: string]: string; // url -> providerName
+}

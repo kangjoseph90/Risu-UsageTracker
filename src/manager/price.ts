@@ -1,7 +1,7 @@
 import { PRICE_ARG, PRICE_TEMP_ARG } from "../consts";
+import { DEFAULT_PRICE } from "../consts/price";
 import { RisuAPI } from "../risuAPI";
 import { PriceInfo, ProviderPrice } from "../types";
-import { DEFAULT_PRICE } from "../consts/price";
 
 function getConfirmedPrice(): ProviderPrice {
     try {
@@ -37,33 +37,6 @@ function getPrice(): ProviderPrice {
     return { ...confirmedPrice, ...tempPrice };
 }
 
-function getProviderKey(url: string): string | null {
-    const priceData = getPrice();
-    for (const key of Object.keys(priceData)) {
-        if (url.includes(key)) {
-            return key;
-        }
-    }
-    
-    for (const key of Object.keys(DEFAULT_PRICE)) {
-        if (url.includes(key)) {
-            return key;
-        }
-    }
-    
-    return null;
-}
-
-function initModelPrice(modelId: string, url: string): PriceInfo {
-    const emptyPrice: PriceInfo = {
-        inputCost: 0,
-        cachedInputCost: 0,
-        outputCost: 0,
-    };
-    PriceManager.setTemporaryPrice(modelId, url, emptyPrice);
-    return emptyPrice;
-}
-
 /**
  * getModelPrice,
  * setTemporaryPrice,
@@ -75,53 +48,57 @@ function initModelPrice(modelId: string, url: string): PriceInfo {
  * getConfirmedPrice,
  */
 export class PriceManager {
-    static getModelPrice(modelId: string, url: string): PriceInfo {
+    static getModelPrice(modelId: string, provider: string): PriceInfo {
         const priceData = getPrice();
-        const providerKey = getProviderKey(url);
 
-        if (!providerKey) {
-            return initModelPrice(modelId, url);
+        // 저장된 가격 정보 조회
+        const savedPrice = priceData[provider];
+        if (savedPrice && savedPrice[modelId]) {
+            return savedPrice[modelId];
         }
 
-        const savedModelPrice = priceData[providerKey];
-        if (savedModelPrice && savedModelPrice[modelId]) {
-            return savedModelPrice[modelId];
+        // 디폴트 가격 정보 조회
+        const defaultPrice = DEFAULT_PRICE[provider];
+        if (defaultPrice && defaultPrice[modelId]) {
+            // 확인된 가격 정보 저장
+            this.setConfirmedPrice(modelId, provider, defaultPrice[modelId]);
+            return defaultPrice[modelId];
         }
-        
-        const defaultModelPrice = DEFAULT_PRICE[providerKey];
-        if (defaultModelPrice && defaultModelPrice[modelId]) {
-            const price = defaultModelPrice[modelId];
-            this.setConfirmedPrice(modelId, providerKey, price);
-            return price;
-        }
-        
-        return initModelPrice(modelId, url);
+
+        // 가격 정보가 없으면 0으로 초기화
+        const tempPrice: PriceInfo = {
+            inputPrice: 0,
+            outputPrice: 0,
+        };
+
+        this.setTemporaryPrice(modelId, provider, tempPrice);
+        return tempPrice;
     }
 
-    static setTemporaryPrice(modelId: string, url: string, priceInfo: PriceInfo): void {
+    static setTemporaryPrice(modelId: string, provider: string, priceInfo: PriceInfo): void {
         const tempPrice = getTemporaryPrice();
-        if(!tempPrice[url]) {
-            tempPrice[url] = {};
+        if(!tempPrice[provider]) {
+            tempPrice[provider] = {};
         }
-        tempPrice[url][modelId] = priceInfo;
+        tempPrice[provider][modelId] = priceInfo;
         setTemporaryPrice(tempPrice);
     }
 
-    static setConfirmedPrice(modelId: string, url: string, priceInfo: PriceInfo): void {
+    static setConfirmedPrice(modelId: string, provider: string, priceInfo: PriceInfo): void {
         const confirmedPrice = getConfirmedPrice();
-        if(!confirmedPrice[url]) {
-            confirmedPrice[url] = {};
+        if(!confirmedPrice[provider]) {
+            confirmedPrice[provider] = {};
         }
-        confirmedPrice[url][modelId] = priceInfo;
+        confirmedPrice[provider][modelId] = priceInfo;
         setConfirmedPrice(confirmedPrice);
     }
 
-    static removeTemporaryModel(modelId: string, url: string): boolean {
-        const tempPrice = getTemporaryPrice();  
-        if (tempPrice[url] && tempPrice[url][modelId]) {
-            delete tempPrice[url][modelId];
-            if (Object.keys(tempPrice[url]).length === 0) {
-                delete tempPrice[url];
+    static removeTemporaryModel(modelId: string, provider: string): boolean {
+        const tempPrice = getTemporaryPrice();
+        if (tempPrice[provider] && tempPrice[provider][modelId]) {
+            delete tempPrice[provider][modelId];
+            if (Object.keys(tempPrice[provider]).length === 0) {
+                delete tempPrice[provider];
             }
             setTemporaryPrice(tempPrice);
             return true;
@@ -129,12 +106,12 @@ export class PriceManager {
         return false;
     }
 
-    static removeConfirmedModel(modelId: string, url: string): boolean {
+    static removeConfirmedModel(modelId: string, provider: string): boolean {
         const confirmedPrice = getConfirmedPrice();
-        if (confirmedPrice[url] && confirmedPrice[url][modelId]) {
-            delete confirmedPrice[url][modelId];
-            if (Object.keys(confirmedPrice[url]).length === 0) {
-                delete confirmedPrice[url];
+        if (confirmedPrice[provider] && confirmedPrice[provider][modelId]) {
+            delete confirmedPrice[provider][modelId];
+            if (Object.keys(confirmedPrice[provider]).length === 0) {
+                delete confirmedPrice[provider];
             }
             setConfirmedPrice(confirmedPrice);
             return true;
@@ -142,9 +119,9 @@ export class PriceManager {
         return false;
     }
 
-    static hasTemporaryPrice(modelId: string, url: string): boolean {
-        const tempPrice = getTemporaryPrice();  
-        return !!(tempPrice[url] && tempPrice[url][modelId]);
+    static hasTemporaryPrice(modelId: string, provider: string): boolean {
+        const tempPrice = getTemporaryPrice();
+        return !!(tempPrice[provider] && tempPrice[provider][modelId]);
     }
 
     static getTemporaryPrice(): ProviderPrice {
@@ -153,5 +130,23 @@ export class PriceManager {
 
     static getConfirmedPrice(): ProviderPrice {
         return getConfirmedPrice();
+    }
+
+    static renameProvider(oldKey: string, newKey: string): void {
+        // Confirmed Price 변경
+        const confirmedPrice = getConfirmedPrice();
+        if (confirmedPrice[oldKey]) {
+            confirmedPrice[newKey] = confirmedPrice[oldKey];
+            delete confirmedPrice[oldKey];
+            setConfirmedPrice(confirmedPrice);
+        }
+
+        // Temporary Price 변경
+        const tempPrice = getTemporaryPrice();
+        if (tempPrice[oldKey]) {
+            tempPrice[newKey] = tempPrice[oldKey];
+            delete tempPrice[oldKey];
+            setTemporaryPrice(tempPrice);
+        }
     }
 }
