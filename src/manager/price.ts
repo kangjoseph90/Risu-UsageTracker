@@ -2,6 +2,7 @@ import { PRICE_ARG, PRICE_TEMP_ARG } from "../consts";
 import { DEFAULT_PRICE } from "../consts/price";
 import { RisuAPI } from "../risuAPI";
 import { PriceInfo, ProviderPrice } from "../types";
+import { UsageManager } from "./usage";
 
 function getConfirmedPrice(): ProviderPrice {
     try {
@@ -31,12 +32,6 @@ function setTemporaryPrice(priceData: ProviderPrice): void {
     RisuAPI.setArg(PRICE_TEMP_ARG, JSON.stringify(priceData));
 }
 
-function getPrice(): ProviderPrice {
-    const tempPrice = getTemporaryPrice();
-    const confirmedPrice = getConfirmedPrice();
-    return { ...confirmedPrice, ...tempPrice };
-}
-
 /**
  * getModelPrice,
  * setTemporaryPrice,
@@ -49,7 +44,9 @@ function getPrice(): ProviderPrice {
  */
 export class PriceManager {
     static getModelPrice(modelId: string, provider: string): PriceInfo {
-        const priceData = getPrice();
+        const tempPriceData = getTemporaryPrice();
+        const confirmedPriceData = getConfirmedPrice();
+        const priceData = { ...confirmedPriceData, ...tempPriceData };
 
         // 저장된 가격 정보 조회
         const savedPrice = priceData[provider];
@@ -66,13 +63,13 @@ export class PriceManager {
         }
 
         // 가격 정보가 없으면 0으로 초기화
-        const tempPrice: PriceInfo = {
+        const newTempPrice: PriceInfo = {
             inputPrice: 0,
             outputPrice: 0,
         };
 
-        this.setTemporaryPrice(modelId, provider, tempPrice);
-        return tempPrice;
+        this.setTemporaryPrice(modelId, provider, newTempPrice);
+        return newTempPrice;
     }
 
     static setTemporaryPrice(modelId: string, provider: string, priceInfo: PriceInfo): void {
@@ -82,6 +79,7 @@ export class PriceManager {
         }
         tempPrice[provider][modelId] = priceInfo;
         setTemporaryPrice(tempPrice);
+        UsageManager.updateCostsForModel(provider, modelId, priceInfo);
     }
 
     static setConfirmedPrice(modelId: string, provider: string, priceInfo: PriceInfo): void {
@@ -91,6 +89,7 @@ export class PriceManager {
         }
         confirmedPrice[provider][modelId] = priceInfo;
         setConfirmedPrice(confirmedPrice);
+        UsageManager.updateCostsForModel(provider, modelId, priceInfo);
     }
 
     static removeTemporaryModel(modelId: string, provider: string): boolean {

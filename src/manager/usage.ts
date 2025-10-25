@@ -1,6 +1,8 @@
 import { DB_ARG } from "../consts";
 import { RisuAPI } from "../risuAPI";
-import { UsageRecord, UsageDB, UsageFilter } from "../types";
+import { UsageRecord, UsageDB, UsageFilter, PriceInfo, CostInfo } from "../types";
+import { calculateCost } from "../util";
+import { ProviderManager } from "./provider";
 
 function initDB() {
     setDB({
@@ -29,6 +31,7 @@ function setDB(db: UsageDB) {
  * removeRecord,
  * getRecords,
  * getLastUpdated,
+ * recalculateCostsForModel,
  */
 export class UsageManager {
     static addRecord(record: UsageRecord) {
@@ -72,6 +75,39 @@ export class UsageManager {
     static getLastUpdated(): string {
         const db = getDB();
         return db.lastUpdated;
+    }
+
+    static updateCostsForModel(provider: string, modelId: string, newPrice: PriceInfo): number {
+        const db = getDB();
+        const providerMap = ProviderManager.getAllProviders();
+        let updatedCount = 0;
+
+        db.records.forEach(record => {
+            const recordProvider = providerMap[record.url];
+            
+            // provider와 modelId 일치 확인
+            if (recordProvider === provider && record.model === modelId) {
+                // 새 가격으로 비용 재계산
+                const newCost: CostInfo = calculateCost(
+                    {
+                        inputTokens: record.inputTokens,
+                        cachedInputTokens: record.cachedInputTokens,
+                        outputTokens: record.outputTokens
+                    },
+                    newPrice
+                );
+                record = Object.assign(record, newCost);
+                updatedCount++;
+            }
+        });
+
+        // 변경사항이 있으면 저장 및 lastUpdated 갱신
+        if (updatedCount > 0) {
+            db.lastUpdated = new Date().toISOString();
+            setDB(db);
+        }
+
+        return updatedCount;
     }
 
 }

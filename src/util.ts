@@ -1,11 +1,12 @@
 import { Logger } from "./logger";
-import { RequestData, RequestType } from "./types";
+import { CostInfo, PriceInfo, RequestData, RequestType, UsageInfo } from "./types";
 
 export {
     parseRequestType,
     getRequestUrl,
     isLLMRequest,
     parseBody,
+    calculateCost
 }
 
 function parseRequestType(mode: string): RequestType {
@@ -159,4 +160,20 @@ function isLLMRequest(requestData: RequestData): boolean {
     const hasContent = contentKeywords.some(keyword => keyword in bodyJson);
 
     return hasModel && hasContent;
+}
+
+function calculateCost(usage: UsageInfo, price: PriceInfo): CostInfo {
+    // cachedInputPrice가 정의되지 않으면 inputPrice 사용
+    const cachedPrice = price.cachedInputPrice ?? price.inputPrice;
+
+    const inputCost = ((usage.inputTokens - usage.cachedInputTokens) / 1_000_000) * price.inputPrice;
+    const cachedInputCost = (usage.cachedInputTokens / 1_000_000) * cachedPrice;
+    const outputCost = (usage.outputTokens / 1_000_000) * price.outputPrice;
+    const totalCost = inputCost + cachedInputCost + outputCost;
+    
+    return {
+        inputCost: inputCost + cachedInputCost,
+        outputCost,
+        totalCost,
+    };
 }

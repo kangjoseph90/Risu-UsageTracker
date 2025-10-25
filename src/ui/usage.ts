@@ -1,6 +1,6 @@
 import { UsageManager } from "../manager/usage";
 import { ProviderManager } from "../manager/provider";
-import { UsageRecord, UsageFilter, RequestType } from "../types";
+import { UsageRecord, UsageFilter, RequestType, ProviderMap } from "../types";
 
 interface Statistics {
     totalCost: number;
@@ -51,6 +51,7 @@ export class UsageUI {
     render() {
         const records = UsageManager.getRecords([]);
         const stats = this.calculateStatistics(records);
+        const providerMap = ProviderManager.getAllProviders();
 
         this.container.innerHTML = `
             <!-- Global Filters (Sticky) -->
@@ -130,7 +131,7 @@ export class UsageUI {
             <div class="mb-6 p-3">
                 <h3 class="text-sm font-semibold text-zinc-100 mb-2">최근 사용 기록</h3>
                 <div id="recentRecordsContainer" class="space-y-2">
-                    ${this.renderRecords(records)}
+                    ${this.renderRecords(records, providerMap)}
                 </div>
             </div>
 
@@ -712,7 +713,7 @@ export class UsageUI {
         `;
     }
 
-    private renderRecords(records: UsageRecord[]): string {
+    private renderRecords(records: UsageRecord[], providerMap: ProviderMap): string {
         if (records.length === 0) {
             return '<div style="text-align: center; color: #a1a1aa; padding: 2rem 0;">사용 기록이 없습니다.</div>';
         }
@@ -730,7 +731,7 @@ export class UsageUI {
                 second: '2-digit'
             });
             
-            const providerName = ProviderManager.getProvider(record.url);
+            const providerName = providerMap[record.url] || record.url; 
 
             return `
                 <div class="p-3 rounded-lg bg-zinc-800 border border-zinc-700 hover:border-zinc-600 transition-colors">
@@ -789,6 +790,8 @@ export class UsageUI {
         const uniqueProviderUrls = [...new Set(records.map(r => r.url))].sort();
         const uniqueRequestTypes = [...new Set(records.map(r => r.requestType || RequestType.Unknown))].sort();
 
+        const providerMap = ProviderManager.getAllProviders();
+
         uniqueModels.forEach(model => {
             const option = document.createElement('option');
             option.value = model;
@@ -799,7 +802,7 @@ export class UsageUI {
         uniqueProviderUrls.forEach(url => {
             const option = document.createElement('option');
             option.value = url;
-            option.textContent = ProviderManager.getProvider(url);
+            option.textContent = providerMap[url] || url;
             globalFilterProvider.appendChild(option);
         });
 
@@ -900,7 +903,7 @@ export class UsageUI {
             const filteredRecords = UsageManager.getRecords(this.buildUsageFilters(filters));
             
             if (recentRecordsContainer) {
-                recentRecordsContainer.innerHTML = this.renderRecords(filteredRecords);
+                recentRecordsContainer.innerHTML = this.renderRecords(filteredRecords, providerMap);
             }
         };
 

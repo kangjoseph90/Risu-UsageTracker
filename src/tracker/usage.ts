@@ -6,7 +6,7 @@ import { UsageManager } from "../manager/usage";
 import { CostInfo, OnRequestCallback, OnResponseCallback, PriceInfo, RequestData, RequestType, UsageInfo, UsageRecord } from "../types";
 import { FetchWrapper } from "./fetch";
 import { ModeTracker } from "./mode";
-import { getRequestUrl, isLLMRequest } from "../util";
+import { calculateCost, getRequestUrl, isLLMRequest } from "../util";
 import { ProviderManager } from "../manager/provider";
 
 function getUsageRecord(type: RequestType, modelId: string, url: string, usageInfo: UsageInfo, priceInfo: PriceInfo): UsageRecord {
@@ -20,22 +20,6 @@ function getUsageRecord(type: RequestType, modelId: string, url: string, usageIn
         ...costInfo,
     };
     return record;
-}
-
-function calculateCost(usage: UsageInfo, price: PriceInfo): CostInfo {
-    // cachedInputPrice가 정의되지 않으면 inputPrice 사용
-    const cachedPrice = price.cachedInputPrice ?? price.inputPrice;
-    
-    const inputCost = (usage.inputTokens / 1_000_000) * price.inputPrice;
-    const cachedInputCost = (usage.cachedInputTokens / 1_000_000) * cachedPrice;
-    const outputCost = (usage.outputTokens / 1_000_000) * price.outputPrice;
-    const totalCost = inputCost + cachedInputCost + outputCost;
-    
-    return {
-        inputCost: inputCost + cachedInputCost,
-        outputCost,
-        totalCost,
-    };
 }
 
 export class UsageTracker {
