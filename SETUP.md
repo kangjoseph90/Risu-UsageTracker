@@ -41,5 +41,4 @@ npm run dev
 ## 사용
 
 1. 빌드: `npm run build`
-2. `dist/plugin.js`를 RisuAI 플러그인 폴더에 복사
-3. RisuAI에서 플러그인 로드
+2. `dist/plugin.js`를 RisuAI 에서 플러그인으로 로드

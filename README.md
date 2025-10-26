@@ -11,8 +11,7 @@ API 사용량과 비용을 추적하고 관리하는 RisuAI 플러그인입니�
 
 ## 설치
 
-1. `dist/plugin.js` 파일을 RisuAI 플러그인 폴더에 복사합니다.
-2. RisuAI에서 플러그인을 로드합니다.
+`dist/plugin.js` 파일을 RisuAI 플러그인으로 로드합니다.
 
 ## 개발
 
