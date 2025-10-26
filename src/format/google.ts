@@ -28,11 +28,12 @@ export class GoogleFormat extends BaseFormat {
             // 리퀘스트: contents 키
             const hasRequestKeys = requestBody.contents !== undefined;
             
-            // 리스폰스: modelVersion, candidates, usageMetadata.promptTokenCount, usageMetadata.candidatesTokenCount 
+            // 리스폰스: modelVersion, candidates, usageMetadata.promptTokenCount, usageMetadata.candidatesTokenCount || usageMetadata.thoughtsTokenCount 
             const hasResponseKeys = 
                 responseJson.candidates &&
                 responseJson.usageMetadata?.promptTokenCount !== undefined &&
-                responseJson.usageMetadata?.candidatesTokenCount !== undefined &&
+                (responseJson.usageMetadata?.candidatesTokenCount !== undefined ||
+                 responseJson.usageMetadata?.thoughtsTokenCount !== undefined) &&
                 responseJson.modelVersion !== undefined;
 
             return hasRequestKeys && hasResponseKeys;
