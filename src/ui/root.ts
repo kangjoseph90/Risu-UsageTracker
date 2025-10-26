@@ -114,10 +114,10 @@ export class RootUI {
                         <h2 class="text-lg sm:text-2xl font-semibold text-zinc-100">${PLUGIN_NAME}</h2>
                         <div class="flex items-center gap-2">
                             <button id="${this.USAGE_BUTTON_ID}" class="px-3 py-2 rounded-lg bg-zinc-800 text-zinc-200 transition-colors text-sm font-medium hover:bg-zinc-700" title="사용량 통계">
-                                사용량 통계
+                                사용량
                             </button>
                             <button id="${this.PRICE_BUTTON_ID}" class="px-3 py-2 rounded-lg text-zinc-200 transition-colors text-sm font-medium hover:text-zinc-100 flex items-center gap-1" title="가격 정보">
-                                <span>가격 정보</span>
+                                <span>가격</span>
                                 <span class="price-warning-icon hidden text-yellow-400">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                         <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
@@ -127,12 +127,12 @@ export class RootUI {
                                 </span>
                             </button>
                             <button id="${this.BACKUP_BUTTON_ID}" class="p-2 text-zinc-200 hover:text-white transition-colors" title="백업">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line>
                                 </svg>
                             </button>
                             <button id="${this.RESTORE_BUTTON_ID}" class="p-2 text-zinc-200 hover:text-white transition-colors" title="복구">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line>
                                 </svg>
                             </button>
