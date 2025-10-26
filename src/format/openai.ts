@@ -56,7 +56,8 @@ export class OpenAIFormat extends BaseFormat {
                     
                     if (parsed.usage) {
                         result.inputTokens = parsed.usage.prompt_tokens || 0;
-                        result.cachedInputTokens = parsed.usage.prompt_tokens_details?.cached_tokens || 0;
+                        result.cachedInputTokens = parsed.usage.prompt_tokens_details?.cached_tokens || 
+                            parsed.usage.prompt_cache_hit_tokens || 0;
                         result.outputTokens = parsed.usage.completion_tokens || 0;
                     }
                 } catch (error) {

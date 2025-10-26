@@ -1,5 +1,5 @@
 import { PROVIDER_MAP_ARG } from "../consts";
-import { DEFAULT_PROVIDER } from "../consts/provider";
+import { getDefaultProvider } from "../consts/provider";
 import { RisuAPI } from "../risuAPI";
 import { ProviderMap } from "../types";
 
@@ -37,8 +37,8 @@ export class ProviderManager {
         }
 
         // 디폴트 매핑 조회
-        if (url in DEFAULT_PROVIDER) {
-            const provider = DEFAULT_PROVIDER[url];
+        const provider = getDefaultProvider(url);
+        if (provider) {
             // 디폴트 매핑 저장
             this.setProvider(url, provider);
             return provider;

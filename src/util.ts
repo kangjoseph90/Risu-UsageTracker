@@ -147,16 +147,16 @@ function isLLMRequest(requestData: RequestData): boolean {
     const bodyJson = parseBody(body);
     if (!bodyJson) return false;
 
-    // 조건 1: body에 model 키가 있거나 url에 models가 있어야 함
+    // 조건 1: body에 model 키가 있거나 url에 models, model이 있어야 함
     const hasModelKey = 'model' in bodyJson;
     
     const url = getRequestUrl(requestData);
-    const hasModelsInUrl = url ? url.includes("models") : false;
+    const hasModelsInUrl = url ? url.includes("models") || url.includes("model") : false;
 
     const hasModel = hasModelKey || hasModelsInUrl;
     
-    // 조건 2: body에 contents, messages, prompt 키 중 하나가 있어야 함
-    const contentKeywords = ["contents", "messages", "prompt"];
+    // 조건 2: body에 contents, messages 키 중 하나가 있어야 함
+    const contentKeywords = ["contents", "messages"];
     const hasContent = contentKeywords.some(keyword => keyword in bodyJson);
 
     return hasModel && hasContent;

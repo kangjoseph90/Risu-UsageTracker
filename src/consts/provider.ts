@@ -1,53 +1,65 @@
-import { ModelPrice, PriceInfo, ProviderMap } from "../types";
+interface ProviderPattern {
+    [provider: string]: RegExp[];
+}
 
-export const DEFAULT_PROVIDER: ProviderMap = {
-    // OpenRouter
-    "https://openrouter.ai/api/v1/chat/completions": "Openrouter",
+const DEFAULT_PROVIDER_PATTERN: ProviderPattern = {
+    "Openrouter": [
+        /https:\/\/openrouter\.ai\/api\/v1\/chat\/completions/,
+    ],
+    "OpenAI": [
+        /https:\/\/api\.openai\.com\/v1\/chat\/completions/,
+    ],
+    "Azure": [
+        /https:\/\/[^/]+\.openai\.azure\.com\/openai\/deployments\/[^/]+\/(chat\/)?completions\?api-version=\d{4}-\d{2}-\d{2}/
+    ], 
+    "Anthropic": [
+        /https:\/\/api\.anthropic\.com\/v1\/messages/,
+    ],
+    "GitHubCopilot": [
+        /https:\/\/api\.githubcopilot\.com\/chat\/completions/,
+    ],
+    "AkashChat": [
+        /https:\/\/chatapi\.akash\.network\/api\/v1\/chat\/completions/,
+    ],
+    "Cerebras": [
+        /https:\/\/api\.cerebras\.ai\/v1\/chat\/completions/,
+    ],
+    "ZAI": [
+        /https:\/\/api\.z\.ai\/api\/(?:coding\/)?paas\/v4\/chat\/completions/,
+        /https:\/\/api\.z\.ai\/api\/anthropic\/v1\/messages/,
+        /https:\/\/open\.bigmodel\.cn\/api\/(?:coding\/)?paas\/v4\/chat\/completions/
+    ],
+    "Mistral": [
+        /https:\/\/api\.mistral\.ai\/v1\/chat\/completions/,
+    ],
+    "GoogleAI": [
+        /https:\/\/generativelanguage\.googleapis\.com\/v1beta\/models\/[\w.@:-]+:(generateContent|streamGenerateContent)/,
+    ],
+    "VertexAI": [
+        /https:\/\/(?:[a-z]+-)?aiplatform\.googleapis\.com\/v1\/projects\/[^/]+\/locations\/[a-z-]+\/publishers\/(google|anthropic)\/models\/[\w.@:-]+:(generateContent|streamGenerateContent|predict|generateMessage)/
+    ],
+    "AWSBedrock" : [
+        /https:\/\/bedrock-runtime\.[\w-]+\.amazonaws\.com\/model\/[\w.@:-]+\/invoke/
+    ],
+    "DeepInfra": [
+        /https:\/\/api\.deepinfra\.com\/v1\/openai\/chat\/completions/,
+    ],
+    "XAI": [
+        /https:\/\/api\.x\.ai\/v1\/chat\/completions/,
+    ],
+    "DeepSeek": [
+        /https:\/\/api\.deepseek\.com\/chat\/completions/,
+        /https:\/\/api\.deepseek\.com\/anthropic\/v1\/messages/
+    ]
+}
 
-    // OpenAI
-    "https://api.openai.com/v1/chat/completions": "OpenAI",
-
-    // Anthropic
-    "https://api.anthropic.com/v1/chat/completions": "Anthropic",
-
-    // GitHub Copilot
-    "https://api.githubcopilot.com/chat/completions": "GitHubCopilot",
-
-    // AkashChat
-    "https://chatapi.akash.network/api/v1/chat/completions": "AkashChat",
-
-    // Cerebras
-    "https://api.cerebras.ai/v1/chat/completions": "Cerebras",
-
-    // Z.AI
-    "https://api.z.ai/api/paas/v4/chat/completions": "Z.AI",
-    "https://api.z.ai/api/coding/paas/v4/chat/completions": "Z.AI",
-    "https://api.z.ai/api/anthropic/v1/messages": "Z.AI",
-
-    // Mistral
-    "https://api.mistral.ai/v1/chat/completions": "Mistral",
-
-    // GoogleAI
-    "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent": "GoogleAI",
-    "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent": "GoogleAI",
-    "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent": "GoogleAI",
-    "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent": "GoogleAI",
-    "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite-preview-09-2025:generateContent": "GoogleAI",
-    "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro-latest:generateContent": "GoogleAI",
-    "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent": "GoogleAI",
-    "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:generateContent": "GoogleAI",
-    "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent": "GoogleAI",
-    "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent": "GoogleAI",
-
-    "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:streamGenerateContent": "GoogleAI",
-    "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:streamGenerateContent": "GoogleAI",
-    "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:streamGenerateContent": "GoogleAI",
-    "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:streamGenerateContent": "GoogleAI",
-    "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite-preview-09-2025:streamGenerateContent": "GoogleAI",
-    "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro-latest:streamGenerateContent": "GoogleAI",
-    "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:streamGenerateContent": "GoogleAI",
-    "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:streamGenerateContent": "GoogleAI",
-    "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:streamGenerateContent": "GoogleAI",
-    "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:streamGenerateContent": "GoogleAI",
-
+export function getDefaultProvider(url: string): string | null {
+    for (const [provider, patterns] of Object.entries(DEFAULT_PROVIDER_PATTERN)) {
+        for (const pattern of patterns) {
+            if (pattern.test(url)) {
+                return provider;
+            }
+        }
+    }
+    return null;
 }
