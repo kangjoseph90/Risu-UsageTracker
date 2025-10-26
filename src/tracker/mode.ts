@@ -19,7 +19,9 @@ export class ModeTracker {
     }
 
     getCurrentMode(): RequestType {
-        return this.lastMode;
+        const mode = this.lastMode;
+        this.lastMode = RequestType.Unknown;
+        return mode;
     }
 
     destroy() {
