@@ -56,7 +56,10 @@ export class AnthropicFormat extends BaseFormat {
                     const parsed = JSON.parse(this.data);
                     
                     if (parsed.usage) {
-                        result.inputTokens = parsed.usage.input_tokens || 0;
+                        result.inputTokens = 
+                            (parsed.usage.input_tokens  || 0) +
+                            (parsed.usage.cache_write_input_tokens || 0) +
+                            (parsed.usage.cache_read_input_tokens || 0);
                         result.cachedInputTokens = parsed.usage.cache_read_input_tokens || 0;
                         result.outputTokens = parsed.usage.output_tokens || 0;
                     }
