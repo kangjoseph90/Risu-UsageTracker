@@ -1,6 +1,8 @@
-import { PLUGIN_NAME } from "../consts";
+import { PLUGIN_NAME } from "../plugin";
 import { UsageUI } from "./usage";
 import { PriceUI } from "./price";
+import { ProviderUI } from "./provider";
+import { RecordUI } from "./record";
 import { PriceManager } from "../manager/price";
 import { BackupManager } from "../manager/backup";
 
@@ -10,13 +12,18 @@ export class RootUI {
     private OPEN_BUTTON_ID = `${this.ROOT_ID}-openButton`;
     private USAGE_BUTTON_ID = `${this.ROOT_ID}-usageButton`;
     private PRICE_BUTTON_ID = `${this.ROOT_ID}-priceButton`;
+    private SETTINGS_BUTTON_ID = `${this.ROOT_ID}-settingsButton`;
+    private SETTINGS_SECTION_ID = `${this.ROOT_ID}-settingsSection`;
     private BACKUP_BUTTON_ID = `${this.ROOT_ID}-backupButton`;
     private RESTORE_BUTTON_ID = `${this.ROOT_ID}-restoreButton`;
+    private PROVIDER_MAP_BUTTON_ID = `${this.ROOT_ID}-providerMapButton`;
+    private RECORD_MANAGE_BUTTON_ID = `${this.ROOT_ID}-recordManageButton`;
     private CLOSE_BUTTON_ID = `${this.ROOT_ID}-closeButton`;
     private BODY_CONTAINER_ID = `${this.ROOT_ID}-bodyContainer`;
 
     private timeout: NodeJS.Timeout | null = null;
-    private currentTab: 'usage' | 'price' = 'usage';
+    private currentTab: 'usage' | 'price' | 'provider' | 'record' = 'usage';
+    private settingsExpanded: boolean = false;
 
     constructor() {
         this.initialize();
@@ -116,7 +123,7 @@ export class RootUI {
                             <button id="${this.USAGE_BUTTON_ID}" class="px-3 py-2 rounded-lg bg-zinc-800 text-zinc-200 transition-colors text-sm font-medium hover:bg-zinc-700" title="사용량 통계">
                                 사용량
                             </button>
-                            <button id="${this.PRICE_BUTTON_ID}" class="px-3 py-2 rounded-lg text-zinc-200 transition-colors text-sm font-medium hover:text-zinc-100 flex items-center gap-1" title="가격 정보">
+                            <button id="${this.PRICE_BUTTON_ID}" class="px-3 py-2 rounded-lg text-zinc-200 transition-colors text-sm font-medium hover:text-zinc-100 hover:bg-zinc-700 flex items-center gap-1" title="가격 정보">
                                 <span>가격</span>
                                 <span class="price-warning-icon hidden text-yellow-400">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -126,14 +133,10 @@ export class RootUI {
                                     </svg>
                                 </span>
                             </button>
-                            <button id="${this.BACKUP_BUTTON_ID}" class="p-2 text-zinc-200 hover:text-white transition-colors" title="백업">
+                            <button id="${this.SETTINGS_BUTTON_ID}" class="p-2 text-zinc-200 hover:text-white transition-colors" title="설정">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line>
-                                </svg>
-                            </button>
-                            <button id="${this.RESTORE_BUTTON_ID}" class="p-2 text-zinc-200 hover:text-white transition-colors" title="복구">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line>
+                                    <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
+                                    <circle cx="12" cy="12" r="3"/>
                                 </svg>
                             </button>
                             <button id="${this.CLOSE_BUTTON_ID}" class="p-2 text-zinc-200 hover:text-white transition-colors" title="닫기">
@@ -141,6 +144,38 @@ export class RootUI {
                                     <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
                                 </svg>
                             </button>
+                        </div>
+                    </div>
+
+                    <!-- Settings Section (Collapsible) -->
+                    <div id="${this.SETTINGS_SECTION_ID}" class="flex-shrink-0 overflow-hidden transition-all duration-300" style="max-height: 0;">
+                        <div class="px-4 pb-4">
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                                <button id="${this.BACKUP_BUTTON_ID}" class="flex items-center justify-center gap-2 px-3 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded transition-colors text-sm">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line>
+                                    </svg>
+                                    <span>백업</span>
+                                </button>
+                                <button id="${this.RESTORE_BUTTON_ID}" class="flex items-center justify-center gap-2 px-3 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded transition-colors text-sm">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line>
+                                    </svg>
+                                    <span>복구</span>
+                                </button>
+                                <button id="${this.PROVIDER_MAP_BUTTON_ID}" class="flex items-center justify-center gap-2 px-3 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded transition-colors text-sm">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect width="18" height="18" x="3" y="3" rx="2"/><path d="M12 3v18"/><path d="M12 3v18"/>
+                                    </svg>
+                                    <span>매핑</span>
+                                </button>
+                                <button id="${this.RECORD_MANAGE_BUTTON_ID}" class="flex items-center justify-center gap-2 px-3 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded transition-colors text-sm">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/>
+                                    </svg>
+                                    <span>레코드</span>
+                                </button>
+                            </div>
                         </div>
                     </div>
 
@@ -196,10 +231,8 @@ export class RootUI {
         // 버튼 상태 업데이트
         usageButton?.classList.add('bg-zinc-800');
         usageButton?.classList.remove('hover:text-zinc-100');
-        usageButton?.classList.add('hover:bg-zinc-700');
         
         priceButton?.classList.remove('bg-zinc-800');
-        priceButton?.classList.remove('hover:bg-zinc-700');
         priceButton?.classList.add('hover:text-zinc-100');
 
         // UsageUI 렌더링
@@ -225,10 +258,8 @@ export class RootUI {
         // 버튼 상태 업데이트
         priceButton?.classList.add('bg-zinc-800');
         priceButton?.classList.remove('hover:text-zinc-100');
-        priceButton?.classList.add('hover:bg-zinc-700');
         
         usageButton?.classList.remove('bg-zinc-800');
-        usageButton?.classList.remove('hover:bg-zinc-700');
         usageButton?.classList.add('hover:text-zinc-100');
 
         // PriceUI 렌더링
@@ -240,14 +271,61 @@ export class RootUI {
     }
 
     /**
+     * ProviderUI 표시
+     */
+    private showProviderUI() {
+        const modal = document.getElementById(this.MODAL_ID);
+        if (!modal) return;
+
+        const usageButton = modal.querySelector(`#${this.USAGE_BUTTON_ID}`) as HTMLButtonElement;
+        const priceButton = modal.querySelector(`#${this.PRICE_BUTTON_ID}`) as HTMLButtonElement;
+        const bodyContainer = modal.querySelector(`#${this.BODY_CONTAINER_ID}`) as HTMLElement;
+        if (!bodyContainer) return;
+
+        this.currentTab = 'provider';
+
+        usageButton?.classList.remove('bg-zinc-800');
+        priceButton?.classList.remove('bg-zinc-800');
+
+        // ProviderUI 렌더링
+        const providerUI = new ProviderUI(bodyContainer);
+        providerUI.render();
+    }
+
+    /**
+     * RecordUI 표시
+     */
+    private showRecordUI() {
+        const modal = document.getElementById(this.MODAL_ID);
+        if (!modal) return;
+
+        const usageButton = modal.querySelector(`#${this.USAGE_BUTTON_ID}`) as HTMLButtonElement;
+        const priceButton = modal.querySelector(`#${this.PRICE_BUTTON_ID}`) as HTMLButtonElement;
+        const bodyContainer = modal.querySelector(`#${this.BODY_CONTAINER_ID}`) as HTMLElement;
+        if (!bodyContainer) return;
+
+        this.currentTab = 'record';
+
+        usageButton?.classList.remove('bg-zinc-800');
+        priceButton?.classList.remove('bg-zinc-800');
+
+        // RecordUI 렌더링
+        const recordUI = new RecordUI(bodyContainer);
+        recordUI.render();
+    }
+
+    /**
      * 이벤트 바인딩
      */
     private bindEvents(modal: HTMLElement) {
         const closeButton = modal.querySelector(`#${this.CLOSE_BUTTON_ID}`);
         const usageButton = modal.querySelector(`#${this.USAGE_BUTTON_ID}`);
         const priceButton = modal.querySelector(`#${this.PRICE_BUTTON_ID}`);
+        const settingsButton = modal.querySelector(`#${this.SETTINGS_BUTTON_ID}`);
         const backupButton = modal.querySelector(`#${this.BACKUP_BUTTON_ID}`);
         const restoreButton = modal.querySelector(`#${this.RESTORE_BUTTON_ID}`);
+        const providerMapButton = modal.querySelector(`#${this.PROVIDER_MAP_BUTTON_ID}`);
+        const recordManageButton = modal.querySelector(`#${this.RECORD_MANAGE_BUTTON_ID}`);
 
         // ESC 키로 닫기
         modal.addEventListener('keydown', (e: KeyboardEvent) => {
@@ -278,6 +356,11 @@ export class RootUI {
             this.showPriceUI();
         });
 
+        // 설정 버튼 (토글)
+        settingsButton?.addEventListener('click', () => {
+            this.toggleSettings();
+        });
+
         // 백업 버튼
         backupButton?.addEventListener('click', async () => {
             const confirmed = confirm('현재 모든 데이터를 백업하시겠습니까?');
@@ -305,6 +388,32 @@ export class RootUI {
                 }
             }
         });
+
+        // 프로바이더 매핑 버튼
+        providerMapButton?.addEventListener('click', () => {
+            this.showProviderUI();
+        });
+
+        // 레코드 관리 버튼
+        recordManageButton?.addEventListener('click', () => {
+            this.showRecordUI();
+        });
+    }
+
+    /**
+     * 설정 섹션 토글
+     */
+    private toggleSettings() {
+        const settingsSection = document.getElementById(this.SETTINGS_SECTION_ID);
+        if (!settingsSection) return;
+
+        this.settingsExpanded = !this.settingsExpanded;
+
+        if (this.settingsExpanded) {
+            settingsSection.style.maxHeight = '200px';
+        } else {
+            settingsSection.style.maxHeight = '0';
+        }
     }
 
     /**

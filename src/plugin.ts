@@ -1,11 +1,22 @@
-export {
-    PLUGIN_TITLE,
+export { 
+    PLUGIN_TITLE, 
     PLUGIN_VERSION,
-    PLUGIN_NAME,
-    DB_ARG,
+    PLUGIN_NAME, 
+    RISU_ARGS, 
+    DB_ARG, 
     PRICE_ARG,
     PRICE_TEMP_ARG,
     PROVIDER_MAP_ARG,
+    RisuArgType
+};
+
+enum RisuArgType {
+    String = 'string',
+    Int = 'int',
+}
+
+interface RisuArgs {
+    [key: string]: RisuArgType;
 }
 
 const PLUGIN_TITLE = 'UsageTracker'
@@ -50,3 +61,17 @@ const PRICE_TEMP_ARG = 'price_temp_info'
 }
 */
 const PROVIDER_MAP_ARG = 'provider_map'
+
+const RISU_ARGS: RisuArgs = {
+    [DB_ARG]: RisuArgType.String,
+    [PRICE_ARG]: RisuArgType.String,
+    [PRICE_TEMP_ARG]: RisuArgType.String,
+    [PROVIDER_MAP_ARG]: RisuArgType.String,
+}
+
+/**
+ * 등록된 모든 Risu Arg 이름을 배열로 반환
+ */
+export function getAllArgNames(): string[] {
+    return Object.keys(RISU_ARGS);
+}

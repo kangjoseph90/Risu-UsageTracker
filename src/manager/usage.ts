@@ -1,5 +1,5 @@
-import { DB_ARG } from "../consts";
-import { RisuAPI } from "../risuAPI";
+import { DB_ARG } from "../plugin";
+import { RisuAPI } from "../api";
 import { UsageRecord, UsageDB, UsageFilter, PriceInfo, CostInfo } from "../types";
 import { calculateCost } from "../util";
 import { ProviderManager } from "./provider";

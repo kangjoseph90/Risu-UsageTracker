@@ -1,7 +1,6 @@
-import { PLUGIN_TITLE } from "../consts";
-import { getAllArgNames, RISU_ARGS } from "../consts/args";
+import { PLUGIN_TITLE, getAllArgNames, RISU_ARGS } from "../plugin";
 import { Logger } from "../logger";
-import { RisuAPI } from "../risuAPI";
+import { RisuAPI } from "../api";
 
 interface BackupData {
     version: string;

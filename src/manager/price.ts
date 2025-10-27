@@ -1,6 +1,6 @@
-import { PRICE_ARG, PRICE_TEMP_ARG } from "../consts";
+import { PRICE_ARG, PRICE_TEMP_ARG } from "../plugin";
 import { DEFAULT_PRICE } from "../consts/price";
-import { RisuAPI } from "../risuAPI";
+import { RisuAPI } from "../api";
 import { PriceInfo, ProviderPrice } from "../types";
 import { UsageManager } from "./usage";
 

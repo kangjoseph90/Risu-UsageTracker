@@ -1,5 +1,4 @@
 import { Logger } from "../logger";
-import { BaseFormat } from "../format/base";
 import { getFormat } from "../format/formatter";
 import { PriceManager } from "../manager/price";
 import { UsageManager } from "../manager/usage";

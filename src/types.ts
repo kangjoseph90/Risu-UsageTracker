@@ -1,8 +1,4 @@
 export {
-    RisuArgType,
-    RisuArg,
-    ReplacerFunction,
-    ReplacerType,
     RequestType,
     PriceInfo,
     ModelPrice,
@@ -16,22 +12,6 @@ export {
     OnResponseCallback,
     RequestData,
     ProviderMap,
-}
-
-enum RisuArgType {
-    String,
-    Int
-}
-
-interface RisuArg {
-    [name: string]: RisuArgType;
-}
-
-type ReplacerFunction = (content: any[], type: string) => any[] | Promise<any[]>
-
-enum ReplacerType {
-    BeforeRequest = 'beforeRequest',
-    AfterRequest = 'afterRequest',
 }
 
 enum RequestType {
