@@ -1,17 +1,17 @@
 import { PLUGIN_NAME, RISU_ARGS, RisuArgType } from './plugin'
 
 export {
+    ScriptMode, ReplacerType,
+    RisuAPI
+};
+export type {
     GlobalFetchArgs,
     GlobalFetchResult,
     NativeFetchArgs,
     PluginV2ProviderArgument,
     PluginV2ProviderOptions,
-    EditFunction,
-    ScriptMode,
-    ReplacerFunction,
-    ReplacerType,
-    RisuAPI,
-}
+    EditFunction, ReplacerFunction
+};
 
 interface GlobalFetchArgs {
   plainFetchForce?: boolean;

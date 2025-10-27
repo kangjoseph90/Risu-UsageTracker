@@ -1,5 +1,6 @@
 import { Logger } from "./logger";
-import { CostInfo, PriceInfo, RequestData, RequestType, UsageInfo } from "./types";
+import type { CostInfo, PriceInfo, RequestData, UsageInfo } from "./types";
+import { RequestType } from "./types";
 
 export {
     parseRequestType,

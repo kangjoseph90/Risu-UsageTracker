@@ -1,6 +1,6 @@
 import { DB_ARG } from "../plugin";
 import { RisuAPI } from "../api";
-import { UsageRecord, UsageDB, UsageFilter, PriceInfo, CostInfo } from "../types";
+import type { UsageRecord, UsageDB, UsageFilter, PriceInfo, CostInfo } from "../types";
 import { calculateCost } from "../util";
 import { ProviderManager } from "./provider";
 

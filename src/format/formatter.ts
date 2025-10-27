@@ -1,5 +1,5 @@
 import { Logger } from "../logger"
-import { RequestData } from "../types"
+import type { RequestData } from "../types"
 import { isLLMRequest } from "../util"
 import { AnthropicFormat } from "./anthropic"
 import { BaseFormat } from "./base"

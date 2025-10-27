@@ -1,5 +1,8 @@
 export {
-    RequestType,
+    RequestType
+};
+
+export type {
     PriceInfo,
     ModelPrice,
     ProviderPrice,
@@ -11,8 +14,8 @@ export {
     OnRequestCallback,
     OnResponseCallback,
     RequestData,
-    ProviderMap,
-}
+    ProviderMap
+};
 
 enum RequestType {
     Chat = 'chat',

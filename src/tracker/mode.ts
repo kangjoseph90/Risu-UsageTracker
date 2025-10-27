@@ -1,6 +1,6 @@
 import { Logger } from "../logger";
 import { RisuAPI } from "../api";
-import { ReplacerFunction, ReplacerType } from "../api";
+import { type ReplacerFunction, ReplacerType } from "../api";
 import { RequestType } from "../types";
 import { parseRequestType } from "../util";
 

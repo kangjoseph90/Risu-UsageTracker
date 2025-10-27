@@ -1,7 +1,7 @@
 import { PRICE_ARG, PRICE_TEMP_ARG } from "../plugin";
 import { DEFAULT_PRICE } from "../consts/price";
 import { RisuAPI } from "../api";
-import { PriceInfo, ProviderPrice } from "../types";
+import type { PriceInfo, ProviderPrice } from "../types";
 import { UsageManager } from "./usage";
 
 function getConfirmedPrice(): ProviderPrice {
@@ -118,9 +118,9 @@ export class PriceManager {
         return false;
     }
 
-    static hasTemporaryPrice(modelId: string, provider: string): boolean {
+    static hasTemporaryPrice(): boolean {
         const tempPrice = getTemporaryPrice();
-        return !!(tempPrice[provider] && tempPrice[provider][modelId]);
+        return Object.keys(tempPrice).length > 0;
     }
 
     static getTemporaryPrice(): ProviderPrice {

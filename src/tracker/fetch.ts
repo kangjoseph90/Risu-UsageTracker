@@ -1,5 +1,5 @@
 import { Logger } from "../logger";
-import { OnRequestCallback, OnResponseCallback, RequestData } from "../types";
+import type { OnRequestCallback, OnResponseCallback, RequestData } from "../types";
 
 /**
  * addOnRequest,

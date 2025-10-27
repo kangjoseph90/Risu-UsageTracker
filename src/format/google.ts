@@ -1,5 +1,5 @@
 import { Logger } from "../logger";
-import { RequestData, UsageInfo } from "../types";
+import type { RequestData, UsageInfo } from "../types";
 import { getRequestUrl, parseBody } from "../util";
 import { BaseFormat } from "./base";
 

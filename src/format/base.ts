@@ -1,4 +1,4 @@
-import { RequestData, UsageInfo } from "../types";
+import type { RequestData, UsageInfo } from "../types";
 
 export abstract class BaseFormat {
     protected requestData: RequestData;

@@ -1,14 +1,13 @@
 //@ts-ignore
 import './style.css';
-import MyPopup from './MyPopup.svelte';
 import { UsageTracker } from "./tracker/usage";
 import { RisuAPI } from "./api";
-import { RootUI } from "./ui/root";
+import { UI } from "./ui/UI";
 
 const usageTracker = new UsageTracker();
-const rootUI = new RootUI();
+const ui = new UI();
 
 RisuAPI.onUnload(() => {
     usageTracker.destroy();
-    rootUI.destroy()
+    ui.destroy();
 });

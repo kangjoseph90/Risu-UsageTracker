@@ -1,4 +1,4 @@
-import { ProviderPrice } from "../types";
+import type { ProviderPrice } from "../types";
 
 /**
  * 기본 가격 정보 (1M 토큰 기준)

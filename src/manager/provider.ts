@@ -1,7 +1,7 @@
 import { PROVIDER_MAP_ARG } from "../plugin";
 import { getDefaultProvider } from "../consts/provider";
 import { RisuAPI } from "../api";
-import { ProviderMap } from "../types";
+import type { ProviderMap } from "../types";
 
 function initProviderMap() {
     setProviderMap({})

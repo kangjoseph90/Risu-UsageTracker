@@ -16,8 +16,8 @@ export default defineConfig({
   build: {
     lib: {
       entry: 'src/main.ts',
-      name: 'my-plugin',
-      fileName: () => 'my-plugin.js',
+      name: 'usage-tracker',
+      fileName: () => 'usage-tracker.js',
       formats: ['umd']
     },
     rollupOptions: {
