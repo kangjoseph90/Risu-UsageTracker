@@ -20,6 +20,7 @@
     }
 
     function forceRefresh() {
+        refreshTempIndicator();
         refreshKey++;
     }
 
@@ -62,7 +63,7 @@
     <div class="flex justify-center w-full h-full">
         <div class="flex flex-col p-3 sm:p-6 rounded-lg bg-zinc-900 w-full max-w-4xl h-full" on:click|stopPropagation role="dialog" aria-modal="true">
             <!-- Header -->
-            <div class="flex justify-between items-center w-full mb-4 flex-shrink-0">
+            <div class="flex justify-between items-center w-full mb-2 flex-shrink-0">
                 <h2 class="text-lg sm:text-2xl font-semibold text-zinc-100">{PLUGIN_NAME}</h2>
                 <div class="flex items-center gap-2">
                     <button class="px-3 py-2 rounded-lg {currentTab === 'usage' ? 'bg-zinc-700' : 'bg-zinc-800'} text-zinc-200 transition-colors text-sm font-medium hover:bg-zinc-700" title="사용량 통계" on:click={() => currentTab = 'usage'} disabled={currentTab === 'usage'}>
@@ -86,7 +87,7 @@
             </div>
             <!-- Settings Section (Collapsible) -->
             <div class="flex-shrink-0 overflow-hidden transition-all duration-300" style="max-height: {settingsExpanded ? '200px' : '0'};">
-                <div class="px-4 pb-4">
+                <div class="px-4 py-2">
                     <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
                         <button class="flex items-center justify-center gap-2 px-3 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded transition-colors text-sm" on:click={backup}>
                             <Upload size={16} />
@@ -108,7 +109,7 @@
                 </div>
             </div>
             <!-- Body Container -->
-            <div class="flex-1 overflow-y-auto min-h-0">
+            <div class="flex-1 overflow-y-auto min-h-0 mt-2">
                 {#if currentTab === 'usage'}
                     <Usage key={refreshKey} />
                 {:else if currentTab === 'price'}

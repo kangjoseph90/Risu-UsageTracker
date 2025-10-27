@@ -363,9 +363,9 @@
     }
 </script>
 
-<div class="space-y-6">
+<div class="space-y-2">
     <!-- Global Filters -->
-    <div class="sticky top-0 z-10 bg-zinc-900 border-b border-zinc-700 mb-2 p-3 flex-shrink-0">
+    <div class="sticky top-0 z-10 bg-zinc-900 border-b border-zinc-700 mb-2 px-3 pb-3 flex-shrink-0">
         <div class="flex gap-2 text-xs flex-wrap items-center">
             <div class="flex gap-2 text-xs flex-wrap items-center">
                 <span class="text-zinc-400">측정값:</span>

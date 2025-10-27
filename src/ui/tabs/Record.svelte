@@ -156,8 +156,8 @@
 	}
 </script>
 
-<div class="space-y-4">
-	<div class="flex justify-between items-center">
+<div class="space-y-4 px-3">
+	<div class="sticky top-0 bg-zinc-900 flex justify-between items-center">
 		<h3 class="text-xl font-semibold text-zinc-100">Usage Records 관리</h3>
 		<div class="flex gap-2">
 			<button
@@ -174,13 +174,6 @@
 				전체 삭제
 			</button>
 		</div>
-	</div>
-
-	<div class="text-sm text-zinc-400">
-		<p>
-			총 <strong class="text-zinc-200">{records.length}</strong>개의 레코드가 있습니다.
-		</p>
-		<p>개별 레코드를 선택하여 삭제하거나, 필터를 적용하여 일괄 삭제할 수 있습니다.</p>
 	</div>
 
 	<div class="p-3 bg-zinc-800 rounded-lg space-y-2">
@@ -207,7 +200,7 @@
 		</div>
 	</div>
 
-	<div class="space-y-2 max-h-96 overflow-y-auto">
+	<div class="space-y-2 overflow-y-auto">
 		{#if records.length === 0}
 			<div class="text-center text-zinc-500 py-8">
 				레코드가 없습니다.

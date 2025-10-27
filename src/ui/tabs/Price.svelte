@@ -172,7 +172,7 @@
     }
 </script>
 
-<div class="space-y-2">
+<div class="space-y-2 px-3">
     {#if allProviders.length === 0}
         <div class="text-center text-zinc-400 py-8">
             설정된 가격 정보가 없습니다
@@ -184,8 +184,8 @@
             {@const models = getProviderModels(provider)}
             {@const isEditingProvider = editingState?.type === 'provider' && editingState?.provider === provider}
 
-            <div class="bg-zinc-800 rounded-lg px-4 pt-2 pb-4 space-y-3">
-                <div class="flex items-center justify-between pb-2 min-w-0">
+            <div class="bg-zinc-800 rounded-lg px-4 pt-2 pb-3 space-y-2">
+                <div class="flex items-center justify-between min-w-0">
                     <div class="flex items-center gap-2 min-w-0">
                         {#if isEditingProvider}
                             <input
@@ -220,29 +220,19 @@
                         {/if}
                     </div>
                 </div>
-
+                                
                 <div class="space-y-2">
-                    <div class="border-t border-zinc-700"></div>
 
-                    {#each models as modelId, idx (modelId)}
+                    {#each models as modelId (provider + modelId)}
                         {@const confirmedPrice = confirmedModels[modelId]}
                         {@const tempPrice = tempModels[modelId]}
                         {@const isEditingPrice = editingState?.type === 'price' && editingState?.provider === provider && editingState?.modelId === modelId}
 
-                        {#if idx > 0}
-                            {@const prevModelId = models[idx - 1]}
-                            {@const prevIsTemp = !!tempModels[prevModelId]}
-                            {@const currIsTemp = !!tempPrice}
-                            {#if !prevIsTemp && !currIsTemp}
-                                <div class="border-t border-zinc-700 mx-2"></div>
-                            {/if}
-                        {/if}
-
                         {#if tempPrice}
                             <div class="flex items-center justify-between bg-yellow-900/20 border border-yellow-700/30 px-3 py-2 rounded text-sm min-w-0">
                                 <div class="flex-1 min-w-0">
-                                    <div class="flex items-center gap-2 mb-2 min-w-0">
-                                        <span class="text-yellow-400 font-medium truncate">{escapeHTML(modelId)}</span>
+                                    <div class="flex items-center gap-2 mb-2 min-w-0 text-yellow-400 font-medium truncate">
+                                        <span>{escapeHTML(modelId)}</span>
                                         <TriangleAlert size={16} />
                                     </div>
                                     <div class="text-xs text-zinc-400 space-y-1 min-w-0">
@@ -316,7 +306,7 @@
                         {/if}
 
                         {#if confirmedPrice && !tempPrice}
-                            <div class="flex items-center justify-between bg-zinc-700/30 px-3 rounded text-sm min-w-0">
+                            <div class="flex items-center justify-between bg-zinc-700/30 px-3 py-2 rounded text-sm min-w-0">
                                 <div class="flex-1 min-w-0">
                                     <div class="flex items-center gap-2 mb-2 min-w-0">
                                         <span class="text-zinc-200 font-medium truncate">{escapeHTML(modelId)}</span>

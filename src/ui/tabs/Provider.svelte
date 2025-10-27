@@ -52,7 +52,7 @@
     }
 </script>
 
-<div class="space-y-4">
+<div class="space-y-4 px-3">
     <div class="flex justify-between items-center">
         <h3 class="text-xl font-semibold text-zinc-100">URL → Provider 매핑</h3>
         <button

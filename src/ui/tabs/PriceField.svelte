@@ -39,7 +39,7 @@
         <div class="flex items-center gap-1 min-w-0">
             <span class="text-zinc-500">캐시: 지원 안 함</span>
             <button
-                class="text-blue-500 hover:text-blue-400 add-cached-price-btn text-xs flex-shrink-0"
+                class="text-zinc-400 hover:text-zinc-200 add-cached-price-btn text-xs flex-shrink-0"
                 on:click={() => addCachedPrice(provider, modelId, mode)}
                 title="추가 입력"
             >
@@ -54,7 +54,7 @@
             type="number"
             step="0.0001"
             value={editPriceInput}
-            on:change={handleInputChange}
+            on:input={handleInputChange}
             on:keydown={(e) => handlePriceInputKeydown(e, provider, modelId, mode, field)}
             class="price-edit-input bg-zinc-700 text-zinc-100 px-1 py-0.5 rounded text-xs w-20"
         />
