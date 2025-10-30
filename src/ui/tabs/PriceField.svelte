@@ -43,7 +43,7 @@
             <button
                 class="text-zinc-400 hover:text-zinc-200 add-cached-price-btn text-xs flex-shrink-0"
                 on:click={() => addCachedPrice(provider, modelId, mode)}
-                title={language.addInput}
+                title="Add Cached Price"
             >
                 <Plus size={12} />
             </button>
@@ -63,14 +63,14 @@
         <button
             class="text-green-600 hover:text-green-500 confirm-price-btn text-xs flex-shrink-0"
             on:click={() => confirmPriceEdit(provider, modelId, mode, field)}
-            title={language.confirm}
+            title="Confirm Price Edit"
         >
             <Check size={12} />
         </button>
         <button
             class="text-zinc-400 hover:text-zinc-200 cancel-edit-btn text-xs flex-shrink-0"
             on:click={cancelEdit}
-            title={language.cancel}
+            title="Cancel Price Edit"
         >
             <X size={12} />
         </button>
@@ -81,7 +81,7 @@
         <button
             class="text-zinc-400 hover:text-zinc-200 edit-price-btn flex-shrink-0"
             on:click={() => startEditingPrice(provider, modelId, mode, field)}
-            title={language.edit}
+            title="Edit Price"
         >
             <Pencil size={12} />
         </button>

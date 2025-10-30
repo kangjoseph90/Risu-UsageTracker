@@ -186,7 +186,7 @@
             {@const models = getProviderModels(provider)}
             {@const isEditingProvider = editingState?.type === 'provider' && editingState?.provider === provider}
 
-            <div class="bg-zinc-800 rounded-lg px-4 pt-2 pb-3 space-y-2">
+            <div class="bg-zinc-800 border border-zinc-700/60 rounded-lg px-4 pt-2 pb-3 space-y-2">
                 <div class="flex items-center justify-between min-w-0">
                     <div class="flex items-center gap-2 min-w-0">
                         {#if isEditingProvider}
@@ -231,7 +231,7 @@
                         {@const isEditingPrice = editingState?.type === 'price' && editingState?.provider === provider && editingState?.modelId === modelId}
 
                         {#if tempPrice}
-                            <div class="flex items-center justify-between bg-yellow-900/20 border border-yellow-700/30 px-3 py-2 rounded text-sm min-w-0">
+                            <div class="flex items-center justify-between bg-yellow-900/20 border border-yellow-700/30 hover:border-yellow-600/30 px-3 py-2 rounded text-sm min-w-0">
                                 <div class="flex-1 min-w-0">
                                     <div class="flex items-center gap-2 mb-2 min-w-0 text-yellow-400 font-medium truncate">
                                         <span>{escapeHTML(modelId)}</span>
@@ -311,7 +311,7 @@
                         {/if}
 
                         {#if confirmedPrice && !tempPrice}
-                            <div class="flex items-center justify-between bg-zinc-700/30 px-3 py-2 rounded text-sm min-w-0">
+                            <div class="flex items-center justify-between bg-zinc-700/30 border border-zinc-700/60 hover:border-zinc-600/60 px-3 py-2 rounded text-sm min-w-0">
                                 <div class="flex-1 min-w-0">
                                     <div class="flex items-center gap-2 mb-2 min-w-0">
                                         <span class="text-zinc-200 font-medium truncate">{escapeHTML(modelId)}</span>

@@ -170,6 +170,22 @@
         const usageFilters = buildUsageFilters(filters);
         const filteredRecords = UsageManager.getRecords(usageFilters);
 
+        // Update statistics based on filtered records
+        stats = {
+            totalCost: 0,
+            totalRequests: filteredRecords.length,
+            totalInputTokens: 0,
+            totalCachedInputTokens: 0,
+            totalOutputTokens: 0,
+        };
+
+        filteredRecords.forEach(record => {
+            stats.totalInputTokens += record.inputTokens || 0;
+            stats.totalCachedInputTokens += record.cachedInputTokens || 0;
+            stats.totalOutputTokens += record.outputTokens || 0;
+            stats.totalCost += record.totalCost || 0;
+        });
+
         recentRecordsDisplay = filteredRecords.slice().sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()).slice(0, 20);
         
         // Update bar chart
@@ -365,13 +381,13 @@
     }
 </script>
 
-<div class="space-y-2">
+<div class="flex flex-col h-full relative">
     <!-- Global Filters -->
-    <div class="sticky top-0 z-10 bg-zinc-900 border-b border-zinc-700 mb-2 px-3 pb-3 flex-shrink-0">
+    <div class="sticky top-0 z-10 bg-zinc-900 border-b border-zinc-700/60 px-3 pb-3 flex-shrink-0 shadow-[0_4px_16px_0_rgba(0,0,0,0.25)]">
         <div class="flex gap-2 text-xs flex-wrap items-center">
             <div class="flex gap-2 text-xs flex-wrap items-center">
                 <span class="text-zinc-400">{language.measure}:</span>
-                <select bind:value={globalMeasureBy} on:change={handleFilterChange} class="bg-zinc-800 text-zinc-200 border border-zinc-700 rounded px-2 py-1 text-xs max-w-[120px]">
+                <select bind:value={globalMeasureBy} on:change={handleFilterChange} class="bg-zinc-800 text-zinc-200 border border-zinc-700/60 rounded px-2 py-1 text-xs max-w-[120px]">
                     <option value="tokens">{language.tokens}</option>
                     <option value="cost">{language.cost}</option>
                     <option value="requests">{language.requests}</option>
@@ -379,26 +395,26 @@
             </div>
             <div class="flex gap-2 text-xs flex-wrap items-center">
                 <span class="text-zinc-400">{language.filter}:</span>
-                <select bind:value={globalFilterTimeRange} on:change={handleFilterChange} class="bg-zinc-800 text-zinc-200 border border-zinc-700 rounded px-2 py-1 text-xs max-w-[120px]">
+                <select bind:value={globalFilterTimeRange} on:change={handleFilterChange} class="bg-zinc-800 text-zinc-200 border border-zinc-700/60 rounded px-2 py-1 text-xs max-w-[120px]">
                     <option value="">{language.allTimeRange}</option>
                     <option value="1h">{language.oneHourRange}</option>
                     <option value="24h">{language.oneDayRange}</option>
                     <option value="7d">{language.sevenDaysRange}</option>
                     <option value="30d">{language.thirtyDaysRange}</option>
                 </select>
-                <select bind:value={globalFilterModel} on:change={handleFilterChange} class="bg-zinc-800 text-zinc-200 border border-zinc-700 rounded px-2 py-1 text-xs max-w-[120px] truncate">
+                <select bind:value={globalFilterModel} on:change={handleFilterChange} class="bg-zinc-800 text-zinc-200 border border-zinc-700/60 rounded px-2 py-1 text-xs max-w-[120px] truncate">
                     <option value="">{language.allModels}</option>
                     {#each uniqueModels as model}
                         <option value={model}>{model}</option>
                     {/each}
                 </select>
-                <select bind:value={globalFilterProvider} on:change={handleFilterChange} class="bg-zinc-800 text-zinc-200 border border-zinc-700 rounded px-2 py-1 text-xs max-w-[120px] truncate">
+                <select bind:value={globalFilterProvider} on:change={handleFilterChange} class="bg-zinc-800 text-zinc-200 border border-zinc-700/60 rounded px-2 py-1 text-xs max-w-[120px] truncate">
                     <option value="">{language.allProviders}</option>
                     {#each uniqueProviders as provider}
                         <option value={provider}>{provider}</option>
                     {/each}
                 </select>
-                <select bind:value={globalFilterRequestType} on:change={handleFilterChange} class="bg-zinc-800 text-zinc-200 border border-zinc-700 rounded px-2 py-1 text-xs max-w-[120px]">
+                <select bind:value={globalFilterRequestType} on:change={handleFilterChange} class="bg-zinc-800 text-zinc-200 border border-zinc-700/60 rounded px-2 py-1 text-xs max-w-[120px]">
                     <option value="">{language.allTypes}</option>
                     {#each uniqueRequestTypes as type}
                         <option value={type}>{type}</option>
@@ -408,115 +424,119 @@
         </div>
     </div>
 
-    <!-- Statistics Summary -->
-    <div class="p-3">
-        <UsageStatistics {stats} {language} />
-    </div>
+    <!-- Content Area -->
+    <div class="flex-grow space-y-2 overflow-y-auto pt-2 pb-5">
 
-    <!-- Bar Chart -->
-    <div class="p-3">
-        <div class="mb-3 flex justify-between items-center">
-            <h3 class="text-sm font-semibold text-zinc-100">{language.statisticsByTime}</h3>
-            <select bind:value={barChartXAxis} on:change={updateAllCharts} class="bg-zinc-800 text-zinc-200 border border-zinc-700 rounded px-2 py-1 text-xs">
-                <option value="5min">{language.fiveMinutes}</option>
-                <option value="15min">{language.fifteenMinutes}</option>
-                <option value="30min">{language.thirtyMinutes}</option>
-                <option value="1hour">{language.oneHour}</option>
-                <option value="4hour">{language.fourHours}</option>
-                <option value="day" selected>{language.daily}</option>
-                <option value="week">{language.weekly}</option>
-                <option value="month">{language.monthly}</option>
-            </select>
+        <!-- Statistics Summary -->
+        <div class="p-3">
+            <UsageStatistics {stats} {language} />
         </div>
-        <div class="p-4 rounded-lg bg-zinc-800 border border-zinc-700">
-            <UsageBarChart data={barChartData} measureBy={globalMeasureBy} timeRange={barChartXAxis} {language} />
-        </div>
-    </div>
 
-    <!-- Donut Chart -->
-    <div class="p-3">
-        <div class="mb-3 flex justify-between items-center">
-            <h3 class="text-sm font-semibold text-zinc-100">{language.statisticsByCategory}</h3>
-            <select bind:value={donutChartGroupBy} on:change={updateAllCharts} class="bg-zinc-800 text-zinc-200 border border-zinc-700 rounded px-2 py-1 text-xs">
-                <option value="model">{language.byModel}</option>
-                <option value="provider">{language.byProvider}</option>
-                <option value="requestType">{language.byType}</option>
-            </select>
+        <!-- Bar Chart -->
+        <div class="p-3">
+            <div class="mb-3 flex justify-between items-center">
+                <h3 class="text-sm font-semibold text-zinc-100">{language.statisticsByTime}</h3>
+                <select bind:value={barChartXAxis} on:change={updateAllCharts} class="bg-zinc-800 text-zinc-200 border border-zinc-700/60 rounded px-2 py-1 text-xs">
+                    <option value="5min">{language.fiveMinutes}</option>
+                    <option value="15min">{language.fifteenMinutes}</option>
+                    <option value="30min">{language.thirtyMinutes}</option>
+                    <option value="1hour">{language.oneHour}</option>
+                    <option value="4hour">{language.fourHours}</option>
+                    <option value="day" selected>{language.daily}</option>
+                    <option value="week">{language.weekly}</option>
+                    <option value="month">{language.monthly}</option>
+                </select>
+            </div>
+            <div class="p-4 rounded-lg bg-zinc-800 border border-zinc-700/60">
+                <UsageBarChart data={barChartData} measureBy={globalMeasureBy} timeRange={barChartXAxis} {language} />
+            </div>
         </div>
-        <div class="p-4 rounded-lg bg-zinc-800 border border-zinc-700">
-            <UsageDonutChart data={donutChartData} measureBy={globalMeasureBy} {language} />
-        </div>
-    </div>
 
-    <!-- Recent Records -->
-    <div class="p-3">
-        <h3 class="text-sm font-semibold text-zinc-100 mb-2">{language.recentUsage}</h3>
-        <div class="space-y-2">
-            {#if recentRecordsDisplay.length === 0}
-                <div class="text-center text-zinc-500 py-8">
-                    {language.noUsageRecords}
-                </div>
-            {:else}
-                {#each recentRecordsDisplay as record (record.timestamp + record.model + record.url)}
-                    {@const dateStr = new Date(record.timestamp).toLocaleString('ko-KR', {
-                        month: '2-digit',
-                        day: '2-digit',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                        second: '2-digit',
-                    })}
-                    <div class="p-3 rounded-lg bg-zinc-800 border border-zinc-700 hover:border-zinc-600 transition-colors">
-                        <div style="display: flex; justify-content: space-between; align-items: flex-start; overflow: hidden;">
-                            <div style="flex: 1; min-width: 0;">
-                                <div style="display: flex; align-items: flex-end; gap: 0.5rem; overflow: hidden;">
-                                    <div style="font-size: 0.875rem; font-weight: 500; color: #f1f5f9; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                                        {escapeHTML(record.model)}
-                                    </div>
-                                    <div style="font-size: 0.75rem; color: #a1a1aa; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1;">
-                                        {escapeHTML(formatProvider(record))}
-                                    </div>
-                                </div>
-                                <div style="font-size: 0.75rem; color: #a1a1aa; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                                    {record.requestType || RequestType.Unknown} • {dateStr}
-                                </div>
-                            </div>
-                            <div style="display: flex; gap: 0.75rem; font-size: 0.75rem; flex-shrink: 0; justify-content: flex-end;">
-                                <div>
-                                    <div style="color: #a1a1aa;">{language.input}</div>
-                                    <div style="color: #ffffff; text-align: right;">
-                                        {(record.inputTokens || 0).toLocaleString()}
-                                    </div>
-                                </div>
-                                {#if record.cachedInputTokens > 0}
-                                    <div>
-                                        <div style="color: #a1a1aa;">{language.cached}</div>
-                                        <div style="color: #ffffff; text-align: right;">
-                                            {record.cachedInputTokens.toLocaleString()}
+        <!-- Donut Chart -->
+        <div class="p-3">
+            <div class="mb-3 flex justify-between items-center">
+                <h3 class="text-sm font-semibold text-zinc-100">{language.statisticsByCategory}</h3>
+                <select bind:value={donutChartGroupBy} on:change={updateAllCharts} class="bg-zinc-800 text-zinc-200 border border-zinc-700/60 rounded px-2 py-1 text-xs">
+                    <option value="model">{language.byModel}</option>
+                    <option value="provider">{language.byProvider}</option>
+                    <option value="requestType">{language.byType}</option>
+                </select>
+            </div>
+            <div class="p-4 rounded-lg bg-zinc-800 border border-zinc-700/60">
+                <UsageDonutChart data={donutChartData} measureBy={globalMeasureBy} {language} />
+            </div>
+        </div>
+
+        <!-- Recent Records -->
+        <div class="p-3">
+            <h3 class="text-sm font-semibold text-zinc-100 mb-2">{language.recentUsage}</h3>
+            <div class="space-y-2">
+                {#if recentRecordsDisplay.length === 0}
+                    <div class="text-center text-zinc-500 py-8">
+                        {language.noUsageRecords}
+                    </div>
+                {:else}
+                    {#each recentRecordsDisplay as record (record.timestamp + record.model + record.url)}
+                        {@const dateStr = new Date(record.timestamp).toLocaleString('ko-KR', {
+                            month: '2-digit',
+                            day: '2-digit',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            second: '2-digit',
+                        })}
+                        <div class="p-3 rounded-lg bg-zinc-800 border border-zinc-700/60 hover:border-zinc-600/60 transition-colors">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start; overflow: hidden;">
+                                <div style="flex: 1; min-width: 0;">
+                                    <div style="display: flex; align-items: flex-end; gap: 0.5rem; overflow: hidden;">
+                                        <div style="font-size: 0.875rem; font-weight: 500; color: #f1f5f9; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                            {escapeHTML(record.model)}
+                                        </div>
+                                        <div style="font-size: 0.75rem; color: #a1a1aa; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1;">
+                                            {escapeHTML(formatProvider(record))}
                                         </div>
                                     </div>
-                                {/if}
-                                <div>
-                                    <div style="color: #a1a1aa;">{language.output}</div>
-                                    <div style="color: #ffffff; text-align: right;">
-                                        {(record.outputTokens || 0).toLocaleString()}
+                                    <div style="font-size: 0.75rem; color: #a1a1aa; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                        {record.requestType || RequestType.Unknown} • {dateStr}
                                     </div>
                                 </div>
-                                <div>
-                                    <div style="color: #a1a1aa;">{language.cost}</div>
-                                    <div style="color: #ffffff; font-weight: 500; text-align: right;">
-                                        ${(((record.inputCost || 0) + (record.outputCost || 0))).toFixed(6)}
+                                <div style="display: flex; gap: 0.75rem; font-size: 0.75rem; flex-shrink: 0; justify-content: flex-end;">
+                                    <div>
+                                        <div style="color: #a1a1aa;">{language.input}</div>
+                                        <div style="color: #ffffff; text-align: right;">
+                                            {(record.inputTokens || 0).toLocaleString()}
+                                        </div>
+                                    </div>
+                                    {#if record.cachedInputTokens > 0}
+                                        <div>
+                                            <div style="color: #a1a1aa;">{language.cached}</div>
+                                            <div style="color: #ffffff; text-align: right;">
+                                                {record.cachedInputTokens.toLocaleString()}
+                                            </div>
+                                        </div>
+                                    {/if}
+                                    <div>
+                                        <div style="color: #a1a1aa;">{language.output}</div>
+                                        <div style="color: #ffffff; text-align: right;">
+                                            {(record.outputTokens || 0).toLocaleString()}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div style="color: #a1a1aa;">{language.cost}</div>
+                                        <div style="color: #ffffff; font-weight: 500; text-align: right;">
+                                            ${(((record.inputCost || 0) + (record.outputCost || 0))).toFixed(6)}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                {/each}
-            {/if}
+                    {/each}
+                {/if}
+            </div>
         </div>
     </div>
 
     <!-- Last Updated Footer -->
-    <div class="sticky bottom-0 z-10 bg-zinc-900 border-t border-zinc-700 pt-2 px-3 text-xs text-zinc-400 text-center">
-        {formatString(language.lastUpdated, { time: new Date(UsageManager.getLastUpdated()).toLocaleString() })}
+    <div class="absolute bottom-0 left-0 right-0 z-10 bg-zinc-900 border-t border-zinc-700/60 pt-2 px-3 text-xs text-zinc-400 text-center shadow-[0_-4px_16px_0_rgba(0,0,0,0.25)]">
+        {formatString(language.lastUpdatedAt, { time: new Date(UsageManager.getLastUpdated()).toLocaleString() })}
     </div>
 </div>

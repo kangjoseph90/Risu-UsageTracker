@@ -122,9 +122,9 @@
 {#if maxValue === 0 || data.length === 0}
     <div class="text-center text-zinc-500 py-8">{language.noData}</div>
 {:else}
-    <div class="flex border border-zinc-700 rounded-md overflow-hidden">
+    <div class="flex border border-zinc-700/80 rounded-md overflow-hidden">
         <!-- Y-axis -->
-        <div class="w-[45px] flex-shrink-0 bg-zinc-900 border-r border-zinc-700">
+        <div class="w-[45px] flex-shrink-0 bg-zinc-900 border-r border-zinc-700/80">
             <svg width={yAxisWidth} height={chartHeight + 30} class="block">
                 {#each yGridLines as gridValue}
                     {@const y = chartHeight - (gridValue / maxValue) * chartHeight}

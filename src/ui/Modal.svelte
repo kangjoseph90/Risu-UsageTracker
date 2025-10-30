@@ -18,6 +18,23 @@
     let currentTab: 'usage' | 'price' | 'provider' | 'record' = 'usage';
     let hasTempPrice: boolean = PriceManager.hasTemporaryPrice();
     let settingsExpanded: boolean = false;
+    let settingsDropdownRef: HTMLDivElement | null = null;
+    let settingsButtonRef: HTMLButtonElement | null = null;
+
+    // Close settings dropdown when clicking outside
+    function handleDocumentClick(event: MouseEvent) {
+        if (settingsExpanded && settingsDropdownRef && !settingsDropdownRef.contains(event.target as Node) && !settingsButtonRef?.contains(event.target as Node)) {
+            settingsExpanded = false;
+            languagesExpanded = false;
+        }
+    }
+
+    $: if (settingsExpanded) {
+        document.addEventListener('mousedown', handleDocumentClick);
+    } else {
+        document.removeEventListener('mousedown', handleDocumentClick);
+    }
+
     let languagesExpanded: boolean = false;
     let refreshKey: number = 0;
     let currentLanguage: SupportedLanguage = LanguageManager.getLanguage();
@@ -96,13 +113,13 @@
 
                     <!-- Settings Button and Dropdown Wrapper -->
                     <div class="relative">
-                        <button class="p-2 rounded-lg bg-zinc-800 text-zinc-200 hover:bg-zinc-700 transition-colors" title="Settings" on:click={() => settingsExpanded = !settingsExpanded}>
+                        <button bind:this={settingsButtonRef} class="p-2 rounded-lg bg-zinc-800 text-zinc-200 hover:bg-zinc-700 transition-colors" title="Settings" on:click={() => {settingsExpanded = !settingsExpanded; languagesExpanded = false;}}>
                             <Settings size={20} />
                         </button>
                         
                         <!-- Settings Section (Collapsible) -->
                         {#if settingsExpanded}
-                            <div class="absolute right-0 top-full mt-2 p-2 w-48 bg-zinc-800 rounded-lg shadow-lg flex flex-col gap-1 text-zinc-100 border border-zinc-700 z-50">
+                            <div bind:this={settingsDropdownRef} class="absolute right-0 top-full mt-2 p-2 w-48 bg-zinc-800 rounded-lg shadow-xl flex flex-col gap-1 text-zinc-100 border border-zinc-700/60 z-50">
                                 <button class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-zinc-700 text-zinc-200 transition-colors text-sm w-full justify-start" on:click={backup}>
                                     <Upload size={16} />
                                     <span>{language.backup}</span>
@@ -148,7 +165,7 @@
             </div>
             
             <!-- Body Container -->
-            <div class="flex-1 overflow-y-auto min-h-0 mt-2">
+            <div class="flex-1 overflow-y-auto min-h-0 pt-2">
                 {#if currentTab === 'usage'}
                     <Usage key={refreshKey} {language} />
                 {:else if currentTab === 'price'}

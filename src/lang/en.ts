@@ -1,5 +1,3 @@
-
-
 export const languageEn = {
     usage: "Usage",
     price: "Price",
@@ -45,8 +43,8 @@ export const languageEn = {
     selectFilterToDelete: "Please select a filter to delete.",
     totalCost: "Total Cost",
     totalRequests: "Total Requests",
-    inputTokens: "Input Tokens",
-    outputTokens: "Output Tokens",
+    inputTokens: "Input",
+    outputTokens: "Output",
     cachedTokens: "Cached",
     input: "Input",
     output: "Output",
@@ -62,7 +60,6 @@ export const languageEn = {
     statisticsByTime: "Statistics by Time",
     statisticsByCategory: "Statistics by Category",
     recentUsage: "Recent Usage Records",
-    lastUpdated: "Last updated:",
     noData: "No data.",
     confirmEdit: "Confirm",
     cancelEdit: "Cancel",
@@ -130,7 +127,7 @@ export const languageEn = {
     byProvider: "By Provider",
     byType: "By Type",
     noUsageRecords: "No usage records.",
-    lastUpdatedAt: "Last updated at: {{time}}",
+    lastUpdatedAt: "Last updated: {{time}}",
     allTimeRange: "All time",
     oneHourRange: "1 hour",
     oneDayRange: "24 hours",
@@ -141,5 +138,8 @@ export const languageEn = {
     monthSuffix: "{{month}} month",
     normalInput: "Normal Input",
     inputCostLabel: "Input Cost",
-    outputCostLabel: "Output Cost"
+    outputCostLabel: "Output Cost",
+    selectAll: "Select All",
+    search: "Search",
+    pageInfo: "Page {{current}} of {{total}} ({{count}} records)"
 };
