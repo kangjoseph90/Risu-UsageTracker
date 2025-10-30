@@ -1,52 +1,65 @@
-# Svelte + TypeScript + Tailwind CSS Plugin Builder
 
-TypeScript, Svelte, Tailwind CSS를 사용하여 **단일 JS 파일**로 빌드되는 플러그인 빌더입니다.
+# Usage Tracker Plugin for RisuAI
 
-## 특징
+This project is a plugin for RisuAI that tracks API usage, cost, and provider information for LLM requests. It is designed to be imported as a pre-built JavaScript file and used directly in the RisuAI environment.
 
-- ✅ **TypeScript로 개발** - 타입 안전성
-- ✅ **Svelte로 UI 작성** - 이벤트 리스너 자동 관리
-- ✅ **Tailwind CSS** - 유틸리티 클래스로 빠른 스타일링
-- ✅ **단일 JS 파일** - `dist/my-plugin.js` (CSS 포함, UMD 포맷)
-- ✅ **eval() 실행 가능** - 프론트엔드 앱에서 동적 로드
+## Features
 
-## 빌드
+- Tracks LLM API usage, including model, provider, and cost per request
+- Supports multiple providers (OpenAI, Anthropic, Google, Azure, etc.)
+- UI for viewing usage statistics, price management, and provider mapping
+- Backup and restore of all usage and price data via browser IndexedDB
+- Automatic cost calculation based on token usage and provider/model pricing
+- Easily extendable for new providers and models
 
-```bash
-npm install
-npm run build
-```
+## Installation & Build
 
-빌드 결과물: `dist/my-plugin.js` (모든 CSS 포함)
+1. **Install dependencies:**
+  ```sh
+  npm install
+  ```
+2. **Build the plugin:**
+  ```sh
+  npm run build
+  ```
+  The output will be in `dist/usage-tracker.js`.
 
-## 사용
+3. **Import in RisuAI:**
+  Import the built `usage-tracker.js` file directly into your RisuAI environment as a plugin.
 
-```javascript
-// 플러그인 파일을 로드하여 eval
-fetch('/path/to/my-plugin.js')
-  .then(res => res.text())
-  .then(code => eval(code));
-```
+## Usage
 
-## 프로젝트 구조
+- The plugin automatically tracks LLM API requests and responses.
+- A floating button is injected into the RisuAI UI for opening the usage statistics modal.
+- The modal provides tabs for usage statistics, price management, provider mapping, and raw record viewing.
+- All data is stored using RisuAPI arguments and can be backed up/restored via the UI.
 
-```
-src/
-├── main.ts          # 플러그인 진입점
-├── MyPopup.svelte   # UI 컴포넌트
-└── style.css        # Tailwind CSS
-```
+## Architecture Overview
 
-## 개발
+- **src/main.ts**: Entry point. Initializes the `UsageTracker` and UI, and registers cleanup on unload.
+- **src/tracker/usage.ts**: Core logic for tracking requests, extracting usage/cost, and recording data.
+- **src/manager/**: Handles persistent storage and management of usage records, price info, and provider mapping.
+- **src/ui/**: Svelte-based UI components for statistics, price, provider, and record management.
+- **src/format/**: Format detection and parsing for different LLM API providers.
+- **src/api.ts**: RisuAPI integration for argument storage, provider registration, and plugin lifecycle.
+- **src/plugin.ts**: Plugin metadata, argument definitions, and constants.
 
-`src/main.ts` - 플러그인 로직 작성  
-`src/MyPopup.svelte` - Svelte 컴포넌트로 UI 작성  
-`src/style.css` - Tailwind CSS 임포트
+## Data Model
 
-## 기술 스택
+- **Usage Records**: Timestamp, model, provider, URL, request type, token usage, and calculated cost.
+- **Price Info**: Per-model, per-provider pricing (input, output, cached input).
+- **Provider Map**: Maps API URLs to provider names.
 
-- **TypeScript** - 개발 언어
-- **Svelte** - UI 프레임워크
-- **Tailwind CSS** - 스타일링
-- **Vite** - 빌드 도구
-- **vite-plugin-css-injected-by-js** - CSS를 JS에 인라인
+## Backup & Restore
+
+- All plugin data can be backed up to and restored from browser IndexedDB via the UI.
+- Backup includes all usage, price, and provider mapping data.
+
+## Customization
+
+- To add new providers or models, update the price and provider constants in `src/consts/price.ts` and `src/consts/provider.ts`.
+- Extend format detection in `src/format/` for new API response formats.
+
+## License
+
+This project is proprietary and intended for use with RisuAI only.
