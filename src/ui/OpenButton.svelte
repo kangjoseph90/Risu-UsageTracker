@@ -1,7 +1,11 @@
 <script lang="ts">
     import { ChartColumn } from 'lucide-svelte';
     import Modal from './Modal.svelte';
+    import { language as languageImport, type LanguageType } from '../lang';
+
     export let id: string;
+
+    let language: LanguageType = { ...languageImport };
 
     function onClick(): void { 
         const container = document.createElement('div');
@@ -13,13 +17,18 @@
                 onClose: () => {
                     modal.$destroy();
                     document.body.removeChild(container);
-                }
+                },
+                language: language,
             }
+        });
+        modal.$on('change', (event) => {
+            language = { ...languageImport };
+            modal.$set({ language: language });
         });
     }
 </script>
 
 <button class="flex gap-2 items-center hover:text-textcolor text-textcolor2" id={id} on:click={onClick}>
     <ChartColumn  />
-    <span>사용량</span>
+    <span>{language.usage}</span>
 </button>

@@ -3,8 +3,10 @@
 	import { UsageManager } from '../../manager/usage';
 	import { ProviderManager } from '../../manager/provider';
 	import type { UsageRecord } from '../../types';
+	import { formatString, type LanguageType } from '../../lang';
 
 	export let key: number = 0;
+	export let language: LanguageType;
 
 	let records: UsageRecord[] = [];
 	let providerMap: Record<string, string> = {};
@@ -45,7 +47,7 @@
 	}
 
 	function deleteRecord(record: UsageRecord) {
-		const confirmed = confirm('이 레코드를 삭제하시겠습니까?');
+		const confirmed = confirm(language.deleteRecordConfirm);
 		if (!confirmed) return;
 
 		const success = UsageManager.removeRecord(record);
@@ -53,14 +55,15 @@
 			clearSelection();
 			refreshData();
 		} else {
-			alert('삭제에 실패했습니다.');
+			alert(language.failToDelete);
 		}
 	}
 
 	function deleteSelectedRecords() {
 		if (selectedCount === 0) return;
 
-		const confirmed = confirm(`선택한 ${selectedCount}개의 레코드를 삭제하시겠습니까?`);
+		const confirmText = formatString(language.deleteSelectedRecordsConfirm, { count: selectedCount });
+		const confirmed = confirm(confirmText);
 		if (!confirmed) return;
 
 		let deletedCount = 0;
@@ -70,14 +73,16 @@
 			}
 		});
 
-		alert(`${deletedCount}개의 레코드가 삭제되었습니다.`);
+		const deletedText = formatString(language.deletedRecords, { count: deletedCount });
+		alert(deletedText);
 		clearSelection();
 		refreshData();
 	}
 
 	function deleteAllRecords() {
 		const allRecords = UsageManager.getRecords([]);
-		const confirmed = confirm(`정말로 모든 레코드(${allRecords.length}개)를 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.`);
+		const confirmText = formatString(language.deleteAllRecordsConfirm, { count: allRecords.length });
+		const confirmed = confirm(confirmText);
 		if (!confirmed) return;
 
 		let deletedCount = 0;
@@ -87,14 +92,15 @@
 			}
 		});
 
-		alert(`${deletedCount}개의 레코드가 삭제되었습니다.`);
+		const deletedText = formatString(language.deletedRecords, { count: deletedCount });
+		alert(deletedText);
 		clearSelection();
 		refreshData();
 	}
 
 	function applyFilter() {
 		if (!filterProvider && !filterModel) {
-			alert('삭제할 필터를 선택해주세요.');
+			alert(language.selectFilterToDelete);
 			return;
 		}
 
@@ -106,11 +112,16 @@
 		});
 
 		if (filtered.length === 0) {
-			alert('필터에 해당하는 레코드가 없습니다.');
+			alert(language.noRecordsForFilter);
 			return;
 		}
 
-		const confirmed = confirm(`필터에 해당하는 ${filtered.length}개의 레코드를 삭제하시겠습니까?\n프로바이더: ${filterProvider || '전체'}\n모델: ${filterModel || '전체'}`);
+		const confirmText = formatString(language.filterRecordsDeleteConfirm, {
+			count: filtered.length,
+			provider: filterProvider || language.all,
+			model: filterModel || language.all
+		});
+		const confirmed = confirm(confirmText);
 		if (!confirmed) return;
 
 		let deletedCount = 0;
@@ -120,7 +131,8 @@
 			}
 		});
 
-		alert(`${deletedCount}개의 레코드가 삭제되었습니다.`);
+		const deletedText = formatString(language.deletedRecords, { count: deletedCount });
+		alert(deletedText);
 		clearSelection();
 		refreshData();
 	}
@@ -158,35 +170,35 @@
 
 <div class="space-y-4 px-3">
 	<div class="sticky top-0 bg-zinc-900 flex justify-between items-center">
-		<h3 class="text-xl font-semibold text-zinc-100">Usage Records 관리</h3>
+		<h3 class="text-xl font-semibold text-zinc-100">{language.recordManagement}</h3>
 		<div class="flex gap-2">
 			<button
 				class="px-3 py-1.5 rounded bg-red-600 hover:bg-red-700 text-white text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 				on:click={deleteSelectedRecords}
 				disabled={selectedCount === 0}
 			>
-				선택 삭제 (<span>{selectedCount}</span>)
+				{formatString(language.deleteSelectedCount, { count: selectedCount })}
 			</button>
 			<button
 				class="px-3 py-1.5 rounded bg-red-700 hover:bg-red-800 text-white text-sm transition-colors"
 				on:click={deleteAllRecords}
 			>
-				전체 삭제
+				{language.deleteAll}
 			</button>
 		</div>
 	</div>
 
 	<div class="p-3 bg-zinc-800 rounded-lg space-y-2">
-		<h4 class="text-sm font-semibold text-zinc-200">필터</h4>
+		<h4 class="text-sm font-semibold text-zinc-200">{language.filter}</h4>
 		<div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
 			<select bind:value={filterProvider} class="px-2 py-1 bg-zinc-700 text-zinc-200 rounded text-sm">
-				<option value="">모든 프로바이더</option>
+				<option value="">{language.allProviders}</option>
 				{#each uniqueProviders as provider}
 					<option value={provider}>{provider}</option>
 				{/each}
 			</select>
 			<select bind:value={filterModel} class="px-2 py-1 bg-zinc-700 text-zinc-200 rounded text-sm">
-				<option value="">모든 모델</option>
+				<option value="">{language.allModels}</option>
 				{#each uniqueModels as model}
 					<option value={model}>{model}</option>
 				{/each}
@@ -195,7 +207,7 @@
 				class="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm transition-colors"
 				on:click={applyFilter}
 			>
-				필터 적용
+				{language.applyFilter}
 			</button>
 		</div>
 	</div>
@@ -203,10 +215,20 @@
 	<div class="space-y-2 overflow-y-auto">
 		{#if records.length === 0}
 			<div class="text-center text-zinc-500 py-8">
-				레코드가 없습니다.
+				{language.noRecordsFound}
 			</div>
 		{:else}
 			{#each records as record, index (record.timestamp + record.model + record.url + index)}
+				{@const inputText = formatString(language.inputWithCache, {
+					input: (record.inputTokens ?? 0).toLocaleString(),
+					cached: (record.cachedInputTokens ?? 0).toLocaleString(),
+					output: (record.outputTokens ?? 0).toLocaleString()
+				})}
+				{@const costText = formatString(language.costBreakdown, {
+					totalCost: formatCost(record.totalCost),
+					inputCost: formatCost(record.inputCost),
+					outputCost: formatCost(record.outputCost)
+				})}
 				<div class="recordItem flex items-start gap-2 p-3 bg-zinc-800 rounded-lg hover:bg-zinc-750 transition-colors">
 					<input
 						type="checkbox"
@@ -220,20 +242,16 @@
 							<div class="text-zinc-400">{new Date(record.timestamp).toLocaleString()}</div>
 						</div>
 						<div class="text-zinc-400 space-y-0.5">
-							<div>
-								입력: {(record.inputTokens ?? 0).toLocaleString()} (캐시: {(record.cachedInputTokens ?? 0).toLocaleString()}) |
-								출력: {(record.outputTokens ?? 0).toLocaleString()}
-							</div>
-							<div>
-								비용: ${formatCost(record.totalCost)} (입력: ${formatCost(record.inputCost)}, 출력: ${formatCost(record.outputCost)})
-							</div>
+							<div>{inputText}</div>
+							<div>{costText}</div>
 						</div>
 					</div>
 					<button
 						class="deleteRecordButton px-2 py-1 text-xs bg-red-600 hover:bg-red-700 text-white rounded transition-colors"
 						on:click={() => deleteRecord(record)}
+						title="Delete Record"
 					>
-						삭제
+						{language.delete}
 					</button>
 				</div>
 			{/each}

@@ -15,14 +15,16 @@
     export let addCachedPrice: (provider: string, modelId: string, mode: 'temp' | 'confirmed') => void;
     export let removeCachedPrice: (provider: string, modelId: string, mode: 'temp' | 'confirmed') => void;
     export let editPriceInput: string;
+    export let language: LanguageType;
 
     import { createEventDispatcher } from 'svelte';
+    import type { LanguageType } from '../../lang';
     const dispatch = createEventDispatcher();
 
     const fieldLabels = {
-        inputPrice: '입력',
-        cachedInputPrice: '캐시',
-        outputPrice: '출력',
+        inputPrice: language.inputPrice,
+        cachedInputPrice: language.cachedInputPrice,
+        outputPrice: language.outputPrice,
     };
 
     $: value = price[field];
@@ -37,11 +39,11 @@
 {#if value === undefined}
     {#if field === 'cachedInputPrice'}
         <div class="flex items-center gap-1 min-w-0">
-            <span class="text-zinc-500">캐시: 지원 안 함</span>
+            <span class="text-zinc-500">{language.cacheNotSupported}</span>
             <button
                 class="text-zinc-400 hover:text-zinc-200 add-cached-price-btn text-xs flex-shrink-0"
                 on:click={() => addCachedPrice(provider, modelId, mode)}
-                title="추가 입력"
+                title={language.addInput}
             >
                 <Plus size={12} />
             </button>
@@ -61,14 +63,14 @@
         <button
             class="text-green-600 hover:text-green-500 confirm-price-btn text-xs flex-shrink-0"
             on:click={() => confirmPriceEdit(provider, modelId, mode, field)}
-            title="확정"
+            title={language.confirm}
         >
             <Check size={12} />
         </button>
         <button
             class="text-zinc-400 hover:text-zinc-200 cancel-edit-btn text-xs flex-shrink-0"
             on:click={cancelEdit}
-            title="취소"
+            title={language.cancel}
         >
             <X size={12} />
         </button>
@@ -79,7 +81,7 @@
         <button
             class="text-zinc-400 hover:text-zinc-200 edit-price-btn flex-shrink-0"
             on:click={() => startEditingPrice(provider, modelId, mode, field)}
-            title="수정"
+            title={language.edit}
         >
             <Pencil size={12} />
         </button>
@@ -87,7 +89,7 @@
             <button
                 class="text-zinc-400 hover:text-zinc-200 remove-cached-price-btn text-xs flex-shrink-0"
                 on:click={() => removeCachedPrice(provider, modelId, mode)}
-                title="비활성화"
+                title={language.disable}
             >
                 <Trash size={12} />
             </button>

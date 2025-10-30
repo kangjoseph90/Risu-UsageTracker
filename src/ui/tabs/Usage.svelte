@@ -7,8 +7,10 @@
     import UsageStatistics from './UsageStatistics.svelte';
     import UsageBarChart from './UsageBarChart.svelte';
     import UsageDonutChart from './UsageDonutChart.svelte';
+    import { formatString, type LanguageType } from '../../lang';
 
     export let key: number = 0;
+    export let language: LanguageType;
 
     let records: UsageRecord[] = [];
     let providerMap: Record<string, string> = {};
@@ -368,36 +370,36 @@
     <div class="sticky top-0 z-10 bg-zinc-900 border-b border-zinc-700 mb-2 px-3 pb-3 flex-shrink-0">
         <div class="flex gap-2 text-xs flex-wrap items-center">
             <div class="flex gap-2 text-xs flex-wrap items-center">
-                <span class="text-zinc-400">측정값:</span>
+                <span class="text-zinc-400">{language.measure}:</span>
                 <select bind:value={globalMeasureBy} on:change={handleFilterChange} class="bg-zinc-800 text-zinc-200 border border-zinc-700 rounded px-2 py-1 text-xs max-w-[120px]">
-                    <option value="tokens">토큰</option>
-                    <option value="cost">비용</option>
-                    <option value="requests">요청</option>
+                    <option value="tokens">{language.tokens}</option>
+                    <option value="cost">{language.cost}</option>
+                    <option value="requests">{language.requests}</option>
                 </select>
             </div>
             <div class="flex gap-2 text-xs flex-wrap items-center">
-                <span class="text-zinc-400">필터:</span>
+                <span class="text-zinc-400">{language.filter}:</span>
                 <select bind:value={globalFilterTimeRange} on:change={handleFilterChange} class="bg-zinc-800 text-zinc-200 border border-zinc-700 rounded px-2 py-1 text-xs max-w-[120px]">
-                    <option value="">모든 시간</option>
-                    <option value="1h">1시간</option>
-                    <option value="24h">24시간</option>
-                    <option value="7d">7일</option>
-                    <option value="30d">30일</option>
+                    <option value="">{language.allTimeRange}</option>
+                    <option value="1h">{language.oneHourRange}</option>
+                    <option value="24h">{language.oneDayRange}</option>
+                    <option value="7d">{language.sevenDaysRange}</option>
+                    <option value="30d">{language.thirtyDaysRange}</option>
                 </select>
                 <select bind:value={globalFilterModel} on:change={handleFilterChange} class="bg-zinc-800 text-zinc-200 border border-zinc-700 rounded px-2 py-1 text-xs max-w-[120px] truncate">
-                    <option value="">모든 모델</option>
+                    <option value="">{language.allModels}</option>
                     {#each uniqueModels as model}
                         <option value={model}>{model}</option>
                     {/each}
                 </select>
                 <select bind:value={globalFilterProvider} on:change={handleFilterChange} class="bg-zinc-800 text-zinc-200 border border-zinc-700 rounded px-2 py-1 text-xs max-w-[120px] truncate">
-                    <option value="">모든 프로바이더</option>
+                    <option value="">{language.allProviders}</option>
                     {#each uniqueProviders as provider}
                         <option value={provider}>{provider}</option>
                     {/each}
                 </select>
                 <select bind:value={globalFilterRequestType} on:change={handleFilterChange} class="bg-zinc-800 text-zinc-200 border border-zinc-700 rounded px-2 py-1 text-xs max-w-[120px]">
-                    <option value="">모든 타입</option>
+                    <option value="">{language.allTypes}</option>
                     {#each uniqueRequestTypes as type}
                         <option value={type}>{type}</option>
                     {/each}
@@ -408,51 +410,51 @@
 
     <!-- Statistics Summary -->
     <div class="p-3">
-        <UsageStatistics {stats} />
+        <UsageStatistics {stats} {language} />
     </div>
 
     <!-- Bar Chart -->
     <div class="p-3">
         <div class="mb-3 flex justify-between items-center">
-            <h3 class="text-sm font-semibold text-zinc-100">시간대별 통계</h3>
+            <h3 class="text-sm font-semibold text-zinc-100">{language.statisticsByTime}</h3>
             <select bind:value={barChartXAxis} on:change={updateAllCharts} class="bg-zinc-800 text-zinc-200 border border-zinc-700 rounded px-2 py-1 text-xs">
-                <option value="5min">5분</option>
-                <option value="15min">15분</option>
-                <option value="30min">30분</option>
-                <option value="1hour">1시간</option>
-                <option value="4hour">4시간</option>
-                <option value="day" selected>일별</option>
-                <option value="week">주별</option>
-                <option value="month">월별</option>
+                <option value="5min">{language.fiveMinutes}</option>
+                <option value="15min">{language.fifteenMinutes}</option>
+                <option value="30min">{language.thirtyMinutes}</option>
+                <option value="1hour">{language.oneHour}</option>
+                <option value="4hour">{language.fourHours}</option>
+                <option value="day" selected>{language.daily}</option>
+                <option value="week">{language.weekly}</option>
+                <option value="month">{language.monthly}</option>
             </select>
         </div>
         <div class="p-4 rounded-lg bg-zinc-800 border border-zinc-700">
-            <UsageBarChart data={barChartData} measureBy={globalMeasureBy} timeRange={barChartXAxis} />
+            <UsageBarChart data={barChartData} measureBy={globalMeasureBy} timeRange={barChartXAxis} {language} />
         </div>
     </div>
 
     <!-- Donut Chart -->
     <div class="p-3">
         <div class="mb-3 flex justify-between items-center">
-            <h3 class="text-sm font-semibold text-zinc-100">분류별 통계</h3>
+            <h3 class="text-sm font-semibold text-zinc-100">{language.statisticsByCategory}</h3>
             <select bind:value={donutChartGroupBy} on:change={updateAllCharts} class="bg-zinc-800 text-zinc-200 border border-zinc-700 rounded px-2 py-1 text-xs">
-                <option value="model">모델별</option>
-                <option value="provider">프로바이더별</option>
-                <option value="requestType">타입별</option>
+                <option value="model">{language.byModel}</option>
+                <option value="provider">{language.byProvider}</option>
+                <option value="requestType">{language.byType}</option>
             </select>
         </div>
         <div class="p-4 rounded-lg bg-zinc-800 border border-zinc-700">
-            <UsageDonutChart data={donutChartData} measureBy={globalMeasureBy} />
+            <UsageDonutChart data={donutChartData} measureBy={globalMeasureBy} {language} />
         </div>
     </div>
 
     <!-- Recent Records -->
     <div class="p-3">
-        <h3 class="text-sm font-semibold text-zinc-100 mb-2">최근 사용 기록</h3>
+        <h3 class="text-sm font-semibold text-zinc-100 mb-2">{language.recentUsage}</h3>
         <div class="space-y-2">
             {#if recentRecordsDisplay.length === 0}
                 <div class="text-center text-zinc-500 py-8">
-                    사용 기록이 없습니다.
+                    {language.noUsageRecords}
                 </div>
             {:else}
                 {#each recentRecordsDisplay as record (record.timestamp + record.model + record.url)}
@@ -480,27 +482,27 @@
                             </div>
                             <div style="display: flex; gap: 0.75rem; font-size: 0.75rem; flex-shrink: 0; justify-content: flex-end;">
                                 <div>
-                                    <div style="color: #a1a1aa;">입력</div>
+                                    <div style="color: #a1a1aa;">{language.input}</div>
                                     <div style="color: #ffffff; text-align: right;">
                                         {(record.inputTokens || 0).toLocaleString()}
                                     </div>
                                 </div>
                                 {#if record.cachedInputTokens > 0}
                                     <div>
-                                        <div style="color: #a1a1aa;">캐시</div>
+                                        <div style="color: #a1a1aa;">{language.cached}</div>
                                         <div style="color: #ffffff; text-align: right;">
                                             {record.cachedInputTokens.toLocaleString()}
                                         </div>
                                     </div>
                                 {/if}
                                 <div>
-                                    <div style="color: #a1a1aa;">출력</div>
+                                    <div style="color: #a1a1aa;">{language.output}</div>
                                     <div style="color: #ffffff; text-align: right;">
                                         {(record.outputTokens || 0).toLocaleString()}
                                     </div>
                                 </div>
                                 <div>
-                                    <div style="color: #a1a1aa;">비용</div>
+                                    <div style="color: #a1a1aa;">{language.cost}</div>
                                     <div style="color: #ffffff; font-weight: 500; text-align: right;">
                                         ${(((record.inputCost || 0) + (record.outputCost || 0))).toFixed(6)}
                                     </div>
@@ -515,6 +517,6 @@
 
     <!-- Last Updated Footer -->
     <div class="sticky bottom-0 z-10 bg-zinc-900 border-t border-zinc-700 pt-2 px-3 text-xs text-zinc-400 text-center">
-        마지막 업데이트: {new Date(UsageManager.getLastUpdated()).toLocaleString()}
+        {formatString(language.lastUpdated, { time: new Date(UsageManager.getLastUpdated()).toLocaleString() })}
     </div>
 </div>

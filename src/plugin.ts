@@ -7,6 +7,7 @@ export {
     PRICE_ARG,
     PRICE_TEMP_ARG,
     PROVIDER_MAP_ARG,
+    LANGUAGE_ARG,
     RisuArgType
 };
 
@@ -62,11 +63,17 @@ const PRICE_TEMP_ARG = 'price_temp_info'
 */
 const PROVIDER_MAP_ARG = 'provider_map'
 
+/*
+SupportedLanguage // 'en' | 'ko'
+*/
+const LANGUAGE_ARG = 'language'
+
 const RISU_ARGS: RisuArgs = {
     [DB_ARG]: RisuArgType.String,
     [PRICE_ARG]: RisuArgType.String,
     [PRICE_TEMP_ARG]: RisuArgType.String,
     [PROVIDER_MAP_ARG]: RisuArgType.String,
+    [LANGUAGE_ARG]: RisuArgType.String,
 }
 
 /**

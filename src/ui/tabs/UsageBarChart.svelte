@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { onMount } from 'svelte';
+    import type { LanguageType } from "../../lang";
 
     export let data: Array<{
         timestamp: string;
@@ -13,9 +13,9 @@
     }>;
     export let measureBy: 'tokens' | 'cost' | 'requests';
     export let timeRange: string;
-
+    export let language: LanguageType;
+    
     let scrollContainer: HTMLDivElement;
-    let lastDataLength = 0;
 
     $: maxValue = calculateMaxValue(data, measureBy);
     $: yGridLines = calculateGridLines(maxValue);
@@ -120,7 +120,7 @@
 </script>
 
 {#if maxValue === 0 || data.length === 0}
-    <div class="text-center text-zinc-500 py-8">데이터가 없습니다.</div>
+    <div class="text-center text-zinc-500 py-8">{language.noData}</div>
 {:else}
     <div class="flex border border-zinc-700 rounded-md overflow-hidden">
         <!-- Y-axis -->
@@ -200,29 +200,29 @@
         {#if measureBy === 'tokens'}
             <div class="flex items-center gap-1">
                 <span class="w-3 h-3 bg-blue-500 rounded"></span>
-                <span>캐시</span>
+                <span>{language.cachedTokens}</span>
             </div>
             <div class="flex items-center gap-1">
                 <span class="w-3 h-3 bg-purple-500 rounded"></span>
-                <span>일반 입력</span>
+                <span>{language.inputTokens}</span>
             </div>
             <div class="flex items-center gap-1">
                 <span class="w-3 h-3 bg-orange-500 rounded"></span>
-                <span>출력</span>
+                <span>{language.outputTokens}</span>
             </div>
         {:else if measureBy === 'cost'}
             <div class="flex items-center gap-1">
                 <span class="w-3 h-3 bg-purple-500 rounded"></span>
-                <span>입력 비용</span>
+                <span>{language.inputCostLabel}</span>
             </div>
             <div class="flex items-center gap-1">
                 <span class="w-3 h-3 bg-orange-500 rounded"></span>
-                <span>출력 비용</span>
+                <span>{language.outputCostLabel}</span>
             </div>
         {:else}
             <div class="flex items-center gap-1">
                 <span class="w-3 h-3 bg-blue-500 rounded"></span>
-                <span>요청</span>
+                <span>{language.requests}</span>
             </div>
         {/if}
     </div>

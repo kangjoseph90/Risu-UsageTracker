@@ -7,14 +7,23 @@
     import Provider from "./tabs/Provider.svelte";
     import Record from "./tabs/Record.svelte";
     import { BackupManager } from "../manager/backup";
-
+    import { LanguageManager } from "../manager/language";
+    import type { LanguageType } from '../lang';
+    import { SupportedLanguage, SupportedLanguageLabels } from '../lang';
+    import { Globe } from 'lucide-svelte';
+    import { createEventDispatcher } from "svelte";
+    
     export let onClose: () => void;
-
+    export let language: LanguageType;
     let currentTab: 'usage' | 'price' | 'provider' | 'record' = 'usage';
     let hasTempPrice: boolean = PriceManager.hasTemporaryPrice();
     let settingsExpanded: boolean = false;
+    let languagesExpanded: boolean = false;
     let refreshKey: number = 0;
+    let currentLanguage: SupportedLanguage = LanguageManager.getLanguage();
 
+    const dispatch = createEventDispatcher();
+    
     function refreshTempIndicator() {
         hasTempPrice = PriceManager.hasTemporaryPrice();
     }
@@ -24,30 +33,38 @@
         refreshKey++;
     }
 
+    function changeLanguage(lang: SupportedLanguage) {
+        LanguageManager.setLanguage(lang);
+        currentLanguage = lang;
+        dispatch('change', { language: lang });
+    }
+
     async function backup() {
-        const confirmed = confirm('현재 모든 데이터를 백업하시겠습니까?');
+        const confirmed = confirm(language.backupConfirm);
         if (confirmed) {
             const success = await BackupManager.backup();
             if (success) {
-                alert('백업이 완료되었습니다.');
+                alert(language.backupSuccess);
             } else {
-                alert('백업에 실패했습니다.');
+                alert(language.backupFail);
             }
         }
     }
     async function restore() {
-        const confirmed = confirm('백업된 데이터로 복구하시겠습니까?\n현재 데이터가 덮어씌워집니다.');
+        const confirmed = confirm(language.restoreConfirm);
         if (confirmed) {
             const success = await BackupManager.restore();
             if (success) {
-                alert('복구가 완료되었습니다.');
-                // 모달 새로고침
+                alert(language.restoreSuccess);
+                // Refresh modal
                 forceRefresh();
             } else {
-                alert('복구된 백업 데이터가 없습니다.');
+                alert(language.restoreFail);
             }
         }
     }
+
+
 </script>
 
 
@@ -66,58 +83,80 @@
             <div class="flex justify-between items-center w-full mb-2 flex-shrink-0">
                 <h2 class="text-lg sm:text-2xl font-semibold text-zinc-100">{PLUGIN_NAME}</h2>
                 <div class="flex items-center gap-2">
-                    <button class="px-3 py-2 rounded-lg {currentTab === 'usage' ? 'bg-zinc-700' : 'bg-zinc-800'} text-zinc-200 transition-colors text-sm font-medium hover:bg-zinc-700" title="사용량 통계" on:click={() => currentTab = 'usage'} disabled={currentTab === 'usage'}>
-                        <span>사용량<span></span>
+                    <button class="px-3 py-2 rounded-lg {currentTab === 'usage' ? 'bg-zinc-700' : 'bg-zinc-800'} text-zinc-200 transition-colors text-sm font-medium hover:bg-zinc-700" title="Usage Statistics" on:click={() => currentTab = 'usage'} disabled={currentTab === 'usage'}>
+                        <span>{language.usage}</span>
                     </button>
 
-                    <button class="px-3 py-2 rounded-lg {currentTab === 'price' ? 'bg-zinc-700' : 'bg-zinc-800'} text-zinc-200 transition-colors text-sm font-medium hover:text-zinc-100 hover:bg-zinc-700 flex items-center gap-1" title="가격 정보" on:click={() => currentTab = 'price'} disabled={currentTab === 'price'}>
-                        <span>가격</span>
+                    <button class="px-3 py-2 rounded-lg {currentTab === 'price' ? 'bg-zinc-700' : 'bg-zinc-800'} text-zinc-200 transition-colors text-sm font-medium hover:text-zinc-100 hover:bg-zinc-700 flex items-center gap-1" title="Price Information" on:click={() => currentTab = 'price'} disabled={currentTab === 'price'}>
+                        <span>{language.price}</span>
                         <span class="price-warning-icon {hasTempPrice ? 'block' : 'hidden'} text-yellow-400">
                             <TriangleAlert size={16} />
                         </span>
                     </button>
 
-                    <button class="p-2 text-zinc-200 hover:text-white transition-colors" title="설정" on:click={() => settingsExpanded = !settingsExpanded}>
-                        <Settings size={16} />
-                    </button>
-                    <button class="p-2 text-zinc-200 hover:text-white transition-colors" title="닫기" on:click={onClose}>
-                        <X size={16} />
-                    </button>
-                </div>
-            </div>
-            <!-- Settings Section (Collapsible) -->
-            <div class="flex-shrink-0 overflow-hidden transition-all duration-300" style="max-height: {settingsExpanded ? '200px' : '0'};">
-                <div class="px-4 py-2">
-                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                        <button class="flex items-center justify-center gap-2 px-3 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded transition-colors text-sm" on:click={backup}>
-                            <Upload size={16} />
-                            <span>백업</span>
+                    <!-- Settings Button and Dropdown Wrapper -->
+                    <div class="relative">
+                        <button class="p-2 rounded-lg bg-zinc-800 text-zinc-200 hover:bg-zinc-700 transition-colors" title="Settings" on:click={() => settingsExpanded = !settingsExpanded}>
+                            <Settings size={20} />
                         </button>
-                        <button class="flex items-center justify-center gap-2 px-3 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded transition-colors text-sm" on:click={restore}>
-                            <Download size={16} />
-                            <span>복구</span>
-                        </button>
-                        <button class="flex items-center justify-center gap-2 px-3 py-2 {currentTab === 'provider' ? 'bg-zinc-700' : 'bg-zinc-800'} hover:bg-zinc-700 text-zinc-200 rounded transition-colors text-sm" on:click={() => currentTab = 'provider'} disabled={currentTab === 'provider'}>
-                            <Columns2 size={16} />
-                            <span>프로바이더</span>
-                        </button>
-                        <button class="flex items-center justify-center gap-2 px-3 py-2 {currentTab === 'record' ? 'bg-zinc-700' : 'bg-zinc-800'} hover:bg-zinc-700 text-zinc-200 rounded transition-colors text-sm" on:click={() => currentTab = 'record'} disabled={currentTab === 'record'}>
-                            <Database size={16} />
-                            <span>레코드</span>
-                        </button>
+                        
+                        <!-- Settings Section (Collapsible) -->
+                        {#if settingsExpanded}
+                            <div class="absolute right-0 top-full mt-2 p-2 w-48 bg-zinc-800 rounded-lg shadow-lg flex flex-col gap-1 text-zinc-100 border border-zinc-700 z-50">
+                                <button class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-zinc-700 text-zinc-200 transition-colors text-sm w-full justify-start" on:click={backup}>
+                                    <Upload size={16} />
+                                    <span>{language.backup}</span>
+                                </button>
+                                <button class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-zinc-700 text-zinc-200 transition-colors text-sm w-full justify-start" on:click={restore}>
+                                    <Download size={16} />
+                                    <span>{language.restore}</span>
+                                </button>
+                                <button class="flex items-center gap-2 px-3 py-2 rounded-lg {currentTab === 'provider' ? 'bg-zinc-700' : ''} hover:bg-zinc-700 text-zinc-200 transition-colors text-sm w-full justify-start" on:click={() => currentTab = 'provider'} disabled={currentTab === 'provider'}>
+                                    <Columns2 size={16} />
+                                    <span>{language.provider}</span>
+                                </button>
+                                <button class="flex items-center gap-2 px-3 py-2 rounded-lg {currentTab === 'record' ? 'bg-zinc-700' : ''} hover:bg-zinc-700 text-zinc-200 transition-colors text-sm w-full justify-start" on:click={() => currentTab = 'record'} disabled={currentTab === 'record'}>
+                                    <Database size={16} />
+                                    <span>{language.record}</span>
+                                </button>
+
+                                <!-- Language Selection -->
+                                <button class="flex items-center gap-2 px-3 py-2 rounded-lg {languagesExpanded ? 'bg-zinc-700' : '' } hover:bg-zinc-700 text-zinc-200 transition-colors text-sm w-full justify-start" on:click={() => languagesExpanded = !languagesExpanded}>
+                                    <Globe size={16} />
+                                    <span>{language.language}</span>
+                                </button>
+                                {#if languagesExpanded}
+                                    <div class="space-y-1 pl-4">
+                                        {#each Object.values(SupportedLanguage) as lang}
+                                            <button
+                                                class="w-full text-left px-2 py-1.5 rounded text-xs transition-colors {currentLanguage === lang ? 'bg-zinc-700 text-zinc-100' : 'text-zinc-400 hover:bg-zinc-700 hover:text-zinc-200'}"
+                                                on:click={() => changeLanguage(lang)}
+                                            >
+                                                {SupportedLanguageLabels[lang]}
+                                            </button>
+                                        {/each}
+                                    </div>
+                                {/if}
+                            </div>
+                        {/if}
                     </div>
+
+                    <button class="p-2 rounded-lg bg-zinc-800 text-zinc-200 hover:bg-zinc-700 transition-colors" title="Close" on:click={onClose}>
+                        <X size={20} />
+                    </button>
                 </div>
             </div>
+            
             <!-- Body Container -->
             <div class="flex-1 overflow-y-auto min-h-0 mt-2">
                 {#if currentTab === 'usage'}
-                    <Usage key={refreshKey} />
+                    <Usage key={refreshKey} {language} />
                 {:else if currentTab === 'price'}
-                    <Price key={refreshKey} on:change={refreshTempIndicator} />
+                    <Price key={refreshKey} {language} on:change={refreshTempIndicator} />
                 {:else if currentTab === 'provider'}
-                    <Provider key={refreshKey} />
+                    <Provider key={refreshKey} {language} />
                 {:else if currentTab === 'record'}
-                    <Record key={refreshKey} />
+                    <Record key={refreshKey} {language} />
                 {/if}
             </div>
         </div>

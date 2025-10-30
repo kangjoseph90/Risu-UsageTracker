@@ -1,4 +1,6 @@
 <script lang="ts">
+    import type { LanguageType } from "../../lang";
+
     export let data: Array<{
         name: string;
         requests: number;
@@ -8,6 +10,7 @@
         percentage: number;
     }>;
     export let measureBy: 'tokens' | 'cost' | 'requests';
+    export let language: LanguageType;
 
     const size = 200;
     const center = size / 2;
@@ -78,7 +81,7 @@
 </script>
 
 {#if data.length === 0}
-    <div class="text-center text-zinc-500 py-8">데이터가 없습니다.</div>
+    <div class="text-center text-zinc-500 py-8">{language.noData}</div>
 {:else}
     <div class="flex gap-8 items-center flex-wrap">
         <!-- Donut Chart -->

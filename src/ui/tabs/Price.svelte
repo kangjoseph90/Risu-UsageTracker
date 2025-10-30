@@ -2,11 +2,13 @@
     import { onMount, createEventDispatcher } from 'svelte';
     import { PriceManager } from '../../manager/price';
     import { ProviderManager } from '../../manager/provider';
-    import type { ProviderPrice, PriceInfo } from '../../types';
+    import type { ProviderPrice } from '../../types';
     import PriceField from './PriceField.svelte';
     import { Check, Trash, Pencil, X, TriangleAlert } from 'lucide-svelte';
+    import type { LanguageType } from '../../lang';
 
     export let key: number = 0;
+    export let language: LanguageType;
 
     const dispatch = createEventDispatcher();
 
@@ -175,7 +177,7 @@
 <div class="space-y-2 px-3">
     {#if allProviders.length === 0}
         <div class="text-center text-zinc-400 py-8">
-            설정된 가격 정보가 없습니다
+            {language.noPriceInfo}
         </div>
     {:else}
         {#each allProviders as provider (provider)}
@@ -197,14 +199,14 @@
                             <button
                                 class="text-green-600 hover:text-green-500 confirm-provider-btn flex-shrink-0"
                                 on:click={() => confirmProviderEdit(provider)}
-                                title="확정"
+                                title="Confirm Edit"
                             >
                                 <Check size={16} />
                             </button>
                             <button
                                 class="text-zinc-400 hover:text-zinc-200 cancel-edit-btn flex-shrink-0"
                                 on:click={cancelEdit}
-                                title="취소"
+                                title="Cancel Edit"
                             >
                                 <X size={16} />
                             </button>
@@ -213,7 +215,7 @@
                             <button
                                 class="text-zinc-400 hover:text-zinc-200 edit-provider-btn flex-shrink-0"
                                 on:click={() => startEditingProvider(provider)}
-                                title="수정"
+                                title="Edit Provider"
                             >
                                 <Pencil size={16} />
                             </button>
@@ -250,6 +252,7 @@
                                             {addCachedPrice}
                                             {removeCachedPrice}
                                             {editPriceInput}
+                                            {language}
                                             on:updateEditPrice={(e) => editPriceInput = e.detail}
                                         />
                                         <PriceField
@@ -266,6 +269,7 @@
                                             {addCachedPrice}
                                             {removeCachedPrice}
                                             {editPriceInput}
+                                            {language}
                                             on:updateEditPrice={(e) => editPriceInput = e.detail}
                                         />
                                         <PriceField
@@ -282,6 +286,7 @@
                                             {addCachedPrice}
                                             {removeCachedPrice}
                                             {editPriceInput}
+                                            {language}
                                             on:updateEditPrice={(e) => editPriceInput = e.detail}
                                         />
                                     </div>
@@ -290,14 +295,14 @@
                                     <button
                                         class="text-green-600 hover:text-green-500 confirm-model-btn flex-shrink-0"
                                         on:click={() => confirmModel(provider, modelId)}
-                                        title="확정"
+                                        title="Confirm Model"
                                     >
                                         <Check size={18} />
                                     </button>
                                     <button
                                         class="text-red-700 hover:text-red-500 delete-model-btn flex-shrink-0"
                                         on:click={() => deleteModel(provider, modelId, 'temp')}
-                                        title="삭제"
+                                        title="Delete Model"
                                     >
                                         <Trash size={18} />
                                     </button>
@@ -326,6 +331,7 @@
                                             {addCachedPrice}
                                             {removeCachedPrice}
                                             {editPriceInput}
+                                            {language}
                                             on:updateEditPrice={(e) => editPriceInput = e.detail}
                                         />
                                         <PriceField
@@ -342,6 +348,7 @@
                                             {addCachedPrice}
                                             {removeCachedPrice}
                                             {editPriceInput}
+                                            {language}
                                             on:updateEditPrice={(e) => editPriceInput = e.detail}
                                         />
                                         <PriceField
@@ -358,6 +365,7 @@
                                             {addCachedPrice}
                                             {removeCachedPrice}
                                             {editPriceInput}
+                                            {language}
                                             on:updateEditPrice={(e) => editPriceInput = e.detail}
                                         />
                                     </div>
@@ -366,7 +374,7 @@
                                     <button
                                         class="text-red-700 hover:text-red-500 delete-model-btn flex-shrink-0"
                                         on:click={() => deleteModel(provider, modelId, 'confirmed')}
-                                        title="삭제"
+                                        title="Delete Model"
                                     >
                                         <Trash size={18} />
                                     </button>
