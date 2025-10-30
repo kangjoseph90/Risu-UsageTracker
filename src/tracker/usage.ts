@@ -1,5 +1,5 @@
 import { Logger } from "../logger";
-import { getFormat } from "../format/formatter";
+import { getFormat } from "../format";
 import { PriceManager } from "../manager/price";
 import { UsageManager } from "../manager/usage";
 import type { CostInfo, OnRequestCallback, OnResponseCallback, PriceInfo, RequestData, UsageInfo, UsageRecord } from "../types";

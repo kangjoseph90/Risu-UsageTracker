@@ -3,9 +3,7 @@
     import Modal from './Modal.svelte';
     export let id: string;
 
-    function onClick(): void {
-        console.log('OpenButton 클릭됨');
-        
+    function onClick(): void { 
         const container = document.createElement('div');
         document.body.appendChild(container);
 

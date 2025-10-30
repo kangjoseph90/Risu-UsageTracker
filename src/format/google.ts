@@ -1,7 +1,7 @@
 import { Logger } from "../logger";
 import type { RequestData, UsageInfo } from "../types";
-import { getRequestUrl, parseBody } from "../util";
-import { BaseFormat } from "./base";
+import { parseBody } from "../util";
+import { BaseFormat } from ".";
 
 export class GoogleFormat extends BaseFormat {
     constructor(requestData: RequestData, response: Response, data?: string) {

@@ -61,7 +61,7 @@
 >
     <!-- svelte-ignore a11y-click-events-have-key-events -->
     <div class="flex justify-center w-full h-full">
-        <div class="flex flex-col p-3 sm:p-6 rounded-lg bg-zinc-900 w-full max-w-4xl h-full" on:click|stopPropagation role="dialog" aria-modal="true">
+        <div class="flex flex-col p-3 sm:p-6 rounded-lg bg-zinc-900 w-full max-w-4xl h-full cursor-default" on:click|stopPropagation role="dialog" aria-modal="true">
             <!-- Header -->
             <div class="flex justify-between items-center w-full mb-2 flex-shrink-0">
                 <h2 class="text-lg sm:text-2xl font-semibold text-zinc-100">{PLUGIN_NAME}</h2>
