@@ -81,7 +81,7 @@
 </script>
 
 {#if data.length === 0}
-    <div class="text-center text-zinc-500 py-8">{language.noData}</div>
+    <div class="text-center text-zinc-500 py-8">{language.noRecordsFound}</div>
 {:else}
     <div class="flex gap-8 items-center flex-wrap">
         <!-- Donut Chart -->

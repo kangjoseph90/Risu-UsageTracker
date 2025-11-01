@@ -120,7 +120,7 @@
 </script>
 
 {#if maxValue === 0 || data.length === 0}
-    <div class="text-center text-zinc-500 py-8">{language.noData}</div>
+    <div class="text-center text-zinc-500 py-8">{language.noRecordsFound}</div>
 {:else}
     <div class="flex border border-zinc-700/80 rounded-md overflow-hidden">
         <!-- Y-axis -->

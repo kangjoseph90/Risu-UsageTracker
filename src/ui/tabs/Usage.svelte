@@ -8,6 +8,7 @@
     import UsageBarChart from './UsageBarChart.svelte';
     import UsageDonutChart from './UsageDonutChart.svelte';
     import { formatString, type LanguageType } from '../../lang';
+    import { Search } from 'lucide-svelte';
 
     export let key: number = 0;
     export let language: LanguageType;
@@ -381,51 +382,60 @@
     }
 </script>
 
-<div class="flex flex-col h-full relative">
+<div class="flex flex-col h-full">
     <!-- Global Filters -->
-    <div class="sticky top-0 z-10 bg-zinc-900 border-b border-zinc-700/60 px-3 pb-3 flex-shrink-0 shadow-[0_4px_16px_0_rgba(0,0,0,0.25)]">
-        <div class="flex gap-2 text-xs flex-wrap items-center">
-            <div class="flex gap-2 text-xs flex-wrap items-center">
-                <span class="text-zinc-400">{language.measure}:</span>
+    <div class="sticky top-0 z-10 bg-zinc-900 border-b border-zinc-700/60 px-3 py-3 flex-shrink-0 shadow-[0_4px_16px_0_rgba(0,0,0,0.25)]">
+        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+            <!-- Measure Group -->
+            <div class="flex items-center gap-2 text-xs">
+                <span class="text-zinc-400 hidden md:inline">{language.measure}:</span>
                 <select bind:value={globalMeasureBy} on:change={handleFilterChange} class="bg-zinc-800 text-zinc-200 border border-zinc-700/60 rounded px-2 py-1 text-xs max-w-[120px]">
                     <option value="tokens">{language.tokens}</option>
                     <option value="cost">{language.cost}</option>
                     <option value="requests">{language.requests}</option>
                 </select>
             </div>
-            <div class="flex gap-2 text-xs flex-wrap items-center">
-                <span class="text-zinc-400">{language.filter}:</span>
-                <select bind:value={globalFilterTimeRange} on:change={handleFilterChange} class="bg-zinc-800 text-zinc-200 border border-zinc-700/60 rounded px-2 py-1 text-xs max-w-[120px]">
+            
+            <!-- Filter Group -->
+            <div class="flex items-center gap-2 text-xs flex-wrap">
+                <span class="text-zinc-400 hidden md:inline">{language.filter}:</span>
+                <select bind:value={globalFilterTimeRange} class="bg-zinc-800 text-zinc-200 border border-zinc-700/60 rounded px-2 py-1 text-xs max-w-[120px]">
                     <option value="">{language.allTimeRange}</option>
                     <option value="1h">{language.oneHourRange}</option>
                     <option value="24h">{language.oneDayRange}</option>
                     <option value="7d">{language.sevenDaysRange}</option>
                     <option value="30d">{language.thirtyDaysRange}</option>
                 </select>
-                <select bind:value={globalFilterModel} on:change={handleFilterChange} class="bg-zinc-800 text-zinc-200 border border-zinc-700/60 rounded px-2 py-1 text-xs max-w-[120px] truncate">
+                <select bind:value={globalFilterModel} class="bg-zinc-800 text-zinc-200 border border-zinc-700/60 rounded px-2 py-1 text-xs max-w-[120px] truncate">
                     <option value="">{language.allModels}</option>
                     {#each uniqueModels as model}
                         <option value={model}>{model}</option>
                     {/each}
                 </select>
-                <select bind:value={globalFilterProvider} on:change={handleFilterChange} class="bg-zinc-800 text-zinc-200 border border-zinc-700/60 rounded px-2 py-1 text-xs max-w-[120px] truncate">
+                <select bind:value={globalFilterProvider} class="bg-zinc-800 text-zinc-200 border border-zinc-700/60 rounded px-2 py-1 text-xs max-w-[120px] truncate">
                     <option value="">{language.allProviders}</option>
                     {#each uniqueProviders as provider}
                         <option value={provider}>{provider}</option>
                     {/each}
                 </select>
-                <select bind:value={globalFilterRequestType} on:change={handleFilterChange} class="bg-zinc-800 text-zinc-200 border border-zinc-700/60 rounded px-2 py-1 text-xs max-w-[120px]">
+                <select bind:value={globalFilterRequestType} class="bg-zinc-800 text-zinc-200 border border-zinc-700/60 rounded px-2 py-1 text-xs max-w-[120px]">
                     <option value="">{language.allTypes}</option>
                     {#each uniqueRequestTypes as type}
                         <option value={type}>{type}</option>
                     {/each}
                 </select>
+                <button
+                    class="px-1.5 py-1.5 bg-zinc-700 hover:bg-zinc-600 text-zinc-200 rounded text-xs flex items-center gap-2 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-zinc-900 focus:ring-blue-500"
+                    on:click={handleFilterChange}
+                >
+                    <Search size={16} />
+                </button>
             </div>
         </div>
     </div>
 
     <!-- Content Area -->
-    <div class="flex-grow space-y-2 overflow-y-auto pt-2 pb-5">
+    <div class="flex-1 overflow-y-auto px-3 pt-2 space-y-2">
 
         <!-- Statistics Summary -->
         <div class="p-3">
@@ -473,7 +483,7 @@
             <div class="space-y-2">
                 {#if recentRecordsDisplay.length === 0}
                     <div class="text-center text-zinc-500 py-8">
-                        {language.noUsageRecords}
+                        {language.noRecordsFound}
                     </div>
                 {:else}
                     {#each recentRecordsDisplay as record (record.timestamp + record.model + record.url)}
@@ -536,7 +546,7 @@
     </div>
 
     <!-- Last Updated Footer -->
-    <div class="absolute bottom-0 left-0 right-0 z-10 bg-zinc-900 border-t border-zinc-700/60 pt-2 px-3 text-xs text-zinc-400 text-center shadow-[0_-4px_16px_0_rgba(0,0,0,0.25)]">
+    <div class="sticky bottom-0 z-10 bg-zinc-900 border-t border-zinc-700/60 pt-2 px-3 text-xs text-zinc-400 text-center shadow-[0_-4px_16px_0_rgba(0,0,0,0.25)]">
         {formatString(language.lastUpdatedAt, { time: new Date(UsageManager.getLastUpdated()).toLocaleString() })}
     </div>
 </div>

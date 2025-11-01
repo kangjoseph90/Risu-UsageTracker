@@ -52,6 +52,7 @@
 {:else if isEditing}
     <div class="flex items-center gap-1 min-w-0">
         <span class="flex-shrink-0">{fieldLabels[field]}:</span>
+        <!-- svelte-ignore a11y-autofocus -->
         <input
             type="number"
             step="0.0001"
@@ -59,6 +60,7 @@
             on:input={handleInputChange}
             on:keydown={(e) => handlePriceInputKeydown(e, provider, modelId, mode, field)}
             class="price-edit-input bg-zinc-700 text-zinc-100 px-1 py-0.5 rounded text-xs w-20"
+            autofocus
         />
         <button
             class="text-green-600 hover:text-green-500 confirm-price-btn text-xs flex-shrink-0"

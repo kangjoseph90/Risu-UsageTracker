@@ -4,8 +4,9 @@
     import { ProviderManager } from '../../manager/provider';
     import type { ProviderPrice } from '../../types';
     import PriceField from './PriceField.svelte';
-    import { Check, Trash, Pencil, X, TriangleAlert } from 'lucide-svelte';
+    import { Check, Trash, Pencil, X, TriangleAlert, Plus } from 'lucide-svelte';
     import type { LanguageType } from '../../lang';
+    import { formatString } from '../../lang';
 
     export let key: number = 0;
     export let language: LanguageType;
@@ -26,6 +27,7 @@
 
     let editProviderInput = '';
     let editPriceInput = '';
+    let searchQuery = '';
 
     onMount(() => {
         refreshData();
@@ -172,15 +174,89 @@
         div.textContent = text;
         return div.innerHTML;
     }
+
+    function showAddModelDialog() {
+        const provider = prompt(language.addModelProviderPrompt);
+        if (!provider) return;
+
+        const modelId = prompt(language.addModelNamePrompt);
+        if (!modelId) return;
+
+        const initialPrice = {
+            inputPrice: 0,
+            outputPrice: 0,
+        };
+
+        PriceManager.setTemporaryPrice(modelId, provider, initialPrice);
+        refreshData();
+        dispatch('change');
+    }
+
+    function handleDeleteModel(provider: string, modelId: string, mode: 'temp' | 'confirmed') {
+        const confirmText = formatString(language.deleteModelConfirm, { provider, modelId });
+        const confirmed = confirm(confirmText);
+        if (!confirmed) return;
+
+        deleteModel(provider, modelId, mode);
+    }
+
+    $: filteredProviders = (() => {
+        if (!searchQuery.trim()) return allProviders;
+        const query = searchQuery.toLowerCase();
+        return allProviders.filter(provider => {
+            const models = getProviderModels(provider);
+            // 프로바이더명 또는 모델명이 일치하면 포함
+            return provider.toLowerCase().includes(query) || 
+                   models.some(model => model.toLowerCase().includes(query));
+        });
+    })();
 </script>
 
-<div class="space-y-2 px-3">
-    {#if allProviders.length === 0}
-        <div class="text-center text-zinc-400 py-8">
-            {language.noPriceInfo}
+<div class="flex flex-col h-full">
+    <!-- Header -->
+    <div class="sticky top-0 z-10 bg-zinc-900 border-b border-zinc-700/60 px-3 py-3 flex-shrink-0 shadow-[0_4px_16px_0_rgba(0,0,0,0.25)]">
+        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+            <!-- Search Group -->
+            <div class="flex items-center gap-2 text-xs flex-wrap">
+                <span class="text-zinc-400 hidden md:inline">{language.search}:</span>
+                <input
+                    type="text"
+                    bind:value={searchQuery}
+                    placeholder={language.search}
+                    class="bg-zinc-800 text-zinc-200 border border-zinc-700/60 rounded px-2 py-1 text-xs max-w-[200px] placeholder-zinc-500"
+                />
+                <span class="text-zinc-500 text-xs">
+                    {filteredProviders.length} / {allProviders.length}
+                </span>
+            </div>
+            
+            <!-- Add Button Group -->
+            <div class="flex justify-end">
+                <button
+                    class="px-1.5 py-1.5 bg-zinc-700 hover:bg-zinc-600 text-zinc-200 rounded text-xs flex items-center gap-2 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-zinc-900 focus:ring-blue-500"
+                    on:click={showAddModelDialog}
+                    title="Add Model"
+                >   
+                    <Plus size={16} />
+                    <span>{language.addModel}</span>
+                </button>
+            </div>
         </div>
-    {:else}
-        {#each allProviders as provider (provider)}
+    </div>
+
+    <!-- Content Area -->
+    <div class="flex-1 overflow-y-auto">
+        {#if allProviders.length === 0}
+            <div class="text-center text-zinc-500 py-8">
+                {language.noRecordsFound}
+            </div>
+        {:else if filteredProviders.length === 0}
+            <div class="text-center text-zinc-500 py-8">
+                {language.noRecordsFound}
+            </div>
+        {:else}
+            <div class="space-y-2 px-3 pt-3">
+            {#each filteredProviders as provider (provider)}
             {@const confirmedModels = confirmedPrices[provider] || {}}
             {@const tempModels = tempPrices[provider] || {}}
             {@const models = getProviderModels(provider)}
@@ -190,11 +266,13 @@
                 <div class="flex items-center justify-between min-w-0">
                     <div class="flex items-center gap-2 min-w-0">
                         {#if isEditingProvider}
+                            <!-- svelte-ignore a11y-autofocus -->
                             <input
                                 type="text"
                                 bind:value={editProviderInput}
                                 class="provider-edit-input bg-zinc-700 text-zinc-100 px-2 py-1 rounded text-sm"
                                 on:keydown={(e) => handleProviderInputKeydown(e, provider)}
+                                autofocus
                             />
                             <button
                                 class="text-green-600 hover:text-green-500 confirm-provider-btn flex-shrink-0"
@@ -301,7 +379,7 @@
                                     </button>
                                     <button
                                         class="text-red-700 hover:text-red-500 delete-model-btn flex-shrink-0"
-                                        on:click={() => deleteModel(provider, modelId, 'temp')}
+                                        on:click={() => handleDeleteModel(provider, modelId, 'temp')}
                                         title="Delete Model"
                                     >
                                         <Trash size={18} />
@@ -373,7 +451,7 @@
                                 <div class="flex gap-1 items-center flex-shrink-0">
                                     <button
                                         class="text-red-700 hover:text-red-500 delete-model-btn flex-shrink-0"
-                                        on:click={() => deleteModel(provider, modelId, 'confirmed')}
+                                        on:click={() => handleDeleteModel(provider, modelId, 'confirmed')}
                                         title="Delete Model"
                                     >
                                         <Trash size={18} />
@@ -384,6 +462,8 @@
                     {/each}
                 </div>
             </div>
-        {/each}
-    {/if}
+            {/each}
+            </div>
+        {/if}
+    </div>
 </div>

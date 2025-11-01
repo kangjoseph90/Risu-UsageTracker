@@ -5,6 +5,7 @@
 	import type { UsageRecord } from '../../types';
 	import { RequestType } from '../../types';
 	import { formatString, type LanguageType } from '../../lang';
+	import { Search, Trash } from 'lucide-svelte';
 
 	export let key: number = 0;
 	export let language: LanguageType;
@@ -26,20 +27,12 @@
 	let totalPages = 1;
 
 	// UI states
-	let selectAllChecked = false;
 
 	$: uniqueProviders = getUniqueProviders(allRecords, providerMap);
 	$: uniqueModels = getUniqueModels(allRecords);
 	$: uniqueRequestTypes = getUniqueRequestTypes(allRecords);
 	$: selectedCount = selectedRecords.size;
-	$: paginatedRecords = getPaginatedRecords();
-
-	// Ensure filteredRecords is always in sync when allRecords changes and no filters are applied
-	$: if (allRecords.length > 0 && filteredRecords.length === 0 && !filterTimeRange && !filterModel && !filterProvider && !filterRequestType) {
-		filteredRecords = [...allRecords];
-		totalPages = Math.max(1, Math.ceil(filteredRecords.length / recordsPerPage));
-		currentPage = 1;
-	}
+	$: paginatedRecords = getPaginatedRecords(filteredRecords, currentPage, recordsPerPage);
 
 	onMount(() => {
 		refreshData();
@@ -51,12 +44,11 @@
 
 	function refreshData() {
 		allRecords = UsageManager.getRecords([]);
+		// Sort records by timestamp in descending order (newest first)
+		allRecords = allRecords.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 		providerMap = ProviderManager.getAllProviders();
-		// Initially show all records without filters
-		filteredRecords = [...allRecords];
-		totalPages = Math.ceil(filteredRecords.length / recordsPerPage);
-		currentPage = 1;
-		clearSelection();
+		// Apply filters to ensure filteredRecords is properly set
+		applyFilters();
 	}
 
 	function applyFilters() {
@@ -119,15 +111,19 @@
 		clearSelection();
 	}
 
-	function getPaginatedRecords(): UsageRecord[] {
-		const startIndex = (currentPage - 1) * recordsPerPage;
-		const endIndex = startIndex + recordsPerPage;
-		return filteredRecords.slice(startIndex, endIndex);
+	function getPaginatedRecords(records: UsageRecord[], page: number, perPage: number): UsageRecord[] {
+		const startIndex = (page - 1) * perPage;
+		const endIndex = startIndex + perPage;
+		return records.slice(startIndex, endIndex);
 	}
 
 	function clearSelection() {
 		selectedRecords = new Set<UsageRecord>();
-		selectAllChecked = false;
+		// Update select all checkbox state
+		const selectAllCheckbox = document.getElementById('selectAllCheckbox') as HTMLInputElement;
+		if (selectAllCheckbox) {
+			selectAllCheckbox.checked = false;
+		}
 	}
 
 	function toggleRecord(record: UsageRecord, checked: boolean) {
@@ -140,19 +136,25 @@
 		selectedRecords = next;
 
 		// Update select all checkbox state
-		selectAllChecked = paginatedRecords.length > 0 && paginatedRecords.every(r => selectedRecords.has(r));
+		const selectAllCheckbox = document.getElementById('selectAllCheckbox') as HTMLInputElement;
+		if (selectAllCheckbox) {
+			selectAllCheckbox.checked = paginatedRecords.length > 0 && paginatedRecords.every(r => selectedRecords.has(r));
+		}
 	}
 
-	function selectAllRecords() {
-		if (selectAllChecked) {
-			// Unselect all on current page
-			paginatedRecords.forEach(record => {
-				selectedRecords.delete(record);
-			});
-		} else {
+	function selectAllRecords(event: Event) {
+		const target = event.currentTarget as HTMLInputElement;
+		const isChecked = target.checked;
+		
+		if (isChecked) {
 			// Select all on current page
 			paginatedRecords.forEach(record => {
 				selectedRecords.add(record);
+			});
+		} else {
+			// Unselect all on current page
+			paginatedRecords.forEach(record => {
+				selectedRecords.delete(record);
 			});
 		}
 		selectedRecords = new Set<UsageRecord>(selectedRecords);
@@ -180,25 +182,6 @@
 
 		let deletedCount = 0;
 		selectedRecords.forEach(record => {
-			if (UsageManager.removeRecord(record)) {
-				deletedCount++;
-			}
-		});
-
-		const deletedText = formatString(language.deletedRecords, { count: deletedCount });
-		alert(deletedText);
-		clearSelection();
-		refreshData();
-	}
-
-	function deleteAllRecords() {
-		const allRecordsToDelete = filteredRecords.length > 0 ? filteredRecords : allRecords;
-		const confirmText = formatString(language.deleteAllRecordsConfirm, { count: allRecordsToDelete.length });
-		const confirmed = confirm(confirmText);
-		if (!confirmed) return;
-
-		let deletedCount = 0;
-		allRecordsToDelete.forEach(record => {
 			if (UsageManager.removeRecord(record)) {
 				deletedCount++;
 			}
@@ -259,127 +242,148 @@
 <div class="flex flex-col h-full">
 	<!-- Header Area (Fixed Scrolling) -->
 	<div class="sticky top-0 z-10 bg-zinc-900 border-b border-zinc-700/60 px-3 py-3 flex-shrink-0 shadow-[0_4px_16px_0_rgba(0,0,0,0.25)]">
-		<!-- Title and Actions -->
-		<div class="flex justify-between items-center mb-3">
-			<h3 class="text-xl font-semibold text-zinc-100">{language.recordManagement}</h3>
-			<div class="flex items-center gap-3">
-				<!-- Select All Checkbox -->
-				<label class="flex items-center gap-2 cursor-pointer">
-					<input
-						type="checkbox"
-						bind:checked={selectAllChecked}
-						on:change={selectAllRecords}
-						class="w-4 h-4 cursor-pointer"
-					/>
-					<span class="text-sm text-zinc-200">{language.selectAll}</span>
-				</label>
-
-				<!-- Action Buttons -->
-				<div class="flex gap-2">
-					<button
-						class="px-3 py-1.5 rounded bg-red-600 hover:bg-red-700 text-white text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-						on:click={deleteSelectedRecords}
-						disabled={selectedCount === 0}
-					>
-						{formatString(language.deleteSelectedCount, { count: selectedCount })}
-					</button>
-					<button
-						class="px-3 py-1.5 rounded bg-red-700 hover:bg-red-800 text-white text-sm transition-colors"
-						on:click={deleteAllRecords}
-					>
-						{language.deleteAll}
-					</button>
-				</div>
+		<!-- Actions -->
+		<div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+			<!-- Filter Group -->
+			<div class="flex items-center gap-2 text-xs flex-wrap">
+				<span class="text-zinc-400 hidden md:inline">{language.filter}:</span>
+				<select bind:value={filterTimeRange} class="bg-zinc-800 text-zinc-200 border border-zinc-700/60 rounded px-2 py-1 text-xs max-w-[120px]">
+					<option value="">{language.allTimeRange}</option>
+					<option value="1h">{language.oneHourRange}</option>
+					<option value="24h">{language.oneDayRange}</option>
+					<option value="7d">{language.sevenDaysRange}</option>
+					<option value="30d">{language.thirtyDaysRange}</option>
+				</select>
+				<select bind:value={filterModel} class="bg-zinc-800 text-zinc-200 border border-zinc-700/60 rounded px-2 py-1 text-xs max-w-[120px] truncate">
+					<option value="">{language.allModels}</option>
+					{#each uniqueModels as model}
+						<option value={model}>{model}</option>
+					{/each}
+				</select>
+				<select bind:value={filterProvider} class="bg-zinc-800 text-zinc-200 border border-zinc-700/60 rounded px-2 py-1 text-xs max-w-[120px] truncate">
+					<option value="">{language.allProviders}</option>
+					{#each uniqueProviders as provider}
+						<option value={provider}>{provider}</option>
+					{/each}
+				</select>
+				<select bind:value={filterRequestType} class="bg-zinc-800 text-zinc-200 border border-zinc-700/60 rounded px-2 py-1 text-xs max-w-[120px]">
+					<option value="">{language.allTypes}</option>
+					{#each uniqueRequestTypes as type}
+						<option value={type}>{type}</option>
+					{/each}
+				</select>
+				<button
+					class="px-1.5 py-1.5 bg-zinc-700 hover:bg-zinc-600 text-zinc-200 rounded text-xs flex items-center gap-2 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-zinc-900 focus:ring-blue-500"
+					on:click={applyFilters}
+				>
+					<Search size={16} />
+				</button>
 			</div>
-		</div>
-
-		<!-- Filters -->
-		<div class="flex gap-2 text-xs flex-wrap items-center">
-			<span class="text-zinc-400">{language.filter}:</span>
-			<select bind:value={filterTimeRange} class="bg-zinc-800 text-zinc-200 border border-zinc-700/60 rounded px-2 py-1 text-xs max-w-[120px]">
-				<option value="">{language.allTimeRange}</option>
-				<option value="1h">{language.oneHourRange}</option>
-				<option value="24h">{language.oneDayRange}</option>
-				<option value="7d">{language.sevenDaysRange}</option>
-				<option value="30d">{language.thirtyDaysRange}</option>
-			</select>
-			<select bind:value={filterModel} class="bg-zinc-800 text-zinc-200 border border-zinc-700/60 rounded px-2 py-1 text-xs max-w-[120px] truncate">
-				<option value="">{language.allModels}</option>
-				{#each uniqueModels as model}
-					<option value={model}>{model}</option>
-				{/each}
-			</select>
-			<select bind:value={filterProvider} class="bg-zinc-800 text-zinc-200 border border-zinc-700/60 rounded px-2 py-1 text-xs max-w-[120px] truncate">
-				<option value="">{language.allProviders}</option>
-				{#each uniqueProviders as provider}
-					<option value={provider}>{provider}</option>
-				{/each}
-			</select>
-			<select bind:value={filterRequestType} class="bg-zinc-800 text-zinc-200 border border-zinc-700/60 rounded px-2 py-1 text-xs max-w-[120px]">
-				<option value="">{language.allTypes}</option>
-				{#each uniqueRequestTypes as type}
-					<option value={type}>{type}</option>
-				{/each}
-			</select>
-			<button
-				class="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs transition-colors"
-				on:click={applyFilters}
-			>
-				{language.search}
-			</button>
+			<!-- Delete Button Group -->
+			<div class="flex">
+				<button
+					class="w-full sm:w-auto px-3 py-1.5 bg-zinc-800 hover:bg-red-600/90 text-zinc-200 hover:text-white rounded text-sm flex items-center justify-center gap-2 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-zinc-900 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
+					on:click={deleteSelectedRecords}
+					disabled={selectedCount === 0}
+				>
+					<Trash size={16} />
+					<span>{formatString(language.deleteSelectedCount, { count: selectedCount })}</span>
+				</button>
+			</div>
 		</div>
 	</div>
 
 	<!-- Record Area (Scrollable) -->
-	<div class="flex-1 overflow-y-auto px-3 py-3 space-y-2">
+	<div class="flex-1 overflow-y-auto overflow-x-auto">
 		{#if paginatedRecords.length === 0}
 			<div class="text-center text-zinc-500 py-8">
 				{language.noRecordsFound}
 			</div>
 		{:else}
-			{#each paginatedRecords as record, index (record.timestamp + record.model + record.url + index)}
-				{@const inputText = formatString(language.inputWithCache, {
-					input: (record.inputTokens ?? 0).toLocaleString(),
-					cached: (record.cachedInputTokens ?? 0).toLocaleString(),
-					output: (record.outputTokens ?? 0).toLocaleString()
-				})}
-				{@const costText = formatString(language.costBreakdown, {
-					totalCost: formatCost(record.totalCost),
-					inputCost: formatCost(record.inputCost),
-					outputCost: formatCost(record.outputCost)
-				})}
-				<div class="recordItem flex items-start gap-2 p-3 bg-zinc-800 rounded-lg hover:bg-zinc-750 transition-colors">
-					<input
-						type="checkbox"
-						class="recordCheckbox mt-1 w-4 h-4 cursor-pointer"
-						checked={selectedRecords.has(record)}
-						on:change={(event) => handleCheckboxChange(record, event)}
-					/>
-					<div class="flex-1 min-w-0 text-xs">
-						<div class="flex justify-between items-start mb-1">
-							<div class="font-semibold text-zinc-200">{formatProvider(record)} - {record.model}</div>
-							<div class="text-zinc-400">{new Date(record.timestamp).toLocaleString()}</div>
-						</div>
-						<div class="text-zinc-400 space-y-0.5">
-							<div>{inputText}</div>
-							<div>{costText}</div>
-						</div>
-					</div>
-					<button
-						class="deleteRecordButton px-2 py-1 text-xs bg-red-600 hover:bg-red-700 text-white rounded transition-colors"
-						on:click={() => deleteRecord(record)}
-						title="Delete Record"
-					>
-						{language.delete}
-					</button>
-				</div>
-			{/each}
+			<table class="min-w-full divide-y divide-zinc-700/60 table-auto">
+				<thead class="bg-zinc-800 sticky top-0 z-10 shadow-lg">
+					<tr>
+						<th scope="col" class="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-zinc-400 w-12">
+							<input
+								id="selectAllCheckbox"
+								type="checkbox"
+								on:change={selectAllRecords}
+								class="w-3 h-3 cursor-pointer"
+							/>
+						</th>
+						<th scope="col" class="pr-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-zinc-400">
+							{language.model}
+						</th>
+						<th scope="col" class="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-zinc-400 whitespace-nowrap">
+							{language.tokens}
+						</th>
+						<th scope="col" class="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-zinc-400 whitespace-nowrap">
+							{language.cost}
+						</th>
+					</tr>
+				</thead>
+					<tbody class="divide-y divide-zinc-700/60 bg-zinc-900/50">
+						{#each paginatedRecords as record, index (record.timestamp + record.model + record.url + index)}
+							<tr class="hover:bg-zinc-800/50 transition-colors {selectedRecords.has(record) ? 'bg-zinc-800' : ''}">
+								<td class="px-4 py-2">
+									<input
+										type="checkbox"
+										checked={selectedRecords.has(record)}
+										on:change={(event) => handleCheckboxChange(record, event)}
+										class="w-3 h-3 cursor-pointer"
+									/>
+								</td>
+								<td class="pr-4 py-2 text-sm">
+									<div class="space-y-0.5">
+										<div class="font-medium text-zinc-200 whitespace-nowrap">{record.model}</div>
+										<div class="text-xs text-zinc-400 whitespace-nowrap">{formatProvider(record)}</div>
+										<div class="text-xs text-zinc-500 whitespace-nowrap">{record.requestType || RequestType.Unknown} • {new Date(record.timestamp).toLocaleString()}</div>
+									</div>
+								</td>
+								<td class="px-4 py-2 text-sm whitespace-nowrap">
+									<div class="space-y-0.5">
+										<div class="flex justify-between gap-2">
+											<span class="text-zinc-400 text-xs">{language.input}:</span>
+											<span class="text-zinc-300 text-xs">{(record.inputTokens ?? 0).toLocaleString()}</span>
+										</div>
+										{#if record.cachedInputTokens > 0}
+											<div class="flex justify-between gap-2">
+												<span class="text-zinc-400 text-xs">{language.cached}:</span>
+												<span class="text-zinc-300 text-xs">{record.cachedInputTokens.toLocaleString()}</span>
+											</div>
+										{/if}
+										<div class="flex justify-between gap-2">
+											<span class="text-zinc-400 text-xs">{language.output}:</span>
+											<span class="text-zinc-300 text-xs">{(record.outputTokens ?? 0).toLocaleString()}</span>
+										</div>
+									</div>
+								</td>
+								<td class="px-4 py-2 text-sm whitespace-nowrap">
+									<div class="space-y-0.5">
+										<div class="flex justify-between gap-2">
+											<span class="text-zinc-400 text-xs">{language.totalCost}:</span>
+											<span class="text-zinc-300 text-xs">${formatCost(record.totalCost)}</span>
+										</div>
+										<div class="flex justify-between gap-2">
+											<span class="text-zinc-400 text-xs">{language.input}:</span>
+											<span class="text-zinc-300 text-xs">${formatCost(record.inputCost)}</span>
+										</div>
+										<div class="flex justify-between gap-2">
+											<span class="text-zinc-400 text-xs">{language.output}:</span>
+											<span class="text-zinc-300 text-xs">${formatCost(record.outputCost)}</span>
+										</div>
+									</div>
+								</td>
+							</tr>
+						{/each}
+					</tbody>
+				</table>
 		{/if}
 	</div>
 
 	<!-- Pagination Area (Fixed Scrolling) -->
 	{#if totalPages > 1}
-	<div class="sticky bottom-0 z-10 bg-zinc-900 border-t border-zinc-700/60 px-3 py-3 flex-shrink-0 shadow-[0_-4px_16px_0_rgba(0,0,0,0.25)]">
+	<div class="sticky bottom-0 z-10 bg-zinc-900 border-t border-zinc-700/60 px-3 pt-3 pb-2 flex-shrink-0 shadow-[0_-4px_16px_0_rgba(0,0,0,0.25)]">
 		<div class="flex justify-center items-center gap-2">
 			<button
 				class="px-3 py-1 bg-zinc-700 hover:bg-zinc-600 text-white rounded text-xs transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
