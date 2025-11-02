@@ -36,7 +36,7 @@
      * Fetch converted amount on hover
      */
     async function handleMouseEnter(event: MouseEvent): Promise<void> {
-        if (!showHint) return;
+        if (!showHint || effectiveLanguage == LanguageType.EN) return;
 
         // Calculate tooltip position
         const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
