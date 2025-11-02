@@ -18,7 +18,7 @@
 	let selectedRecords = new Set<UsageRecord>();
 
 	// Filter states
-	let filterTimeRange = '';
+	let filterTimeRange: { start: Date | null; end: Date | null } | '' = '';
 	let filterModel = '';
 	let filterProvider = '';
 	let filterRequestType = '';
@@ -53,30 +53,24 @@
 		applyFilters();
 	}
 
-	function applyFilters() {
-		let timeRangeMs = 0;
-
-		switch (filterTimeRange) {
-			case '1h':
-				timeRangeMs = 60 * 60 * 1000;
-				break;
-			case '24h':
-				timeRangeMs = 24 * 60 * 60 * 1000;
-				break;
-			case '7d':
-				timeRangeMs = 7 * 24 * 60 * 60 * 1000;
-				break;
-			case '30d':
-				timeRangeMs = 30 * 24 * 60 * 60 * 1000;
-				break;
+	function applyFilters(event?: CustomEvent) {
+		if (event) {
+			const { timeRange, model, provider, requestType } = event.detail;
+			filterTimeRange = timeRange;
+			filterModel = model;
+			filterProvider = provider;
+			filterRequestType = requestType;
 		}
 
 		// Apply filters to allRecords
 		const filtered = allRecords.filter(record => {
 			// Time filter
-			if (timeRangeMs > 0) {
-				const cutoffTime = new Date().getTime() - timeRangeMs;
-				if (new Date(record.timestamp).getTime() < cutoffTime) {
+			if (filterTimeRange && (filterTimeRange.start || filterTimeRange.end)) {
+				const recordTime = new Date(record.timestamp).getTime();
+				if (filterTimeRange.start && recordTime < filterTimeRange.start.getTime()) {
+					return false;
+				}
+				if (filterTimeRange.end && recordTime > filterTimeRange.end.getTime()) {
 					return false;
 				}
 			}
@@ -257,7 +251,6 @@
 			<!-- Filter Group -->
 			<RecordFilters
 				{language}
-				bind:filterTimeRange
 				bind:filterModel
 				bind:filterProvider
 				bind:filterRequestType

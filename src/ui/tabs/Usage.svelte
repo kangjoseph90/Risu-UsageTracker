@@ -27,7 +27,7 @@
     };
 
     let globalMeasureBy: "tokens" | "cost" | "requests" = 'tokens';
-    let globalFilterTimeRange = '';
+    let globalFilterTimeRange: { start: Date | null; end: Date | null } = { start: null, end: null };
     let globalFilterModel = '';
     let globalFilterProvider = '';
     let globalFilterRequestType = '';
@@ -110,26 +110,9 @@
     }
 
     function getGlobalFilters() {
-        let timeRangeMs = 0;
-
-        switch (globalFilterTimeRange) {
-            case '1h':
-                timeRangeMs = 60 * 60 * 1000;
-                break;
-            case '24h':
-                timeRangeMs = 24 * 60 * 60 * 1000;
-                break;
-            case '7d':
-                timeRangeMs = 7 * 24 * 60 * 60 * 1000;
-                break;
-            case '30d':
-                timeRangeMs = 30 * 24 * 60 * 60 * 1000;
-                break;
-        }
-
         return {
             measureBy: globalMeasureBy,
-            timeRangeMs,
+            timeRange: globalFilterTimeRange,
             models: globalFilterModel ? [globalFilterModel] : [],
             providers: globalFilterProvider ? [globalFilterProvider] : [],
             requestTypes: globalFilterRequestType ? [globalFilterRequestType] : [],
@@ -138,16 +121,24 @@
 
     function buildUsageFilters(filters: {
         measureBy: string;
-        timeRangeMs: number;
+        timeRange: { start: Date | null; end: Date | null };
         models: string[];
         providers: string[];
         requestTypes: string[];
     }): UsageFilter[] {
         const usageFilters: UsageFilter[] = [];
 
-        if (filters.timeRangeMs > 0) {
-            const cutoffTime = new Date().getTime() - filters.timeRangeMs;
-            usageFilters.push((record: UsageRecord) => new Date(record.timestamp).getTime() >= cutoffTime);
+        if (filters.timeRange && (filters.timeRange.start || filters.timeRange.end)) {
+            usageFilters.push((record: UsageRecord) => {
+                const recordTime = new Date(record.timestamp).getTime();
+                if (filters.timeRange.start && recordTime < filters.timeRange.start.getTime()) {
+                    return false;
+                }
+                if (filters.timeRange.end && recordTime > filters.timeRange.end.getTime()) {
+                    return false;
+                }
+                return true;
+            });
         }
 
         if (filters.models.length > 0) {
@@ -410,10 +401,9 @@
             <!-- Filter Group -->
             <RecordFilters
                 {language}
-                filterTimeRange={globalFilterTimeRange}
-                filterModel={globalFilterModel}
-                filterProvider={globalFilterProvider}
-                filterRequestType={globalFilterRequestType}
+                bind:filterModel={globalFilterModel}
+                bind:filterProvider={globalFilterProvider}
+                bind:filterRequestType={globalFilterRequestType}
                 {uniqueModels}
                 {uniqueProviders}
                 {uniqueRequestTypes}
