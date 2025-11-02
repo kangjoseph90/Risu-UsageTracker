@@ -8,6 +8,7 @@
     import UsageBarChart from '../components/UsageBarChart.svelte';
     import UsageDonutChart from '../components/UsageDonutChart.svelte';
     import DollarDisplay from '../components/DollarDisplay.svelte';
+    import RecordFilters from '../components/RecordFilters.svelte';
     import { formatString, type Language } from '../../lang';
     import { Search } from 'lucide-svelte';
 
@@ -372,6 +373,15 @@
         updateAllCharts();
     }
 
+    function handleFilterApply(event: CustomEvent) {
+        const { timeRange, model, provider, requestType } = event.detail;
+        globalFilterTimeRange = timeRange;
+        globalFilterModel = model;
+        globalFilterProvider = provider;
+        globalFilterRequestType = requestType;
+        updateAllCharts();
+    }
+
     function formatProvider(record: UsageRecord): string {
         return providerMap[record.url] || record.url;
     }
@@ -398,40 +408,17 @@
             </div>
             
             <!-- Filter Group -->
-            <div class="flex items-center gap-2 text-xs flex-wrap">
-                <span class="text-zinc-400 hidden md:inline">{language.filter}:</span>
-                <select bind:value={globalFilterTimeRange} class="bg-zinc-800 text-zinc-200 border border-zinc-700/60 rounded px-2 py-1 text-xs max-w-[120px]">
-                    <option value="">{language.allTimeRange}</option>
-                    <option value="1h">{language.oneHourRange}</option>
-                    <option value="24h">{language.oneDayRange}</option>
-                    <option value="7d">{language.sevenDaysRange}</option>
-                    <option value="30d">{language.thirtyDaysRange}</option>
-                </select>
-                <select bind:value={globalFilterModel} class="bg-zinc-800 text-zinc-200 border border-zinc-700/60 rounded px-2 py-1 text-xs max-w-[120px] truncate">
-                    <option value="">{language.allModels}</option>
-                    {#each uniqueModels as model}
-                        <option value={model}>{model}</option>
-                    {/each}
-                </select>
-                <select bind:value={globalFilterProvider} class="bg-zinc-800 text-zinc-200 border border-zinc-700/60 rounded px-2 py-1 text-xs max-w-[120px] truncate">
-                    <option value="">{language.allProviders}</option>
-                    {#each uniqueProviders as provider}
-                        <option value={provider}>{provider}</option>
-                    {/each}
-                </select>
-                <select bind:value={globalFilterRequestType} class="bg-zinc-800 text-zinc-200 border border-zinc-700/60 rounded px-2 py-1 text-xs max-w-[120px]">
-                    <option value="">{language.allTypes}</option>
-                    {#each uniqueRequestTypes as type}
-                        <option value={type}>{type}</option>
-                    {/each}
-                </select>
-                <button
-                    class="px-1.5 py-1.5 bg-zinc-700 hover:bg-zinc-600 text-zinc-200 rounded text-xs flex items-center gap-2 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-zinc-900 focus:ring-blue-500"
-                    on:click={handleFilterChange}
-                >
-                    <Search size={16} />
-                </button>
-            </div>
+            <RecordFilters
+                {language}
+                filterTimeRange={globalFilterTimeRange}
+                filterModel={globalFilterModel}
+                filterProvider={globalFilterProvider}
+                filterRequestType={globalFilterRequestType}
+                {uniqueModels}
+                {uniqueProviders}
+                {uniqueRequestTypes}
+                on:apply={handleFilterApply}
+            />
         </div>
     </div>
 
