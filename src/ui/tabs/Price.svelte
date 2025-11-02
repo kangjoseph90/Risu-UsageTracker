@@ -3,13 +3,13 @@
     import { PriceManager } from '../../manager/price';
     import { ProviderManager } from '../../manager/provider';
     import type { ProviderPrice } from '../../types';
-    import PriceField from './PriceField.svelte';
+    import PriceField from '../components/PriceField.svelte';
     import { Check, Trash, Pencil, X, TriangleAlert, Plus } from 'lucide-svelte';
-    import type { LanguageType } from '../../lang';
+    import type { Language } from '../../lang';
     import { formatString } from '../../lang';
 
     export let key: number = 0;
-    export let language: LanguageType;
+    export let language: Language;
 
     const dispatch = createEventDispatcher();
 

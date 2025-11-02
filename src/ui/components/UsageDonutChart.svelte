@@ -1,5 +1,6 @@
 <script lang="ts">
-    import type { LanguageType } from "../../lang";
+    import type { Language } from "../../lang";
+    import DollarDisplay from "./DollarDisplay.svelte";
 
     export let data: Array<{
         name: string;
@@ -10,7 +11,7 @@
         percentage: number;
     }>;
     export let measureBy: 'tokens' | 'cost' | 'requests';
-    export let language: LanguageType;
+    export let language: Language;
 
     const size = 200;
     const center = size / 2;
@@ -68,16 +69,6 @@
 
         return `M ${x1} ${y1} A ${radius} ${radius} 0 ${largeArc} 1 ${x2} ${y2} L ${x3} ${y3} A ${innerRadius} ${innerRadius} 0 ${largeArc} 0 ${x4} ${y4} Z`;
     }
-
-    function formatValue(value: number, measure: typeof measureBy): string {
-        if (measure === 'cost') {
-            return `$${value.toFixed(2)}`;
-        } else if (measure === 'tokens') {
-            return `${(value / 1000).toFixed(1)}K`;
-        } else {
-            return value.toString();
-        }
-    }
 </script>
 
 {#if data.length === 0}
@@ -109,7 +100,16 @@
                     </span>
                     <div class="flex gap-2 items-center flex-shrink-0">
                         <span class="text-zinc-500">{item.percentage.toFixed(1)}%</span>
-                        <span class="text-white font-medium">{formatValue(item.value, measureBy)}</span>
+                        {#if measureBy === 'cost'}
+                            <DollarDisplay 
+                                amount={item.value} 
+                                language={language}
+                                textClass="text-white font-medium" />
+                        {:else if measureBy === 'tokens'}
+                            <span class="text-white font-medium">{(item.value / 1000).toFixed(1)}K</span>
+                        {:else}
+                            <span class="text-white font-medium">{item.value}</span>
+                        {/if}
                     </div>
                 </div>
             {/each}

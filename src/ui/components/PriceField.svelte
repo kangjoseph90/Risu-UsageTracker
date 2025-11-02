@@ -1,5 +1,6 @@
 <script lang="ts">
     import type { PriceInfo } from '../../types';
+    import DollarDisplay from './DollarDisplay.svelte';
     import { Plus, Pencil, Check, X, Trash } from 'lucide-svelte';
 
     export let provider: string;
@@ -15,10 +16,10 @@
     export let addCachedPrice: (provider: string, modelId: string, mode: 'temp' | 'confirmed') => void;
     export let removeCachedPrice: (provider: string, modelId: string, mode: 'temp' | 'confirmed') => void;
     export let editPriceInput: string;
-    export let language: LanguageType;
+    export let language: Language;
 
     import { createEventDispatcher } from 'svelte';
-    import type { LanguageType } from '../../lang';
+    import type { Language } from '../../lang';
     const dispatch = createEventDispatcher();
 
     const fieldLabels = {
@@ -79,7 +80,14 @@
     </div>
 {:else}
     <div class="flex items-center gap-1 min-w-0">
-        <span class="truncate">{fieldLabels[field]}: ${value.toFixed(4)}/M</span>
+        <span class="truncate">
+            {fieldLabels[field]}: <DollarDisplay 
+                amount={value} 
+                language={language}
+                textClass="text-xs"
+                showHint={true}
+            />/M
+        </span>
         <button
             class="text-zinc-400 hover:text-zinc-200 edit-price-btn flex-shrink-0"
             on:click={() => startEditingPrice(provider, modelId, mode, field)}

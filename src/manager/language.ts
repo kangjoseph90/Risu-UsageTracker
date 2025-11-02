@@ -1,6 +1,6 @@
 import { RisuAPI } from '../api'
 import { LANGUAGE_ARG } from '../plugin'
-import { setLanguage, SupportedLanguage } from '../lang'
+import { setLanguage, LanguageType } from '../lang'
 
 /**
  * init,
@@ -10,25 +10,25 @@ import { setLanguage, SupportedLanguage } from '../lang'
 export class LanguageManager {
     static init() {
         const lang = RisuAPI.getArg(LANGUAGE_ARG);
-        if (lang && Object.values(SupportedLanguage).includes(lang as SupportedLanguage)) {
-            setLanguage(lang as SupportedLanguage);
+        if (lang && Object.values(LanguageType).includes(lang as LanguageType)) {
+            setLanguage(lang as LanguageType);
         } else {
-            setLanguage(SupportedLanguage.EN);
-            RisuAPI.setArg(LANGUAGE_ARG, SupportedLanguage.EN);
+            setLanguage(LanguageType.EN);
+            RisuAPI.setArg(LANGUAGE_ARG, LanguageType.EN);
         }
     }
 
-    static setLanguage(lang: SupportedLanguage) {
+    static setLanguage(lang: LanguageType) {
         setLanguage(lang);
         RisuAPI.setArg(LANGUAGE_ARG, lang);
     }
 
-    static getLanguage(): SupportedLanguage {
+    static getLanguage(): LanguageType {
         const lang = RisuAPI.getArg(LANGUAGE_ARG);
-        if (lang && Object.values(SupportedLanguage).includes(lang as SupportedLanguage)) {
-            return lang as SupportedLanguage;
+        if (lang && Object.values(LanguageType).includes(lang as LanguageType)) {
+            return lang as LanguageType;
         }
-        RisuAPI.setArg(LANGUAGE_ARG, SupportedLanguage.EN);
-        return SupportedLanguage.EN;
+        RisuAPI.setArg(LANGUAGE_ARG, LanguageType.EN);
+        return LanguageType.EN;
     }
 }

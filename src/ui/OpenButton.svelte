@@ -1,11 +1,11 @@
 <script lang="ts">
     import { ChartColumn } from 'lucide-svelte';
     import Modal from './Modal.svelte';
-    import { language as languageImport, type LanguageType } from '../lang';
+    import { language as languageImport, type Language } from '../lang';
 
     export let id: string;
 
-    let language: LanguageType = { ...languageImport };
+    let language: Language = { ...languageImport };
 
     function onClick(): void { 
         const container = document.createElement('div');

@@ -1,11 +1,11 @@
 <script lang="ts">
     import { onMount } from 'svelte';
     import { ProviderManager } from '../../manager/provider';
-    import { formatString, type LanguageType } from '../../lang';
+    import { formatString, type Language } from '../../lang';
     import { Plus, Check, X, Pencil, Trash } from 'lucide-svelte';
 
     export let key: number = 0;
-    export let language: LanguageType;
+    export let language: Language;
 
     let providerMap: Record<string, string> = {};
     let entries: [string, string][] = [];

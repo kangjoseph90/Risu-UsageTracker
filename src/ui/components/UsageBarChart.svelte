@@ -1,5 +1,5 @@
 <script lang="ts">
-    import type { LanguageType } from "../../lang";
+    import type { Language } from "../../lang";
 
     export let data: Array<{
         timestamp: string;
@@ -13,7 +13,7 @@
     }>;
     export let measureBy: 'tokens' | 'cost' | 'requests';
     export let timeRange: string;
-    export let language: LanguageType;
+    export let language: Language;
     
     let scrollContainer: HTMLDivElement;
 

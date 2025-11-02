@@ -11,13 +11,10 @@ interface BackupData {
 }
 
 /**
- * BackupManager
- * 모든 RisuAPI 데이터를 브라우저 IndexedDB에 백업/복구하는 기능 제공
- * args.ts의 RISU_ARGS에 등록된 모든 arg를 자동으로 처리
- * 
- * 사용 예시:
- * - BackupManager.backup() → 현재 모든 데이터 브라우저 DB에 저장
- * - BackupManager.restore() → 브라우저 DB에서 복구
+ * backup,
+ * restore,
+ * hasBackup,
+ * getBackupTimestamp
  */
 export class BackupManager {
     private static readonly DB_NAME = PLUGIN_TITLE;
@@ -25,9 +22,6 @@ export class BackupManager {
     private static readonly BACKUP_KEY = 'latest_backup';
     private static readonly VERSION = '1.0';
 
-    /**
-     * 현재 모든 RisuAPI 데이터를 브라우저 IndexedDB에 백업
-     */
     static async backup(): Promise<boolean> {
         try {
             const backupData: BackupData = {
@@ -54,9 +48,6 @@ export class BackupManager {
         }
     }
 
-    /**
-     * 브라우저 IndexedDB에서 백업 데이터를 복구
-     */
     static async restore(): Promise<boolean> {
         try {
             const backupData = await this.loadFromIndexedDB();
@@ -80,9 +71,6 @@ export class BackupManager {
         }
     }
 
-    /**
-     * 브라우저에 백업 데이터가 존재하는지 확인
-     */
     static async hasBackup(): Promise<boolean> {
         try {
             const backupData = await this.loadFromIndexedDB();
@@ -92,9 +80,6 @@ export class BackupManager {
         }
     }
 
-    /**
-     * 백업 데이터의 타임스탐프를 조회
-     */
     static async getBackupTimestamp(): Promise<string | null> {
         try {
             const backupData = await this.loadFromIndexedDB();
@@ -104,11 +89,6 @@ export class BackupManager {
         }
     }
 
-
-
-    /**
-     * IndexedDB에 백업 데이터 저장
-     */
     private static saveToIndexedDB(backupData: BackupData): Promise<void> {
         return new Promise((resolve, reject) => {
             try {
@@ -138,9 +118,6 @@ export class BackupManager {
         });
     }
 
-    /**
-     * IndexedDB에서 백업 데이터 로드
-     */
     private static loadFromIndexedDB(): Promise<BackupData | null> {
         return new Promise((resolve, reject) => {
             try {
@@ -170,16 +147,10 @@ export class BackupManager {
         });
     }
 
-    /**
-     * arg 이름이 등록된 것인지 검증
-     */
     private static isValidArgName(argName: string): boolean {
         return argName in RISU_ARGS;
     }
 
-    /**
-     * 백업 데이터 삭제
-     */
     static async clearBackup(): Promise<boolean> {
         try {
             await new Promise<void>((resolve, reject) => {

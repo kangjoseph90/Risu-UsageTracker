@@ -2,24 +2,24 @@ import { merge } from "lodash";
 import { languageEn } from "./en";
 import { languageKo } from "./ko";
 
-export enum SupportedLanguage {
+export enum LanguageType {
     EN = "en",
     KO = "ko",
 }
 
-export const SupportedLanguageLabels: Record<SupportedLanguage, string> = {
-    [SupportedLanguage.EN]: "English",
-    [SupportedLanguage.KO]: "한국어",
+export const LanguageTypeLabels: Record<LanguageType, string> = {
+    [LanguageType.EN]: "English",
+    [LanguageType.KO]: "한국어",
 };
 
-export type LanguageType = typeof languageEn;
+export type Language = typeof languageEn;
 
-export let language: LanguageType = languageEn;
+export let language: Language = languageEn;
 
 
-export function setLanguage(lang: SupportedLanguage) {
+export function setLanguage(lang: LanguageType) {
     switch (lang) {
-        case SupportedLanguage.EN:
+        case LanguageType.EN:
             language = languageEn;
             break;
         default:

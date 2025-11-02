@@ -8,13 +8,13 @@
     import Record from "./tabs/Record.svelte";
     import { BackupManager } from "../manager/backup";
     import { LanguageManager } from "../manager/language";
-    import type { LanguageType } from '../lang';
-    import { SupportedLanguage, SupportedLanguageLabels } from '../lang';
+    import type { Language } from '../lang';
+    import { LanguageType, LanguageTypeLabels } from '../lang';
     import { Globe } from 'lucide-svelte';
     import { createEventDispatcher } from "svelte";
     
     export let onClose: () => void;
-    export let language: LanguageType;
+    export let language: Language;
     let currentTab: 'usage' | 'price' | 'provider' | 'record' = 'usage';
     let hasTempPrice: boolean = PriceManager.hasTemporaryPrice();
     let settingsExpanded: boolean = false;
@@ -37,7 +37,7 @@
 
     let languagesExpanded: boolean = false;
     let refreshKey: number = 0;
-    let currentLanguage: SupportedLanguage = LanguageManager.getLanguage();
+    let currentLanguage: LanguageType = LanguageManager.getLanguage();
 
     const dispatch = createEventDispatcher();
     
@@ -50,7 +50,7 @@
         refreshKey++;
     }
 
-    function changeLanguage(lang: SupportedLanguage) {
+    function changeLanguage(lang: LanguageType) {
         LanguageManager.setLanguage(lang);
         currentLanguage = lang;
         dispatch('change', { language: lang });
@@ -75,9 +75,9 @@
                 alert(language.restoreSuccess);
 
                 // Refresh language
-                const lang = LanguageManager.getLanguage();
-                LanguageManager.setLanguage(lang);
-                dispatch('change', { language: lang });
+                currentLanguage = LanguageManager.getLanguage();
+                LanguageManager.setLanguage(currentLanguage);
+                dispatch('change', { language: currentLanguage });
 
                 // Refresh modal
                 forceRefresh();
@@ -150,12 +150,12 @@
                                 </button>
                                 {#if languagesExpanded}
                                     <div class="space-y-1 pl-4">
-                                        {#each Object.values(SupportedLanguage) as lang}
+                                        {#each Object.values(LanguageType) as lang}
                                             <button
                                                 class="w-full text-left px-2 py-1.5 rounded text-xs transition-colors {currentLanguage === lang ? 'bg-zinc-700 text-zinc-100' : 'text-zinc-400 hover:bg-zinc-700 hover:text-zinc-200'}"
                                                 on:click={() => changeLanguage(lang)}
                                             >
-                                                {SupportedLanguageLabels[lang]}
+                                                {LanguageTypeLabels[lang]}
                                             </button>
                                         {/each}
                                     </div>

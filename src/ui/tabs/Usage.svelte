@@ -4,14 +4,15 @@
     import { ProviderManager } from '../../manager/provider';
     import type { UsageRecord, UsageFilter } from '../../types';
     import { RequestType } from '../../types';
-    import UsageStatistics from './UsageStatistics.svelte';
-    import UsageBarChart from './UsageBarChart.svelte';
-    import UsageDonutChart from './UsageDonutChart.svelte';
-    import { formatString, type LanguageType } from '../../lang';
+    import UsageStatistics from '../components/UsageStatistics.svelte';
+    import UsageBarChart from '../components/UsageBarChart.svelte';
+    import UsageDonutChart from '../components/UsageDonutChart.svelte';
+    import DollarDisplay from '../components/DollarDisplay.svelte';
+    import { formatString, type Language } from '../../lang';
     import { Search } from 'lucide-svelte';
 
     export let key: number = 0;
-    export let language: LanguageType;
+    export let language: Language;
 
     let records: UsageRecord[] = [];
     let providerMap: Record<string, string> = {};
@@ -495,46 +496,49 @@
                             second: '2-digit',
                         })}
                         <div class="p-3 rounded-lg bg-zinc-800 border border-zinc-700/60 hover:border-zinc-600/60 transition-colors">
-                            <div style="display: flex; justify-content: space-between; align-items: flex-start; overflow: hidden;">
-                                <div style="flex: 1; min-width: 0;">
-                                    <div style="display: flex; align-items: flex-end; gap: 0.5rem; overflow: hidden;">
-                                        <div style="font-size: 0.875rem; font-weight: 500; color: #f1f5f9; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                            <div class="flex justify-between items-start overflow-hidden">
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-end gap-2 overflow-hidden">
+                                        <div class="text-sm font-medium text-slate-100 whitespace-nowrap overflow-hidden text-ellipsis">
                                             {escapeHTML(record.model)}
                                         </div>
-                                        <div style="font-size: 0.75rem; color: #a1a1aa; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1;">
+                                        <div class="text-xs text-zinc-400 whitespace-nowrap overflow-hidden text-ellipsis flex-1">
                                             {escapeHTML(formatProvider(record))}
                                         </div>
                                     </div>
-                                    <div style="font-size: 0.75rem; color: #a1a1aa; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                    <div class="text-xs text-zinc-400 whitespace-nowrap overflow-hidden text-ellipsis">
                                         {record.requestType || RequestType.Unknown} • {dateStr}
                                     </div>
                                 </div>
-                                <div style="display: flex; gap: 0.75rem; font-size: 0.75rem; flex-shrink: 0; justify-content: flex-end;">
+                                <div class="flex gap-3 text-xs flex-shrink-0 justify-end">
                                     <div>
-                                        <div style="color: #a1a1aa;">{language.input}</div>
-                                        <div style="color: #ffffff; text-align: right;">
+                                        <div class="text-zinc-400">{language.input}</div>
+                                        <div class="text-white text-right">
                                             {(record.inputTokens || 0).toLocaleString()}
                                         </div>
                                     </div>
                                     {#if record.cachedInputTokens > 0}
                                         <div>
-                                            <div style="color: #a1a1aa;">{language.cached}</div>
-                                            <div style="color: #ffffff; text-align: right;">
+                                            <div class="text-zinc-400">{language.cached}</div>
+                                            <div class="text-white text-right">
                                                 {record.cachedInputTokens.toLocaleString()}
                                             </div>
                                         </div>
                                     {/if}
                                     <div>
-                                        <div style="color: #a1a1aa;">{language.output}</div>
-                                        <div style="color: #ffffff; text-align: right;">
+                                        <div class="text-zinc-400">{language.output}</div>
+                                        <div class="text-white text-right">
                                             {(record.outputTokens || 0).toLocaleString()}
                                         </div>
                                     </div>
                                     <div>
-                                        <div style="color: #a1a1aa;">{language.cost}</div>
-                                        <div style="color: #ffffff; font-weight: 500; text-align: right;">
-                                            ${(((record.inputCost || 0) + (record.outputCost || 0))).toFixed(6)}
-                                        </div>
+                                        <div class="text-zinc-400">{language.cost}</div>
+                                        <DollarDisplay 
+                                            amount={(record.inputCost || 0) + (record.outputCost || 0)} 
+                                            {language}
+                                            textClass="text-white text-right"
+                                            showHint={true}
+                                        />
                                     </div>
                                 </div>
                             </div>

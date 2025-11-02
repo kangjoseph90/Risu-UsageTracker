@@ -4,11 +4,13 @@
 	import { ProviderManager } from '../../manager/provider';
 	import type { UsageRecord } from '../../types';
 	import { RequestType } from '../../types';
-	import { formatString, type LanguageType } from '../../lang';
-	import { Search, Trash } from 'lucide-svelte';
+	import { formatString, type Language } from '../../lang';
+	import { Trash } from 'lucide-svelte';
+	import RecordFilters from '../components/RecordFilters.svelte';
+	import RecordRow from '../components/RecordRow.svelte';
 
 	export let key: number = 0;
-	export let language: LanguageType;
+	export let language: Language;
 
 	let allRecords: UsageRecord[] = [];
 	let filteredRecords: UsageRecord[] = [];
@@ -237,6 +239,14 @@
 	function formatCost(value?: number): string {
 		return (value ?? 0).toFixed(4);
 	}
+
+	function handleRecordToggle(event: CustomEvent<boolean>, record: UsageRecord) {
+		toggleRecord(record, event.detail);
+	}
+
+	function handleRecordDelete(event: CustomEvent<UsageRecord>) {
+		deleteRecord(event.detail);
+	}
 </script>
 
 <div class="flex flex-col h-full">
@@ -245,40 +255,17 @@
 		<!-- Actions -->
 		<div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
 			<!-- Filter Group -->
-			<div class="flex items-center gap-2 text-xs flex-wrap">
-				<span class="text-zinc-400 hidden md:inline">{language.filter}:</span>
-				<select bind:value={filterTimeRange} class="bg-zinc-800 text-zinc-200 border border-zinc-700/60 rounded px-2 py-1 text-xs max-w-[120px]">
-					<option value="">{language.allTimeRange}</option>
-					<option value="1h">{language.oneHourRange}</option>
-					<option value="24h">{language.oneDayRange}</option>
-					<option value="7d">{language.sevenDaysRange}</option>
-					<option value="30d">{language.thirtyDaysRange}</option>
-				</select>
-				<select bind:value={filterModel} class="bg-zinc-800 text-zinc-200 border border-zinc-700/60 rounded px-2 py-1 text-xs max-w-[120px] truncate">
-					<option value="">{language.allModels}</option>
-					{#each uniqueModels as model}
-						<option value={model}>{model}</option>
-					{/each}
-				</select>
-				<select bind:value={filterProvider} class="bg-zinc-800 text-zinc-200 border border-zinc-700/60 rounded px-2 py-1 text-xs max-w-[120px] truncate">
-					<option value="">{language.allProviders}</option>
-					{#each uniqueProviders as provider}
-						<option value={provider}>{provider}</option>
-					{/each}
-				</select>
-				<select bind:value={filterRequestType} class="bg-zinc-800 text-zinc-200 border border-zinc-700/60 rounded px-2 py-1 text-xs max-w-[120px]">
-					<option value="">{language.allTypes}</option>
-					{#each uniqueRequestTypes as type}
-						<option value={type}>{type}</option>
-					{/each}
-				</select>
-				<button
-					class="px-1.5 py-1.5 bg-zinc-700 hover:bg-zinc-600 text-zinc-200 rounded text-xs flex items-center gap-2 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-zinc-900 focus:ring-blue-500"
-					on:click={applyFilters}
-				>
-					<Search size={16} />
-				</button>
-			</div>
+			<RecordFilters
+				{language}
+				bind:filterTimeRange
+				bind:filterModel
+				bind:filterProvider
+				bind:filterRequestType
+				{uniqueModels}
+				{uniqueProviders}
+				{uniqueRequestTypes}
+				on:apply={applyFilters}
+			/>
 			<!-- Delete Button Group -->
 			<div class="flex">
 				<button
@@ -324,57 +311,14 @@
 				</thead>
 					<tbody class="divide-y divide-zinc-700/60 bg-zinc-900/50">
 						{#each paginatedRecords as record, index (record.timestamp + record.model + record.url + index)}
-							<tr class="hover:bg-zinc-800/50 transition-colors {selectedRecords.has(record) ? 'bg-zinc-800' : ''}">
-								<td class="px-4 py-2">
-									<input
-										type="checkbox"
-										checked={selectedRecords.has(record)}
-										on:change={(event) => handleCheckboxChange(record, event)}
-										class="w-3 h-3 cursor-pointer"
-									/>
-								</td>
-								<td class="pr-4 py-2 text-sm">
-									<div class="space-y-0.5">
-										<div class="font-medium text-zinc-200 whitespace-nowrap">{record.model}</div>
-										<div class="text-xs text-zinc-400 whitespace-nowrap">{formatProvider(record)}</div>
-										<div class="text-xs text-zinc-500 whitespace-nowrap">{record.requestType || RequestType.Unknown} • {new Date(record.timestamp).toLocaleString()}</div>
-									</div>
-								</td>
-								<td class="px-4 py-2 text-sm whitespace-nowrap">
-									<div class="space-y-0.5">
-										<div class="flex justify-between gap-2">
-											<span class="text-zinc-400 text-xs">{language.input}:</span>
-											<span class="text-zinc-300 text-xs">{(record.inputTokens ?? 0).toLocaleString()}</span>
-										</div>
-										{#if record.cachedInputTokens > 0}
-											<div class="flex justify-between gap-2">
-												<span class="text-zinc-400 text-xs">{language.cached}:</span>
-												<span class="text-zinc-300 text-xs">{record.cachedInputTokens.toLocaleString()}</span>
-											</div>
-										{/if}
-										<div class="flex justify-between gap-2">
-											<span class="text-zinc-400 text-xs">{language.output}:</span>
-											<span class="text-zinc-300 text-xs">{(record.outputTokens ?? 0).toLocaleString()}</span>
-										</div>
-									</div>
-								</td>
-								<td class="px-4 py-2 text-sm whitespace-nowrap">
-									<div class="space-y-0.5">
-										<div class="flex justify-between gap-2">
-											<span class="text-zinc-400 text-xs">{language.totalCost}:</span>
-											<span class="text-zinc-300 text-xs">${formatCost(record.totalCost)}</span>
-										</div>
-										<div class="flex justify-between gap-2">
-											<span class="text-zinc-400 text-xs">{language.input}:</span>
-											<span class="text-zinc-300 text-xs">${formatCost(record.inputCost)}</span>
-										</div>
-										<div class="flex justify-between gap-2">
-											<span class="text-zinc-400 text-xs">{language.output}:</span>
-											<span class="text-zinc-300 text-xs">${formatCost(record.outputCost)}</span>
-										</div>
-									</div>
-								</td>
-							</tr>
+							<RecordRow
+								{record}
+								{language}
+								{providerMap}
+								isSelected={selectedRecords.has(record)}
+								on:toggle={(event) => handleRecordToggle(event, record)}
+								on:delete={handleRecordDelete}
+							/>
 						{/each}
 					</tbody>
 				</table>

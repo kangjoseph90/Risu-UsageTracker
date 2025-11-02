@@ -64,7 +64,7 @@ const PRICE_TEMP_ARG = 'price_temp_info'
 const PROVIDER_MAP_ARG = 'provider_map'
 
 /*
-SupportedLanguage // 'en' | 'ko'
+LanguageType // 'en' | 'ko'
 */
 const LANGUAGE_ARG = 'language'
 
