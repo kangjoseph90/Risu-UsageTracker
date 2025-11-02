@@ -215,7 +215,7 @@
 <div class="flex flex-col h-full">
     <!-- Header -->
     <div class="sticky top-0 z-10 bg-zinc-900 border-b border-zinc-700/60 px-3 py-3 flex-shrink-0 shadow-[0_4px_16px_0_rgba(0,0,0,0.25)]">
-        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+        <div class="flex flex-row justify-between items-center gap-3">
             <!-- Search Group -->
             <div class="flex items-center gap-2 text-xs flex-wrap">
                 <span class="text-zinc-400 hidden md:inline">{language.search}:</span>
