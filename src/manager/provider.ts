@@ -2,90 +2,74 @@ import { PROVIDER_MAP_ARG } from "../plugin";
 import { getDefaultProvider } from "../consts/provider";
 import { RisuAPI } from "../api";
 import type { ProviderMap } from "../types";
+import { debounce } from "../util";
 
-function initProviderMap() {
-    setProviderMap({})
-}
-
-function getProviderMap(): ProviderMap {
-    try {
-        const map: ProviderMap = JSON.parse(RisuAPI.getArg(PROVIDER_MAP_ARG) as string);
-        return map;
-    } catch (e) {
-        initProviderMap();
-        const map: ProviderMap = JSON.parse(RisuAPI.getArg(PROVIDER_MAP_ARG) as string);
-        return map;
-    }
-}
-
-function setProviderMap(map: ProviderMap) {
-    RisuAPI.setArg(PROVIDER_MAP_ARG, JSON.stringify(map))
-}
-
-/**
- * getProvider
- * setProvider
- * removeProvider
- * getAllProviders
- */
 export class ProviderManager {
+    private static cachedMap: ProviderMap = {};
+    private static readonly DEBOUNCE_WAIT = 500;
+
+    private static debouncedSave = debounce(() => {
+        RisuAPI.setArg(PROVIDER_MAP_ARG, JSON.stringify(ProviderManager.cachedMap));
+    }, ProviderManager.DEBOUNCE_WAIT);
+
+    static init() {
+        try {
+            const storedMap = RisuAPI.getArg(PROVIDER_MAP_ARG) as string;
+            this.cachedMap = storedMap ? JSON.parse(storedMap) : {};
+        } catch (e) {
+            this.cachedMap = {};
+        }
+    }
+
     static getProvider(url: string): string {
-        // 저장된 매핑에서 조회
-        const map = getProviderMap();
-        if (url in map) {
-            return map[url];
+        if (url in this.cachedMap) {
+            return this.cachedMap[url];
         }
 
-        // 디폴트 매핑 조회
         const provider = getDefaultProvider(url);
         if (provider) {
-            // 디폴트 매핑 저장
             this.setProvider(url, provider);
             return provider;
         }
 
-        // url -> url 매핑으로 초기화
         this.setProvider(url, url);
         return url;
     }
 
     static setProvider(url: string, providerName: string): void {
-        const map = getProviderMap();
-        map[url] = providerName;
-        setProviderMap(map);
+        this.cachedMap[url] = providerName;
+        this.debouncedSave();
     }
 
     static removeProvider(url: string): boolean {
-        const map = getProviderMap();
-        if (url in map) {
-            delete map[url];
-            setProviderMap(map);
+        if (url in this.cachedMap) {
+            delete this.cachedMap[url];
+            this.debouncedSave();
             return true;
         }
         return false;
     }
 
     static getAllProviders(): ProviderMap {
-        return getProviderMap();
+        return this.cachedMap;
     }
 
     static clearAll(): void {
-        initProviderMap();
+        this.cachedMap = {};
+        this.debouncedSave();
     }
 
     static renameProvider(oldName: string, newName: string): number {
-        const map = getProviderMap();
         let count = 0;
-        
-        for (const [url, providerName] of Object.entries(map)) {
-            if (providerName === oldName) {
-                map[url] = newName;
+        for (const url in this.cachedMap) {
+            if (this.cachedMap[url] === oldName) {
+                this.cachedMap[url] = newName;
                 count++;
             }
         }
         
         if (count > 0) {
-            setProviderMap(map);
+            this.debouncedSave();
         }
         
         return count;

@@ -14,7 +14,6 @@
 
 	let allRecords: UsageRecord[] = [];
 	let filteredRecords: UsageRecord[] = [];
-	let providerMap: Record<string, string> = {};
 	let selectedRecords = new Set<UsageRecord>();
 
 	// Filter states
@@ -30,7 +29,7 @@
 
 	// UI states
 
-	$: uniqueProviders = getUniqueProviders(allRecords, providerMap);
+	$: uniqueProviders = getUniqueProviders();
 	$: uniqueModels = getUniqueModels(allRecords);
 	$: uniqueRequestTypes = getUniqueRequestTypes(allRecords);
 	$: selectedCount = selectedRecords.size;
@@ -48,7 +47,6 @@
 		allRecords = UsageManager.getRecords([]);
 		// Sort records by timestamp in descending order (newest first)
 		allRecords = allRecords.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-		providerMap = ProviderManager.getAllProviders();
 		// Apply filters to ensure filteredRecords is properly set
 		applyFilters();
 	}
@@ -82,7 +80,7 @@
 
 			// Provider filter
 			if (filterProvider) {
-				const providerName = providerMap[record.url] || record.url;
+				const providerName = ProviderManager.getProvider(record.url);
 				if (providerName !== filterProvider) {
 					return false;
 				}
@@ -196,12 +194,9 @@
 		}
 	}
 
-	function getUniqueProviders(items: UsageRecord[], providers: Record<string, string>): string[] {
-		const unique = new Set<string>();
-		items.forEach(record => {
-			const providerName = providers[record.url] || record.url;
-			unique.add(providerName);
-		});
+	function getUniqueProviders(): string[] {
+		const providerMap = ProviderManager.getAllProviders();
+		const unique = new Set(Object.values(providerMap));
 		return Array.from(unique).sort();
 	}
 
@@ -219,19 +214,6 @@
 			unique.add(record.requestType || RequestType.Unknown);
 		});
 		return Array.from(unique).sort();
-	}
-
-	function handleCheckboxChange(record: UsageRecord, event: Event) {
-		const target = event.currentTarget as HTMLInputElement;
-		toggleRecord(record, target.checked);
-	}
-
-	function formatProvider(record: UsageRecord): string {
-		return providerMap[record.url] || record.url;
-	}
-
-	function formatCost(value?: number): string {
-		return (value ?? 0).toFixed(4);
 	}
 
 	function handleRecordToggle(event: CustomEvent<boolean>, record: UsageRecord) {
@@ -307,7 +289,7 @@
 							<RecordRow
 								{record}
 								{language}
-								{providerMap}
+								providerName={ProviderManager.getProvider(record.url)}
 								isSelected={selectedRecords.has(record)}
 								on:toggle={(event) => handleRecordToggle(event, record)}
 								on:delete={handleRecordDelete}

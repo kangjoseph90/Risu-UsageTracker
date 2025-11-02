@@ -10,7 +10,7 @@
 	export let record: UsageRecord;
 	export let language: Language;
 	export let isSelected: boolean = false;
-	export let providerMap: Record<string, string> = {};
+	export let providerName: string;
 
 	/**
 	 * Events
@@ -33,13 +33,6 @@
 	}
 
 	/**
-	 * Format provider name
-	 */
-	function formatProvider(): string {
-		return providerMap[record.url] || record.url;
-	}
-
-	/**
 	 * Format cost value
 	 */
 	function formatCost(value?: number): string {
@@ -59,7 +52,7 @@
 	<td class="pr-4 py-2 text-sm">
 		<div class="space-y-0.5">
 			<div class="font-medium text-zinc-200 whitespace-nowrap">{record.model}</div>
-			<div class="text-xs text-zinc-400 whitespace-nowrap">{formatProvider()}</div>
+			<div class="text-xs text-zinc-400 whitespace-nowrap">{providerName}</div>
 			<div class="text-xs text-zinc-500 whitespace-nowrap">
 				{record.requestType || RequestType.Unknown} • {new Date(record.timestamp).toLocaleString()}
 			</div>

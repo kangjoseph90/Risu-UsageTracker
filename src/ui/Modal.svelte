@@ -76,7 +76,6 @@
 
                 // Refresh language
                 currentLanguage = LanguageManager.getLanguage();
-                LanguageManager.setLanguage(currentLanguage);
                 dispatch('change', { language: currentLanguage });
 
                 // Refresh modal

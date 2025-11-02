@@ -3,66 +3,50 @@ import { DEFAULT_PRICE } from "../consts/price";
 import { RisuAPI } from "../api";
 import type { PriceInfo, ProviderPrice } from "../types";
 import { UsageManager } from "./usage";
+import { debounce } from "../util";
 
-function getConfirmedPrice(): ProviderPrice {
-    try {
-        const priceData: ProviderPrice = JSON.parse(RisuAPI.getArg(PRICE_ARG) as string);
-        return priceData;
-    } catch (e) {
-        setConfirmedPrice({});
-        return {};
-    }
-}
-
-function setConfirmedPrice(priceData: ProviderPrice): void {
-    RisuAPI.setArg(PRICE_ARG, JSON.stringify(priceData));
-}
-
-function getTemporaryPrice(): ProviderPrice {
-    try {
-        const priceData: ProviderPrice = JSON.parse(RisuAPI.getArg(PRICE_TEMP_ARG) as string);
-        return priceData;
-    } catch (e) {
-        setTemporaryPrice({});
-        return {};
-    }
-}
-
-function setTemporaryPrice(priceData: ProviderPrice): void {
-    RisuAPI.setArg(PRICE_TEMP_ARG, JSON.stringify(priceData));
-}
-
-/**
- * getModelPrice,
- * setTemporaryPrice,
- * setConfirmedPrice,
- * removeTemporaryModel,
- * removeConfirmedModel,
- * hasTemporaryPrice,
- * getTemporaryPrice,
- * getConfirmedPrice,
- */
 export class PriceManager {
-    static getModelPrice(modelId: string, provider: string): PriceInfo {
-        const tempPriceData = getTemporaryPrice();
-        const confirmedPriceData = getConfirmedPrice();
-        const priceData = { ...confirmedPriceData, ...tempPriceData };
+    private static cachedConfirmed: ProviderPrice = {};
+    private static cachedTemporary: ProviderPrice = {};
+    private static readonly DEBOUNCE_WAIT = 500;
 
-        // 저장된 가격 정보 조회
+    private static debouncedSaveConfirmed = debounce(() => {
+        RisuAPI.setArg(PRICE_ARG, JSON.stringify(PriceManager.cachedConfirmed));
+    }, PriceManager.DEBOUNCE_WAIT);
+
+    private static debouncedSaveTemporary = debounce(() => {
+        RisuAPI.setArg(PRICE_TEMP_ARG, JSON.stringify(PriceManager.cachedTemporary));
+    }, PriceManager.DEBOUNCE_WAIT);
+
+    static init() {
+        try {
+            const confirmed = RisuAPI.getArg(PRICE_ARG) as string;
+            this.cachedConfirmed = confirmed ? JSON.parse(confirmed) : {};
+        } catch (e) {
+            this.cachedConfirmed = {};
+        }
+        try {
+            const temporary = RisuAPI.getArg(PRICE_TEMP_ARG) as string;
+            this.cachedTemporary = temporary ? JSON.parse(temporary) : {};
+        } catch (e) {
+            this.cachedTemporary = {};
+        }
+    }
+
+    static getModelPrice(modelId: string, provider: string): PriceInfo {
+        const priceData = { ...this.cachedConfirmed, ...this.cachedTemporary };
+
         const savedPrice = priceData[provider];
         if (savedPrice && savedPrice[modelId]) {
             return savedPrice[modelId];
         }
 
-        // 디폴트 가격 정보 조회
         const defaultPrice = DEFAULT_PRICE[provider];
         if (defaultPrice && defaultPrice[modelId]) {
-            // 확인된 가격 정보 저장
             this.setConfirmedPrice(modelId, provider, defaultPrice[modelId]);
             return defaultPrice[modelId];
         }
 
-        // 가격 정보가 없으면 0으로 초기화
         const newTempPrice: PriceInfo = {
             inputPrice: 0,
             outputPrice: 0,
@@ -73,79 +57,70 @@ export class PriceManager {
     }
 
     static setTemporaryPrice(modelId: string, provider: string, priceInfo: PriceInfo): void {
-        const tempPrice = getTemporaryPrice();
-        if(!tempPrice[provider]) {
-            tempPrice[provider] = {};
+        if (!this.cachedTemporary[provider]) {
+            this.cachedTemporary[provider] = {};
         }
-        tempPrice[provider][modelId] = priceInfo;
-        setTemporaryPrice(tempPrice);
+        this.cachedTemporary[provider][modelId] = priceInfo;
+        this.debouncedSaveTemporary();
         UsageManager.updateCostsForModel(provider, modelId, priceInfo);
     }
 
     static setConfirmedPrice(modelId: string, provider: string, priceInfo: PriceInfo): void {
-        const confirmedPrice = getConfirmedPrice();
-        if(!confirmedPrice[provider]) {
-            confirmedPrice[provider] = {};
+        if (!this.cachedConfirmed[provider]) {
+            this.cachedConfirmed[provider] = {};
         }
-        confirmedPrice[provider][modelId] = priceInfo;
-        setConfirmedPrice(confirmedPrice);
+        this.cachedConfirmed[provider][modelId] = priceInfo;
+        this.debouncedSaveConfirmed();
         UsageManager.updateCostsForModel(provider, modelId, priceInfo);
     }
 
     static removeTemporaryModel(modelId: string, provider: string): boolean {
-        const tempPrice = getTemporaryPrice();
-        if (tempPrice[provider] && tempPrice[provider][modelId]) {
-            delete tempPrice[provider][modelId];
-            if (Object.keys(tempPrice[provider]).length === 0) {
-                delete tempPrice[provider];
+        if (this.cachedTemporary[provider] && this.cachedTemporary[provider][modelId]) {
+            delete this.cachedTemporary[provider][modelId];
+            if (Object.keys(this.cachedTemporary[provider]).length === 0) {
+                delete this.cachedTemporary[provider];
             }
-            setTemporaryPrice(tempPrice);
+            this.debouncedSaveTemporary();
             return true;
         }
         return false;
     }
 
     static removeConfirmedModel(modelId: string, provider: string): boolean {
-        const confirmedPrice = getConfirmedPrice();
-        if (confirmedPrice[provider] && confirmedPrice[provider][modelId]) {
-            delete confirmedPrice[provider][modelId];
-            if (Object.keys(confirmedPrice[provider]).length === 0) {
-                delete confirmedPrice[provider];
+        if (this.cachedConfirmed[provider] && this.cachedConfirmed[provider][modelId]) {
+            delete this.cachedConfirmed[provider][modelId];
+            if (Object.keys(this.cachedConfirmed[provider]).length === 0) {
+                delete this.cachedConfirmed[provider];
             }
-            setConfirmedPrice(confirmedPrice);
+            this.debouncedSaveConfirmed();
             return true;
         }
         return false;
     }
 
     static hasTemporaryPrice(): boolean {
-        const tempPrice = getTemporaryPrice();
-        return Object.keys(tempPrice).length > 0;
+        return Object.keys(this.cachedTemporary).length > 0;
     }
 
     static getTemporaryPrice(): ProviderPrice {
-        return getTemporaryPrice();
+        return this.cachedTemporary;
     }
 
     static getConfirmedPrice(): ProviderPrice {
-        return getConfirmedPrice();
+        return this.cachedConfirmed;
     }
 
     static renameProvider(oldKey: string, newKey: string): void {
-        // Confirmed Price 변경
-        const confirmedPrice = getConfirmedPrice();
-        if (confirmedPrice[oldKey]) {
-            confirmedPrice[newKey] = confirmedPrice[oldKey];
-            delete confirmedPrice[oldKey];
-            setConfirmedPrice(confirmedPrice);
+        if (this.cachedConfirmed[oldKey]) {
+            this.cachedConfirmed[newKey] = this.cachedConfirmed[oldKey];
+            delete this.cachedConfirmed[oldKey];
+            this.debouncedSaveConfirmed();
         }
 
-        // Temporary Price 변경
-        const tempPrice = getTemporaryPrice();
-        if (tempPrice[oldKey]) {
-            tempPrice[newKey] = tempPrice[oldKey];
-            delete tempPrice[oldKey];
-            setTemporaryPrice(tempPrice);
+        if (this.cachedTemporary[oldKey]) {
+            this.cachedTemporary[newKey] = this.cachedTemporary[oldKey];
+            delete this.cachedTemporary[oldKey];
+            this.debouncedSaveTemporary();
         }
     }
 }

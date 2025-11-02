@@ -10,13 +10,11 @@
     import DollarDisplay from '../components/DollarDisplay.svelte';
     import RecordFilters from '../components/RecordFilters.svelte';
     import { formatString, type Language } from '../../lang';
-    import { Search } from 'lucide-svelte';
 
     export let key: number = 0;
     export let language: Language;
 
     let records: UsageRecord[] = [];
-    let providerMap: Record<string, string> = {};
     
     let stats = {
         totalCost: 0,
@@ -69,7 +67,6 @@
 
     function refreshData() {
         records = UsageManager.getRecords([]);
-        providerMap = ProviderManager.getAllProviders();
         calculateStatistics();
         updateFilterOptions();
         updateAllCharts();
@@ -94,13 +91,11 @@
 
     function updateFilterOptions() {
         const models = new Set<string>();
-        const providers = new Set<string>();
+        const providers = new Set(Object.values(ProviderManager.getAllProviders()));
         const requestTypes = new Set<string>();
 
         records.forEach(record => {
             models.add(record.model);
-            const providerName = providerMap[record.url] || record.url;
-            providers.add(providerName);
             requestTypes.add(record.requestType || RequestType.Unknown);
         });
 
@@ -147,7 +142,7 @@
 
         if (filters.providers.length > 0) {
             usageFilters.push((record: UsageRecord) => {
-                const recordProvider = providerMap[record.url] || record.url;
+                const recordProvider = ProviderManager.getProvider(record.url);
                 return filters.providers.includes(recordProvider);
             });
         }
@@ -241,7 +236,7 @@
             
             switch (groupBy) {
                 case 'provider':
-                    key = providerMap[record.url] || record.url;
+                    key = ProviderManager.getProvider(record.url);
                     displayName = key;
                     break;
                 case 'model':
@@ -374,7 +369,7 @@
     }
 
     function formatProvider(record: UsageRecord): string {
-        return providerMap[record.url] || record.url;
+        return ProviderManager.getProvider(record.url);
     }
 
     function escapeHTML(text: string): string {

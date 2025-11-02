@@ -3,11 +3,27 @@ import type { CostInfo, PriceInfo, RequestData, UsageInfo } from "./types";
 import { RequestType } from "./types";
 
 export {
+    debounce,
     parseRequestType,
     getRequestUrl,
     isLLMRequest,
     parseBody,
     calculateCost
+}
+
+function debounce<T extends (...args: any[]) => void>(
+    func: T,
+    wait: number
+): (...args: Parameters<T>) => void {
+    let timeout: number | undefined;
+
+    return function(this: ThisParameterType<T>, ...args: Parameters<T>): void {
+        const context = this;
+        clearTimeout(timeout);
+        timeout = window.setTimeout(() => {
+            func.apply(context, args);
+        }, wait);
+    };
 }
 
 function parseRequestType(mode: string): RequestType {

@@ -1,6 +1,10 @@
 import { PLUGIN_TITLE, getAllArgNames, RISU_ARGS } from "../plugin";
 import { Logger } from "../logger";
 import { RisuAPI } from "../api";
+import { LanguageManager } from "./language";
+import { ProviderManager } from "./provider";
+import { PriceManager } from "./price";
+import { UsageManager } from "./usage";
 
 interface BackupData {
     version: string;
@@ -63,6 +67,11 @@ export class BackupManager {
                     RisuAPI.setArg(argName, value);
                 }
             }
+
+            LanguageManager.init();
+            ProviderManager.init();
+            PriceManager.init();
+            UsageManager.init();
 
             return true;
         } catch (e) {

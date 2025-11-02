@@ -1,93 +1,76 @@
 import { DB_ARG } from "../plugin";
 import { RisuAPI } from "../api";
 import type { UsageRecord, UsageDB, UsageFilter, PriceInfo, CostInfo } from "../types";
-import { calculateCost } from "../util";
+import { calculateCost, debounce } from "../util";
 import { ProviderManager } from "./provider";
 
-function initDB() {
-    setDB({
+export class UsageManager {
+    private static cachedDB: UsageDB = {
         records: [],
         lastUpdated: new Date().toISOString()
-    })
-}
+    };
+    private static readonly DEBOUNCE_WAIT = 500;
 
-function getDB(): UsageDB {
-    try {
-        const db: UsageDB = JSON.parse(RisuAPI.getArg(DB_ARG) as string);
-        return db;
-    } catch (e) {
-        initDB();
-        const db: UsageDB = JSON.parse(RisuAPI.getArg(DB_ARG) as string);
-        return db;
+    private static debouncedSave = debounce(() => {
+        RisuAPI.setArg(DB_ARG, JSON.stringify(UsageManager.cachedDB));
+    }, UsageManager.DEBOUNCE_WAIT);
+
+    static init() {
+        try {
+            const storedDB = RisuAPI.getArg(DB_ARG) as string;
+            if (storedDB) {
+                this.cachedDB = JSON.parse(storedDB);
+            }
+        } catch (e) {
+            // Keep default empty DB if parsing fails
+            this.cachedDB = {
+                records: [],
+                lastUpdated: new Date().toISOString()
+            };
+        }
     }
-}
 
-function setDB(db: UsageDB) {
-    RisuAPI.setArg(DB_ARG, JSON.stringify(db))
-}
-
-/**
- * addRecord,
- * removeRecord,
- * getRecords,
- * getLastUpdated,
- * recalculateCostsForModel,
- */
-export class UsageManager {
     static addRecord(record: UsageRecord) {
-        const db = getDB();
-        db.records.push(record);
-        db.lastUpdated = new Date().toISOString();
-        setDB(db);
+        this.cachedDB.records.push(record);
+        this.cachedDB.lastUpdated = new Date().toISOString();
+        this.debouncedSave();
     }
 
     static removeRecord(record: UsageRecord): boolean {
-        const db = getDB();
-        const index = db.records.findIndex(r =>
+        const index = this.cachedDB.records.findIndex(r =>
             r.timestamp === record.timestamp &&
             r.model === record.model &&
-            r.url === record.url &&
-            r.requestType === record.requestType &&
-            r.inputTokens === record.inputTokens &&
-            r.cachedInputTokens === record.cachedInputTokens &&
-            r.outputTokens === record.outputTokens &&
-            r.inputCost === record.inputCost &&
-            r.outputCost === record.outputCost &&
-            r.totalCost === record.totalCost
+            r.url === record.url
         );
+
         if (index !== -1) {
-            db.records.splice(index, 1);
-            db.lastUpdated = new Date().toISOString();
-            setDB(db);
+            this.cachedDB.records.splice(index, 1);
+            this.cachedDB.lastUpdated = new Date().toISOString();
+            this.debouncedSave();
             return true;
         }
         return false;
     }
 
     static getRecords(filter: UsageFilter[]): UsageRecord[] {
-        const db = getDB();
-        const filtered = db.records.filter((record: UsageRecord) =>
+        if (!this.cachedDB.records) return [];
+        const filtered = this.cachedDB.records.filter((record: UsageRecord) =>
             filter.every(fn => fn(record))
         );
         return filtered;
     }
 
     static getLastUpdated(): string {
-        const db = getDB();
-        return db.lastUpdated;
+        return this.cachedDB.lastUpdated;
     }
 
     static updateCostsForModel(provider: string, modelId: string, newPrice: PriceInfo): number {
-        const db = getDB();
-        const providerMap = ProviderManager.getAllProviders();
         let updatedCount = 0;
 
-        db.records.forEach(record => {
-            const recordProvider = providerMap[record.url];
+        this.cachedDB.records.forEach(record => {
+            const recordProvider = ProviderManager.getProvider(record.url);
             
-            // provider와 modelId 일치 확인
             if (recordProvider === provider && record.model === modelId) {
-                // 새 가격으로 비용 재계산
                 const newCost: CostInfo = calculateCost(
                     {
                         inputTokens: record.inputTokens,
@@ -96,18 +79,16 @@ export class UsageManager {
                     },
                     newPrice
                 );
-                record = Object.assign(record, newCost);
+                Object.assign(record, newCost);
                 updatedCount++;
             }
         });
 
-        // 변경사항이 있으면 저장 및 lastUpdated 갱신
         if (updatedCount > 0) {
-            db.lastUpdated = new Date().toISOString();
-            setDB(db);
+            this.cachedDB.lastUpdated = new Date().toISOString();
+            this.debouncedSave();
         }
 
         return updatedCount;
     }
-
 }
