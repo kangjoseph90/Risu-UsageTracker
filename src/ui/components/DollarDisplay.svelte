@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { onMount } from 'svelte';
+    import { onMount, onDestroy } from 'svelte';
     import { fade } from 'svelte/transition';
     import { Loader } from 'lucide-svelte';
     import { LanguageManager } from '../../manager/language';
@@ -36,6 +36,7 @@
      * Fetch converted amount on hover
      */
     async function handleMouseEnter(event: MouseEvent): Promise<void> {
+        if (isHovering) return;
         if (!showHint || effectiveLanguage == LanguageType.EN) return;
 
         // Calculate tooltip position
@@ -86,15 +87,22 @@
         CurrencyManager.isAvailable().catch(() => {
             // API unavailable - no action needed, fallback will work
         });
+
+        window.addEventListener('scroll', handleMouseLeave, true);
+    });
+
+    onDestroy(() => {
+        window.removeEventListener('scroll', handleMouseLeave, true);
     });
 </script>
 
-<span
-    class="inline-block relative {textClass}"
+<button
+    type="button"
+    class="inline-block relative {textClass} appearance-none bg-transparent border-none p-0 m-0 font-inherit text-inherit text-left cursor-pointer focus:outline-none"
     on:mouseenter={handleMouseEnter}
+    on:click={handleMouseEnter}
     on:mouseleave={handleMouseLeave}
-    role="tooltip"
-    aria-label="Amount in USD. Hover to see in {effectiveLanguage} currency"
+    aria-label="Amount in USD. Hover or click to see in {effectiveLanguage} currency"
 >
     <!-- Base Display -->
     {formattedUSD}
@@ -118,4 +126,4 @@
             {/if}
         </div>
     {/if}
-</span>
+</button>
