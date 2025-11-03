@@ -120,12 +120,12 @@
 </script>
 
 {#if maxValue === 0 || data.length === 0}
-    <div class="ut-text-center ut-text-zinc-500 ut-py-8">{language.noRecordsFound}</div>
+    <div class="text-center text-zinc-500 py-8">{language.noRecordsFound}</div>
 {:else}
-    <div class="ut-flex ut-border ut-border-zinc-700/80 ut-rounded-md ut-overflow-hidden">
+    <div class="flex border border-zinc-700/80 rounded-md overflow-hidden">
         <!-- Y-axis -->
-        <div class="ut-w-[45px] ut-flex-shrink-0 ut-bg-zinc-900 ut-border-r ut-border-zinc-700/80">
-            <svg width={yAxisWidth} height={chartHeight + 30} class="ut-block">
+        <div class="w-[45px] flex-shrink-0 bg-zinc-900 border-r border-zinc-700/80">
+            <svg width={yAxisWidth} height={chartHeight + 30} class="block">
                 {#each yGridLines as gridValue}
                     {@const y = chartHeight - (gridValue / maxValue) * chartHeight}
                     {@const label = gridValue >= 1000 ? (gridValue / 1000).toFixed(0) + 'K' : gridValue.toString()}
@@ -135,8 +135,8 @@
         </div>
 
         <!-- Chart area -->
-        <div bind:this={scrollContainer} class="ut-overflow-x-auto ut-flex-1">
-            <svg width={chartWidth + rightPadding} height={chartHeight + 30} class="ut-block">
+        <div bind:this={scrollContainer} class="overflow-x-auto flex-1">
+            <svg width={chartWidth + rightPadding} height={chartHeight + 30} class="block">
                 <!-- Grid lines -->
                 {#each yGridLines as gridValue}
                     {@const y = chartHeight - (gridValue / maxValue) * chartHeight}
@@ -171,7 +171,7 @@
                         {@const inputCostHeight = (bucket.inputCost / maxValue) * chartHeight}
                         {@const inputY = chartHeight - inputCostHeight}
                         {@const outputY = inputY - outputCostHeight}
-                       
+                        
                         {#if outputCostHeight > 0}
                             <rect x={x} y={outputY} width={barWidth} height={outputCostHeight} fill="#f97316" rx="2"/>
                         {/if}
@@ -196,32 +196,32 @@
     </div>
 
     <!-- Legend -->
-    <div class="ut-flex ut-gap-4 ut-text-xs ut-text-zinc-300 ut-mt-2">
+    <div class="flex gap-4 text-xs text-zinc-300 mt-2">
         {#if measureBy === 'tokens'}
-            <div class="ut-flex ut-items-center ut-gap-1">
-                <span class="ut-w-3 ut-h-3 ut-bg-blue-500 ut-rounded"></span>
+            <div class="flex items-center gap-1">
+                <span class="w-3 h-3 bg-blue-500 rounded"></span>
                 <span>{language.cachedTokens}</span>
             </div>
-            <div class="ut-flex ut-items-center ut-gap-1">
-                <span class="ut-w-3 ut-h-3 ut-bg-purple-500 ut-rounded"></span>
+            <div class="flex items-center gap-1">
+                <span class="w-3 h-3 bg-purple-500 rounded"></span>
                 <span>{language.inputTokens}</span>
             </div>
-            <div class="ut-flex ut-items-center ut-gap-1">
-                <span class="ut-w-3 ut-h-3 ut-bg-orange-500 ut-rounded"></span>
+            <div class="flex items-center gap-1">
+                <span class="w-3 h-3 bg-orange-500 rounded"></span>
                 <span>{language.outputTokens}</span>
             </div>
         {:else if measureBy === 'cost'}
-            <div class="ut-flex ut-items-center ut-gap-1">
-                <span class="ut-w-3 ut-h-3 ut-bg-purple-500 ut-rounded"></span>
+            <div class="flex items-center gap-1">
+                <span class="w-3 h-3 bg-purple-500 rounded"></span>
                 <span>{language.inputCostLabel}</span>
             </div>
-            <div class="ut-flex ut-items-center ut-gap-1">
-                <span class="ut-w-3 ut-h-3 ut-bg-orange-500 ut-rounded"></span>
+            <div class="flex items-center gap-1">
+                <span class="w-3 h-3 bg-orange-500 rounded"></span>
                 <span>{language.outputCostLabel}</span>
             </div>
         {:else}
-            <div class="ut-flex ut-items-center ut-gap-1">
-                <span class="ut-w-3 ut-h-3 ut-bg-blue-500 ut-rounded"></span>
+            <div class="flex items-center gap-1">
+                <span class="w-3 h-3 bg-blue-500 rounded"></span>
                 <span>{language.requests}</span>
             </div>
         {/if}

@@ -379,14 +379,14 @@
     }
 </script>
 
-<div class="ut-flex ut-flex-col ut-h-full">
+<div class="flex flex-col h-full">
     <!-- Global Filters -->
-    <div class="ut-sticky ut-top-0 ut-z-10 ut-bg-zinc-900 ut-border-b ut-border-zinc-700/60 ut-px-3 ut-py-3 ut-flex-shrink-0 ut-shadow-[0_4px_16px_0_rgba(0,0,0,0.25)]">
-        <div class="ut-flex ut-flex-col sm:ut-flex-row sm:ut-justify-between sm:ut-items-center ut-gap-3">
+    <div class="sticky top-0 z-10 bg-zinc-900 border-b border-zinc-700/60 px-3 py-3 flex-shrink-0 shadow-[0_4px_16px_0_rgba(0,0,0,0.25)]">
+        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
             <!-- Measure Group -->
-            <div class="ut-flex ut-items-center ut-gap-2 ut-text-xs">
-                <span class="ut-text-zinc-400 hidden md:inline">{language.measure}:</span>
-                <select bind:value={globalMeasureBy} on:change={handleFilterChange} class="ut-bg-zinc-800 ut-text-zinc-200 ut-border ut-border-zinc-700/60 ut-rounded ut-px-2 ut-py-1 ut-text-xs ut-max-w-[120px]">
+            <div class="flex items-center gap-2 text-xs">
+                <span class="text-zinc-400 hidden md:inline">{language.measure}:</span>
+                <select bind:value={globalMeasureBy} on:change={handleFilterChange} class="bg-zinc-800 text-zinc-200 border border-zinc-700/60 rounded px-2 py-1 text-xs max-w-[120px]">
                     <option value="tokens">{language.tokens}</option>
                     <option value="cost">{language.cost}</option>
                     <option value="requests">{language.requests}</option>
@@ -408,18 +408,18 @@
     </div>
 
     <!-- Content Area -->
-    <div class="ut-flex-1 ut-overflow-y-auto ut-px-3 ut-pt-2 ut-space-y-2">
+    <div class="flex-1 overflow-y-auto px-3 pt-2 space-y-2">
 
         <!-- Statistics Summary -->
-        <div class="ut-p-3">
+        <div class="p-3">
             <UsageStatistics {stats} {language} />
         </div>
 
         <!-- Bar Chart -->
-        <div class="ut-p-3">
-            <div class="ut-mb-3 ut-flex ut-justify-between ut-items-center">
-                <h3 class="ut-text-sm ut-font-semibold ut-text-zinc-100">{language.statisticsByTime}</h3>
-                <select bind:value={barChartXAxis} on:change={updateAllCharts} class="ut-bg-zinc-800 ut-text-zinc-200 ut-border ut-border-zinc-700/60 ut-rounded ut-px-2 ut-py-1 ut-text-xs">
+        <div class="p-3">
+            <div class="mb-3 flex justify-between items-center">
+                <h3 class="text-sm font-semibold text-zinc-100">{language.statisticsByTime}</h3>
+                <select bind:value={barChartXAxis} on:change={updateAllCharts} class="bg-zinc-800 text-zinc-200 border border-zinc-700/60 rounded px-2 py-1 text-xs">
                     <option value="5min">{language.fiveMinutes}</option>
                     <option value="15min">{language.fifteenMinutes}</option>
                     <option value="30min">{language.thirtyMinutes}</option>
@@ -430,32 +430,32 @@
                     <option value="month">{language.monthly}</option>
                 </select>
             </div>
-            <div class="ut-p-4 ut-rounded-lg ut-bg-zinc-800 ut-border ut-border-zinc-700/60">
+            <div class="p-4 rounded-lg bg-zinc-800 border border-zinc-700/60">
                 <UsageBarChart data={barChartData} measureBy={globalMeasureBy} timeRange={barChartXAxis} {language} />
             </div>
         </div>
 
         <!-- Donut Chart -->
-        <div class="ut-p-3">
-            <div class="ut-mb-3 ut-flex ut-justify-between ut-items-center">
-                <h3 class="ut-text-sm ut-font-semibold ut-text-zinc-100">{language.statisticsByCategory}</h3>
-                <select bind:value={donutChartGroupBy} on:change={updateAllCharts} class="ut-bg-zinc-800 ut-text-zinc-200 ut-border ut-border-zinc-700/60 ut-rounded ut-px-2 ut-py-1 ut-text-xs">
+        <div class="p-3">
+            <div class="mb-3 flex justify-between items-center">
+                <h3 class="text-sm font-semibold text-zinc-100">{language.statisticsByCategory}</h3>
+                <select bind:value={donutChartGroupBy} on:change={updateAllCharts} class="bg-zinc-800 text-zinc-200 border border-zinc-700/60 rounded px-2 py-1 text-xs">
                     <option value="model">{language.byModel}</option>
                     <option value="provider">{language.byProvider}</option>
                     <option value="requestType">{language.byType}</option>
                 </select>
             </div>
-            <div class="ut-p-4 ut-rounded-lg ut-bg-zinc-800 ut-border ut-border-zinc-700/60">
+            <div class="p-4 rounded-lg bg-zinc-800 border border-zinc-700/60">
                 <UsageDonutChart data={donutChartData} measureBy={globalMeasureBy} {language} />
             </div>
         </div>
 
         <!-- Recent Records -->
-        <div class="ut-p-3">
-            <h3 class="ut-text-sm ut-font-semibold ut-text-zinc-100 ut-mb-2">{language.recentUsage}</h3>
-            <div class="ut-space-y-2">
+        <div class="p-3">
+            <h3 class="text-sm font-semibold text-zinc-100 mb-2">{language.recentUsage}</h3>
+            <div class="space-y-2">
                 {#if recentRecordsDisplay.length === 0}
-                    <div class="ut-text-center ut-text-zinc-500 ut-py-8">
+                    <div class="text-center text-zinc-500 py-8">
                         {language.noRecordsFound}
                     </div>
                 {:else}
@@ -467,48 +467,48 @@
                             minute: '2-digit',
                             second: '2-digit',
                         })}
-                        <div class="ut-p-3 ut-rounded-lg ut-bg-zinc-800 ut-border ut-border-zinc-700/60 hover:ut-border-zinc-600/60 ut-transition-colors">
-                            <div class="ut-flex ut-justify-between ut-items-start ut-overflow-hidden">
-                                <div class="ut-flex-1 ut-min-w-0">
-                                    <div class="ut-flex ut-items-end ut-gap-2 ut-overflow-hidden">
-                                        <div class="ut-text-sm ut-font-medium ut-text-slate-100 ut-whitespace-nowrap ut-overflow-hidden ut-text-ellipsis">
+                        <div class="p-3 rounded-lg bg-zinc-800 border border-zinc-700/60 hover:border-zinc-600/60 transition-colors">
+                            <div class="flex justify-between items-start overflow-hidden">
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-end gap-2 overflow-hidden">
+                                        <div class="text-sm font-medium text-slate-100 whitespace-nowrap overflow-hidden text-ellipsis">
                                             {escapeHTML(record.model)}
                                         </div>
-                                        <div class="ut-text-xs ut-text-zinc-400 ut-whitespace-nowrap ut-overflow-hidden ut-text-ellipsis ut-flex-1">
+                                        <div class="text-xs text-zinc-400 whitespace-nowrap overflow-hidden text-ellipsis flex-1">
                                             {escapeHTML(formatProvider(record))}
                                         </div>
                                     </div>
-                                    <div class="ut-text-xs ut-text-zinc-400 ut-whitespace-nowrap ut-overflow-hidden ut-text-ellipsis">
+                                    <div class="text-xs text-zinc-400 whitespace-nowrap overflow-hidden text-ellipsis">
                                         {record.requestType || RequestType.Unknown} • {dateStr}
                                     </div>
                                 </div>
-                                <div class="ut-flex ut-gap-3 ut-text-xs ut-flex-shrink-0 ut-justify-end">
+                                <div class="flex gap-3 text-xs flex-shrink-0 justify-end">
                                     <div>
-                                        <div class="ut-text-zinc-400">{language.input}</div>
-                                        <div class="ut-text-white ut-text-right">
+                                        <div class="text-zinc-400">{language.input}</div>
+                                        <div class="text-white text-right">
                                             {(record.inputTokens || 0).toLocaleString()}
                                         </div>
                                     </div>
                                     {#if record.cachedInputTokens > 0}
                                         <div>
-                                            <div class="ut-text-zinc-400">{language.cached}</div>
-                                            <div class="ut-text-white ut-text-right">
+                                            <div class="text-zinc-400">{language.cached}</div>
+                                            <div class="text-white text-right">
                                                 {record.cachedInputTokens.toLocaleString()}
                                             </div>
                                         </div>
                                     {/if}
                                     <div>
-                                        <div class="ut-text-zinc-400">{language.output}</div>
-                                        <div class="ut-text-white ut-text-right">
+                                        <div class="text-zinc-400">{language.output}</div>
+                                        <div class="text-white text-right">
                                             {(record.outputTokens || 0).toLocaleString()}
                                         </div>
                                     </div>
                                     <div>
-                                        <div class="ut-text-zinc-400">{language.cost}</div>
-                                        <DollarDisplay
-                                            amount={(record.inputCost || 0) + (record.outputCost || 0)}
+                                        <div class="text-zinc-400">{language.cost}</div>
+                                        <DollarDisplay 
+                                            amount={(record.inputCost || 0) + (record.outputCost || 0)} 
                                             {language}
-                                            textClass="ut-text-white ut-text-right"
+                                            textClass="text-white text-right"
                                             showHint={true}
                                         />
                                     </div>
@@ -522,7 +522,7 @@
     </div>
 
     <!-- Last Updated Footer -->
-    <div class="ut-sticky ut-bottom-0 ut-z-10 ut-bg-zinc-900 ut-border-t ut-border-zinc-700/60 ut-pt-2 ut-px-3 ut-text-xs ut-text-zinc-400 ut-text-center ut-shadow-[0_-4px_16px_0_rgba(0,0,0,0.25)]">
+    <div class="sticky bottom-0 z-10 bg-zinc-900 border-t border-zinc-700/60 pt-2 px-3 text-xs text-zinc-400 text-center shadow-[0_-4px_16px_0_rgba(0,0,0,0.25)]">
         {formatString(language.lastUpdatedAt, { time: new Date(UsageManager.getLastUpdated()).toLocaleString() })}
     </div>
 </div>

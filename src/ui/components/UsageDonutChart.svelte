@@ -72,18 +72,18 @@
 </script>
 
 {#if data.length === 0}
-    <div class="ut-text-center ut-text-zinc-500 ut-py-8">{language.noRecordsFound}</div>
+    <div class="text-center text-zinc-500 py-8">{language.noRecordsFound}</div>
 {:else}
-    <div class="ut-flex ut-gap-8 ut-items-center ut-flex-wrap">
+    <div class="flex gap-8 items-center flex-wrap">
         <!-- Donut Chart -->
-        <div class="ut-flex ut-justify-center ut-flex-shrink-0">
+        <div class="flex justify-center flex-shrink-0">
             <svg width={size} height={size}>
                 {#each topData as item, index}
                     {@const angle = (item.percentage / 100) * 360}
                     {@const startAngle = topData.slice(0, index).reduce((sum, d) => sum + (d.percentage / 100) * 360, -90)}
-                    <path
-                        d={createSegmentPath(startAngle, angle, index)}
-                        fill={colors[index % colors.length]}
+                    <path 
+                        d={createSegmentPath(startAngle, angle, index)} 
+                        fill={colors[index % colors.length]} 
                         opacity="0.9"
                     />
                 {/each}
@@ -91,24 +91,24 @@
         </div>
 
         <!-- Legend -->
-        <div class="ut-flex ut-flex-col ut-gap-2 ut-flex-1 ut-min-w-[200px]">
+        <div class="flex flex-col gap-2 flex-1 min-w-[200px]">
             {#each topData as item, index}
-                <div class="ut-flex ut-items-center ut-gap-3 ut-text-sm">
-                    <span class="ut-w-3 ut-h-3 ut-rounded" style="background-color: {colors[index % colors.length]}; ut-flex-shrink: 0;"></span>
-                    <span class="ut-text-zinc-300 ut-flex-1 ut-overflow-hidden ut-text-ellipsis ut-whitespace-nowrap ut-min-w-0" title={item.name}>
+                <div class="flex items-center gap-3 text-sm">
+                    <span class="w-3 h-3 rounded" style="background-color: {colors[index % colors.length]}; flex-shrink: 0;"></span>
+                    <span class="text-zinc-300 flex-1 overflow-hidden text-ellipsis whitespace-nowrap min-w-0" title={item.name}>
                         {item.name}
                     </span>
-                    <div class="ut-flex ut-gap-2 ut-items-center ut-flex-shrink-0">
-                        <span class="ut-text-zinc-500">{item.percentage.toFixed(1)}%</span>
+                    <div class="flex gap-2 items-center flex-shrink-0">
+                        <span class="text-zinc-500">{item.percentage.toFixed(1)}%</span>
                         {#if measureBy === 'cost'}
-                            <DollarDisplay
-                                amount={item.value}
+                            <DollarDisplay 
+                                amount={item.value} 
                                 language={language}
-                                textClass="ut-text-white ut-font-medium" />
+                                textClass="text-white font-medium" />
                         {:else if measureBy === 'tokens'}
-                            <span class="ut-text-white ut-font-medium">{(item.value / 1000).toFixed(1)}K</span>
+                            <span class="text-white font-medium">{(item.value / 1000).toFixed(1)}K</span>
                         {:else}
-                            <span class="ut-text-white ut-font-medium">{item.value}</span>
+                            <span class="text-white font-medium">{item.value}</span>
                         {/if}
                     </div>
                 </div>

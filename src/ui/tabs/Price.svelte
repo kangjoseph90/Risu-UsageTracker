@@ -212,31 +212,31 @@
     })();
 </script>
 
-<div class="ut-flex ut-flex-col ut-h-full">
+<div class="flex flex-col h-full">
     <!-- Header -->
-    <div class="ut-sticky ut-top-0 ut-z-10 ut-bg-zinc-900 ut-border-b ut-border-zinc-700/60 ut-px-3 ut-py-3 ut-flex-shrink-0 ut-shadow-[0_4px_16px_0_rgba(0,0,0,0.25)]">
-        <div class="ut-flex ut-flex-wrap ut-flex-row ut-justify-between ut-items-center ut-gap-3">
+    <div class="sticky top-0 z-10 bg-zinc-900 border-b border-zinc-700/60 px-3 py-3 flex-shrink-0 shadow-[0_4px_16px_0_rgba(0,0,0,0.25)]">
+        <div class="flex flex-wrap flex-row justify-between items-center gap-3">
             <!-- Search Group -->
-            <div class="ut-flex ut-items-center ut-gap-2 ut-text-xs">
-                <span class="ut-text-zinc-400 hidden md:inline">{language.search}:</span>
+            <div class="flex items-center gap-2 text-xs">
+                <span class="text-zinc-400 hidden md:inline">{language.search}:</span>
                 <input
                     type="text"
                     bind:value={searchQuery}
                     placeholder={language.search}
-                    class="ut-bg-zinc-800 ut-text-zinc-200 ut-border ut-border-zinc-700/60 ut-rounded ut-px-2 ut-py-1 ut-text-xs ut-max-w-[200px] placeholder-zinc-500"
+                    class="bg-zinc-800 text-zinc-200 border border-zinc-700/60 rounded px-2 py-1 text-xs max-w-[200px] placeholder-zinc-500"
                 />
-                <span class="ut-text-zinc-500 ut-text-xs">
+                <span class="text-zinc-500 text-xs">
                     {filteredProviders.length} / {allProviders.length}
                 </span>
             </div>
             
             <!-- Add Button Group -->
-            <div class="ut-flex ut-justify-end">
+            <div class="flex justify-end">
                 <button
-                    class="ut-px-1.5 ut-py-1.5 ut-bg-zinc-700 hover:ut-bg-zinc-600 ut-text-zinc-200 ut-rounded ut-text-xs ut-flex ut-items-center ut-gap-2 ut-transition-colors ut-duration-200 ut-focus:outline-none ut-focus:ring-2 ut-focus:ring-offset-2 ut-focus:ring-offset-zinc-900 ut-focus:ring-blue-500"
+                    class="px-1.5 py-1.5 bg-zinc-700 hover:bg-zinc-600 text-zinc-200 rounded text-xs flex items-center gap-2 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-zinc-900 focus:ring-blue-500"
                     on:click={showAddModelDialog}
                     title="Add Model"
-                >
+                >   
                     <Plus size={16} />
                     <span>{language.addModel}</span>
                 </button>
@@ -245,53 +245,53 @@
     </div>
 
     <!-- Content Area -->
-    <div class="ut-flex-1 ut-overflow-y-auto">
+    <div class="flex-1 overflow-y-auto">
         {#if allProviders.length === 0}
-            <div class="ut-text-center ut-text-zinc-500 ut-py-8">
+            <div class="text-center text-zinc-500 py-8">
                 {language.noRecordsFound}
             </div>
         {:else if filteredProviders.length === 0}
-            <div class="ut-text-center ut-text-zinc-500 ut-py-8">
+            <div class="text-center text-zinc-500 py-8">
                 {language.noRecordsFound}
             </div>
         {:else}
-            <div class="ut-space-y-2 ut-px-3 ut-pt-3">
+            <div class="space-y-2 px-3 pt-3">
             {#each filteredProviders as provider (provider)}
             {@const confirmedModels = confirmedPrices[provider] || {}}
             {@const tempModels = tempPrices[provider] || {}}
             {@const models = getProviderModels(provider)}
             {@const isEditingProvider = editingState?.type === 'provider' && editingState?.provider === provider}
 
-            <div class="ut-bg-zinc-800 ut-border ut-border-zinc-700/60 ut-rounded-lg ut-px-4 ut-pt-2 ut-pb-3 ut-space-y-2">
-                <div class="ut-flex ut-items-center ut-justify-between ut-min-w-0">
-                    <div class="ut-flex ut-items-center ut-gap-2 ut-min-w-0">
+            <div class="bg-zinc-800 border border-zinc-700/60 rounded-lg px-4 pt-2 pb-3 space-y-2">
+                <div class="flex items-center justify-between min-w-0">
+                    <div class="flex items-center gap-2 min-w-0">
                         {#if isEditingProvider}
                             <!-- svelte-ignore a11y-autofocus -->
                             <input
                                 type="text"
                                 bind:value={editProviderInput}
-                                class="provider-edit-input ut-bg-zinc-700 ut-text-zinc-100 ut-px-2 ut-py-1 ut-rounded ut-text-sm"
+                                class="provider-edit-input bg-zinc-700 text-zinc-100 px-2 py-1 rounded text-sm"
                                 on:keydown={(e) => handleProviderInputKeydown(e, provider)}
                                 autofocus
                             />
                             <button
-                                class="ut-text-green-600 hover:ut-text-green-500 confirm-provider-btn ut-flex-shrink-0"
+                                class="text-green-600 hover:text-green-500 confirm-provider-btn flex-shrink-0"
                                 on:click={() => confirmProviderEdit(provider)}
                                 title="Confirm Edit"
                             >
                                 <Check size={16} />
                             </button>
                             <button
-                                class="ut-text-zinc-400 hover:ut-text-zinc-200 cancel-edit-btn ut-flex-shrink-0"
+                                class="text-zinc-400 hover:text-zinc-200 cancel-edit-btn flex-shrink-0"
                                 on:click={cancelEdit}
                                 title="Cancel Edit"
                             >
                                 <X size={16} />
                             </button>
                         {:else}
-                            <h4 class="ut-text-base ut-font-semibold ut-text-zinc-100 ut-truncate">{escapeHTML(provider)}</h4>
+                            <h4 class="text-base font-semibold text-zinc-100 truncate">{escapeHTML(provider)}</h4>
                             <button
-                                class="ut-text-zinc-400 hover:ut-text-zinc-200 edit-provider-btn ut-flex-shrink-0"
+                                class="text-zinc-400 hover:text-zinc-200 edit-provider-btn flex-shrink-0"
                                 on:click={() => startEditingProvider(provider)}
                                 title="Edit Provider"
                             >
@@ -301,7 +301,7 @@
                     </div>
                 </div>
                                 
-                <div class="ut-space-y-2">
+                <div class="space-y-2">
 
                     {#each models as modelId (provider + modelId)}
                         {@const confirmedPrice = confirmedModels[modelId]}
@@ -309,13 +309,13 @@
                         {@const isEditingPrice = editingState?.type === 'price' && editingState?.provider === provider && editingState?.modelId === modelId}
 
                         {#if tempPrice}
-                            <div class="ut-flex ut-items-center ut-justify-between ut-bg-yellow-900/20 ut-border ut-border-yellow-700/30 hover:ut-border-yellow-600/30 ut-px-3 ut-py-2 ut-rounded ut-text-sm ut-min-w-0">
-                                <div class="ut-flex-1 ut-min-w-0">
-                                    <div class="ut-flex ut-items-center ut-gap-2 ut-mb-2 ut-min-w-0 ut-text-yellow-400 ut-font-medium ut-truncate">
+                            <div class="flex items-center justify-between bg-yellow-900/20 border border-yellow-700/30 hover:border-yellow-600/30 px-3 py-2 rounded text-sm min-w-0">
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center gap-2 mb-2 min-w-0 text-yellow-400 font-medium truncate">
                                         <span>{escapeHTML(modelId)}</span>
                                         <TriangleAlert size={16} />
                                     </div>
-                                    <div class="ut-text-xs ut-text-zinc-400 ut-space-y-1 ut-min-w-0">
+                                    <div class="text-xs text-zinc-400 space-y-1 min-w-0">
                                         <PriceField
                                             {provider}
                                             {modelId}
@@ -369,16 +369,16 @@
                                         />
                                     </div>
                                 </div>
-                                <div class="ut-flex ut-gap-1 ut-items-center ut-flex-shrink-0">
+                                <div class="flex gap-1 items-center flex-shrink-0">
                                     <button
-                                        class="ut-text-green-600 hover:ut-text-green-500 confirm-model-btn ut-flex-shrink-0"
+                                        class="text-green-600 hover:text-green-500 confirm-model-btn flex-shrink-0"
                                         on:click={() => confirmModel(provider, modelId)}
                                         title="Confirm Model"
                                     >
                                         <Check size={18} />
                                     </button>
                                     <button
-                                        class="ut-text-red-700 hover:ut-text-red-500 delete-model-btn ut-flex-shrink-0"
+                                        class="text-red-700 hover:text-red-500 delete-model-btn flex-shrink-0"
                                         on:click={() => handleDeleteModel(provider, modelId, 'temp')}
                                         title="Delete Model"
                                     >
@@ -389,12 +389,12 @@
                         {/if}
 
                         {#if confirmedPrice && !tempPrice}
-                            <div class="ut-flex ut-items-center ut-justify-between ut-bg-zinc-700/30 ut-border ut-border-zinc-700/60 hover:ut-border-zinc-600/60 ut-px-3 ut-py-2 ut-rounded ut-text-sm ut-min-w-0">
-                                <div class="ut-flex-1 ut-min-w-0">
-                                    <div class="ut-flex ut-items-center ut-gap-2 ut-mb-2 ut-min-w-0">
-                                        <span class="ut-text-zinc-200 ut-font-medium ut-truncate">{escapeHTML(modelId)}</span>
+                            <div class="flex items-center justify-between bg-zinc-700/30 border border-zinc-700/60 hover:border-zinc-600/60 px-3 py-2 rounded text-sm min-w-0">
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center gap-2 mb-2 min-w-0">
+                                        <span class="text-zinc-200 font-medium truncate">{escapeHTML(modelId)}</span>
                                     </div>
-                                    <div class="ut-text-xs ut-text-zinc-400 ut-space-y-1 ut-min-w-0">
+                                    <div class="text-xs text-zinc-400 space-y-1 min-w-0">
                                         <PriceField
                                             {provider}
                                             {modelId}
@@ -448,9 +448,9 @@
                                         />
                                     </div>
                                 </div>
-                                <div class="ut-flex ut-gap-1 ut-items-center ut-flex-shrink-0">
+                                <div class="flex gap-1 items-center flex-shrink-0">
                                     <button
-                                        class="ut-text-red-700 hover:ut-text-red-500 delete-model-btn ut-flex-shrink-0"
+                                        class="text-red-700 hover:text-red-500 delete-model-btn flex-shrink-0"
                                         on:click={() => handleDeleteModel(provider, modelId, 'confirmed')}
                                         title="Delete Model"
                                     >

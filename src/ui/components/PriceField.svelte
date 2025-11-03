@@ -39,10 +39,10 @@
 
 {#if value === undefined}
     {#if field === 'cachedInputPrice'}
-        <div class="ut-flex ut-items-center ut-gap-1 ut-min-w-0">
-            <span class="ut-text-zinc-500">{language.cacheNotSupported}</span>
+        <div class="flex items-center gap-1 min-w-0">
+            <span class="text-zinc-500">{language.cacheNotSupported}</span>
             <button
-                class="ut-text-zinc-400 hover:ut-text-zinc-200 add-cached-price-btn ut-text-xs ut-flex-shrink-0"
+                class="text-zinc-400 hover:text-zinc-200 add-cached-price-btn text-xs flex-shrink-0"
                 on:click={() => addCachedPrice(provider, modelId, mode)}
                 title="Add Cached Price"
             >
@@ -51,8 +51,8 @@
         </div>
     {/if}
 {:else if isEditing}
-    <div class="ut-flex ut-items-center ut-gap-1 ut-min-w-0">
-        <span class="ut-flex-shrink-0">{fieldLabels[field]}:</span>
+    <div class="flex items-center gap-1 min-w-0">
+        <span class="flex-shrink-0">{fieldLabels[field]}:</span>
         <!-- svelte-ignore a11y-autofocus -->
         <input
             type="number"
@@ -60,18 +60,18 @@
             value={editPriceInput}
             on:input={handleInputChange}
             on:keydown={(e) => handlePriceInputKeydown(e, provider, modelId, mode, field)}
-            class="price-edit-input ut-bg-zinc-700 ut-text-zinc-100 ut-px-1 ut-py-0.5 ut-rounded ut-text-xs ut-w-20"
+            class="price-edit-input bg-zinc-700 text-zinc-100 px-1 py-0.5 rounded text-xs w-20"
             autofocus
         />
         <button
-            class="ut-text-green-600 hover:ut-text-green-500 confirm-price-btn ut-text-xs ut-flex-shrink-0"
+            class="text-green-600 hover:text-green-500 confirm-price-btn text-xs flex-shrink-0"
             on:click={() => confirmPriceEdit(provider, modelId, mode, field)}
             title="Confirm Price Edit"
         >
             <Check size={12} />
         </button>
         <button
-            class="ut-text-zinc-400 hover:ut-text-zinc-200 cancel-edit-btn ut-text-xs ut-flex-shrink-0"
+            class="text-zinc-400 hover:text-zinc-200 cancel-edit-btn text-xs flex-shrink-0"
             on:click={cancelEdit}
             title="Cancel Price Edit"
         >
@@ -79,17 +79,17 @@
         </button>
     </div>
 {:else}
-    <div class="ut-flex ut-items-center ut-gap-1 ut-min-w-0">
-        <span class="ut-truncate">
-            {fieldLabels[field]}: <DollarDisplay
-                amount={value}
+    <div class="flex items-center gap-1 min-w-0">
+        <span class="truncate">
+            {fieldLabels[field]}: <DollarDisplay 
+                amount={value} 
                 language={language}
-                textClass="ut-text-xs"
+                textClass="text-xs"
                 showHint={true}
             />/M
         </span>
         <button
-            class="ut-text-zinc-400 hover:ut-text-zinc-200 edit-price-btn ut-flex-shrink-0"
+            class="text-zinc-400 hover:text-zinc-200 edit-price-btn flex-shrink-0"
             on:click={() => startEditingPrice(provider, modelId, mode, field)}
             title="Edit Price"
         >
@@ -97,7 +97,7 @@
         </button>
         {#if showDisableBtn}
             <button
-                class="ut-text-zinc-400 hover:ut-text-zinc-200 remove-cached-price-btn ut-text-xs ut-flex-shrink-0"
+                class="text-zinc-400 hover:text-zinc-200 remove-cached-price-btn text-xs flex-shrink-0"
                 on:click={() => removeCachedPrice(provider, modelId, mode)}
                 title={language.disable}
             >

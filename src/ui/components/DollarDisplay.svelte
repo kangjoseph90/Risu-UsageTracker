@@ -93,7 +93,7 @@
 
 <button
     type="button"
-    class="ut-inline-block ut-relative {textClass} ut-appearance-none ut-bg-transparent ut-border-none ut-p-0 ut-m-0 ut-font-inherit ut-text-inherit ut-text-left ut-cursor-pointer ut-focus:outline-none"
+    class="inline-block relative {textClass} appearance-none bg-transparent border-none p-0 m-0 font-inherit text-inherit text-left cursor-pointer focus:outline-none"
     on:mouseenter={handleMouseEnter}
     on:click={handleMouseEnter}
     on:mouseleave={handleMouseLeave}
@@ -105,17 +105,17 @@
     <!-- Tooltip Container -->
     {#if isHovering}
         <div
-            class="ut-fixed ut-z-[9999] ut-rounded-md ut-bg-gray-900 ut-px-2 ut-py-1 ut-text-xs ut-text-white ut-shadow-lg ut-whitespace-nowrap ut-pointer-events-none"
+            class="fixed z-[9999] rounded-md bg-gray-900 px-2 py-1 text-xs text-white shadow-lg whitespace-nowrap pointer-events-none"
             style="top: {tooltipTop}px; left: {tooltipLeft}px;"
             transition:fade={{ duration: 150 }}
         >
             {#if isLoading}
-                <div class="ut-flex ut-items-center ut-gap-1">
-                    <Loader class="ut-animate-spin" size={12} />
+                <div class="flex items-center gap-1">
+                    <Loader class="animate-spin" size={12} />
                     <span>Loading...</span>
                 </div>
             {:else if error}
-                <span class="ut-text-red-300">{error}</span>
+                <span class="text-red-300">{error}</span>
             {:else}
                 <span>{formattedConverted}</span>
             {/if}

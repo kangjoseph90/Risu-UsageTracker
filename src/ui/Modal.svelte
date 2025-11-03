@@ -91,67 +91,67 @@
 
 
 <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
-<div
-  class="ut-fixed ut-inset-0 ut-bg-black/60 ut-z-50 ut-flex ut-items-center ut-justify-center"
+<div 
+  class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center"
   on:click={onClose}
   on:keydown={(e) => e.key === 'Escape' && onClose()}
   role="button"
   tabindex="0"
 >
     <!-- svelte-ignore a11y-click-events-have-key-events -->
-    <div class="ut-flex ut-justify-center ut-w-full ut-h-full">
-        <div class="ut-flex ut-flex-col ut-p-3 sm:ut-p-6 ut-rounded-lg ut-bg-zinc-900 ut-w-full ut-max-w-4xl ut-h-full ut-cursor-default" on:click|stopPropagation role="dialog" aria-modal="true">
+    <div class="flex justify-center w-full h-full">
+        <div class="flex flex-col p-3 sm:p-6 rounded-lg bg-zinc-900 w-full max-w-4xl h-full cursor-default" on:click|stopPropagation role="dialog" aria-modal="true">
             <!-- Header -->
-            <div class="ut-flex ut-justify-between ut-items-center ut-w-full ut-mb-2 ut-flex-shrink-0 ut-gap-2 ut-flex-wrap">
-                <h2 class="ut-text-lg sm:ut-text-2xl ut-font-semibold ut-text-zinc-100">{PLUGIN_NAME}</h2>
-                <div class="ut-flex ut-items-center ut-gap-2 ut-flex-wrap">
-                    <button class="ut-px-3 ut-py-2 ut-rounded-lg ut-text-xs sm:ut-text-sm ut-whitespace-nowrap {currentTab === 'usage' ? 'ut-bg-zinc-700' : 'ut-bg-zinc-800'} ut-text-zinc-200 ut-transition-colors ut-font-medium hover:ut-bg-zinc-700" title="Usage Statistics" on:click={() => currentTab = 'usage'} disabled={currentTab === 'usage'}>
+            <div class="flex justify-between items-center w-full mb-2 flex-shrink-0 gap-2 flex-wrap">
+                <h2 class="text-lg sm:text-2xl font-semibold text-zinc-100">{PLUGIN_NAME}</h2>
+                <div class="flex items-center gap-2 flex-wrap">
+                    <button class="px-3 py-2 rounded-lg text-xs sm:text-sm whitespace-nowrap {currentTab === 'usage' ? 'bg-zinc-700' : 'bg-zinc-800'} text-zinc-200 transition-colors font-medium hover:bg-zinc-700" title="Usage Statistics" on:click={() => currentTab = 'usage'} disabled={currentTab === 'usage'}>
                         <span>{language.usage}</span>
                     </button>
 
-                    <button class="ut-px-3 ut-py-2 ut-rounded-lg ut-text-xs sm:ut-text-sm ut-whitespace-nowrap {currentTab === 'price' ? 'ut-bg-zinc-700' : 'ut-bg-zinc-800'} ut-text-zinc-200 ut-transition-colors ut-font-medium hover:ut-text-zinc-100 hover:ut-bg-zinc-700 ut-flex ut-items-center ut-gap-1" title="Price Information" on:click={() => currentTab = 'price'} disabled={currentTab === 'price'}>
+                    <button class="px-3 py-2 rounded-lg text-xs sm:text-sm whitespace-nowrap {currentTab === 'price' ? 'bg-zinc-700' : 'bg-zinc-800'} text-zinc-200 transition-colors font-medium hover:text-zinc-100 hover:bg-zinc-700 flex items-center gap-1" title="Price Information" on:click={() => currentTab = 'price'} disabled={currentTab === 'price'}>
                         <span>{language.price}</span>
-                        <span class="price-warning-icon {hasTempPrice ? 'block' : 'hidden'} ut-text-yellow-400">
+                        <span class="price-warning-icon {hasTempPrice ? 'block' : 'hidden'} text-yellow-400">
                             <TriangleAlert size={16} />
                         </span>
                     </button>
 
                     <!-- Settings Button and Dropdown Wrapper -->
-                    <div class="ut-relative">
-                        <button bind:this={settingsButtonRef} class="ut-p-2 ut-rounded-lg ut-bg-zinc-800 ut-text-zinc-200 hover:ut-bg-zinc-700 ut-transition-colors" title="Settings" on:click={() => {settingsExpanded = !settingsExpanded; languagesExpanded = false;}}>
+                    <div class="relative">
+                        <button bind:this={settingsButtonRef} class="p-2 rounded-lg bg-zinc-800 text-zinc-200 hover:bg-zinc-700 transition-colors" title="Settings" on:click={() => {settingsExpanded = !settingsExpanded; languagesExpanded = false;}}>
                             <Settings size={20} />
                         </button>
                         
                         <!-- Settings Section (Collapsible) -->
                         {#if settingsExpanded}
-                            <div bind:this={settingsDropdownRef} class="ut-absolute ut-right-0 ut-top-full ut-mt-2 ut-p-2 ut-w-48 ut-bg-zinc-800 ut-rounded-lg ut-shadow-xl ut-flex ut-flex-col ut-gap-1 ut-text-zinc-100 ut-border ut-border-zinc-700/60 ut-z-50">
-                                <button class="ut-flex ut-items-center ut-gap-2 ut-px-3 ut-py-2 ut-rounded-lg hover:ut-bg-zinc-700 ut-text-zinc-200 ut-transition-colors ut-text-sm ut-w-full ut-justify-start" on:click={backup}>
+                            <div bind:this={settingsDropdownRef} class="absolute right-0 top-full mt-2 p-2 w-48 bg-zinc-800 rounded-lg shadow-xl flex flex-col gap-1 text-zinc-100 border border-zinc-700/60 z-50">
+                                <button class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-zinc-700 text-zinc-200 transition-colors text-sm w-full justify-start" on:click={backup}>
                                     <Upload size={16} />
                                     <span>{language.backup}</span>
                                 </button>
-                                <button class="ut-flex ut-items-center ut-gap-2 ut-px-3 ut-py-2 ut-rounded-lg hover:ut-bg-zinc-700 ut-text-zinc-200 ut-transition-colors ut-text-sm ut-w-full ut-justify-start" on:click={restore}>
+                                <button class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-zinc-700 text-zinc-200 transition-colors text-sm w-full justify-start" on:click={restore}>
                                     <Download size={16} />
                                     <span>{language.restore}</span>
                                 </button>
-                                <button class="ut-flex ut-items-center ut-gap-2 ut-px-3 ut-py-2 ut-rounded-lg {currentTab === 'provider' ? 'ut-bg-zinc-700' : ''} hover:ut-bg-zinc-700 ut-text-zinc-200 ut-transition-colors ut-text-sm ut-w-full ut-justify-start" on:click={() => currentTab = 'provider'} disabled={currentTab === 'provider'}>
+                                <button class="flex items-center gap-2 px-3 py-2 rounded-lg {currentTab === 'provider' ? 'bg-zinc-700' : ''} hover:bg-zinc-700 text-zinc-200 transition-colors text-sm w-full justify-start" on:click={() => currentTab = 'provider'} disabled={currentTab === 'provider'}>
                                     <Columns2 size={16} />
                                     <span>{language.provider}</span>
                                 </button>
-                                <button class="ut-flex ut-items-center ut-gap-2 ut-px-3 ut-py-2 ut-rounded-lg {currentTab === 'record' ? 'ut-bg-zinc-700' : ''} hover:ut-bg-zinc-700 ut-text-zinc-200 ut-transition-colors ut-text-sm ut-w-full ut-justify-start" on:click={() => currentTab = 'record'} disabled={currentTab === 'record'}>
+                                <button class="flex items-center gap-2 px-3 py-2 rounded-lg {currentTab === 'record' ? 'bg-zinc-700' : ''} hover:bg-zinc-700 text-zinc-200 transition-colors text-sm w-full justify-start" on:click={() => currentTab = 'record'} disabled={currentTab === 'record'}>
                                     <Database size={16} />
                                     <span>{language.record}</span>
                                 </button>
 
                                 <!-- Language Selection -->
-                                <button class="ut-flex ut-items-center ut-gap-2 ut-px-3 ut-py-2 ut-rounded-lg {languagesExpanded ? 'ut-bg-zinc-700' : '' } hover:ut-bg-zinc-700 ut-text-zinc-200 ut-transition-colors ut-text-sm ut-w-full ut-justify-start" on:click={() => languagesExpanded = !languagesExpanded}>
+                                <button class="flex items-center gap-2 px-3 py-2 rounded-lg {languagesExpanded ? 'bg-zinc-700' : '' } hover:bg-zinc-700 text-zinc-200 transition-colors text-sm w-full justify-start" on:click={() => languagesExpanded = !languagesExpanded}>
                                     <Globe size={16} />
                                     <span>{language.language}</span>
                                 </button>
                                 {#if languagesExpanded}
-                                    <div class="ut-space-y-1 ut-pl-4">
+                                    <div class="space-y-1 pl-4">
                                         {#each Object.values(LanguageType) as lang}
                                             <button
-                                                class="ut-w-full ut-text-left ut-px-2 ut-py-1.5 ut-rounded ut-text-xs ut-transition-colors {currentLanguage === lang ? 'ut-bg-zinc-700 ut-text-zinc-100' : 'ut-text-zinc-400 hover:ut-bg-zinc-700 hover:ut-text-zinc-200'}"
+                                                class="w-full text-left px-2 py-1.5 rounded text-xs transition-colors {currentLanguage === lang ? 'bg-zinc-700 text-zinc-100' : 'text-zinc-400 hover:bg-zinc-700 hover:text-zinc-200'}"
                                                 on:click={() => changeLanguage(lang)}
                                             >
                                                 {LanguageTypeLabels[lang]}
@@ -163,14 +163,14 @@
                         {/if}
                     </div>
 
-                    <button class="ut-p-2 ut-rounded-lg ut-bg-zinc-800 ut-text-zinc-200 hover:ut-bg-zinc-700 ut-transition-colors" title="Close" on:click={onClose}>
+                    <button class="p-2 rounded-lg bg-zinc-800 text-zinc-200 hover:bg-zinc-700 transition-colors" title="Close" on:click={onClose}>
                         <X size={20} />
                     </button>
                 </div>
             </div>
             
             <!-- Body Container -->
-            <div class="ut-flex-1 ut-overflow-y-auto ut-min-h-0 ut-pt-2">
+            <div class="flex-1 overflow-y-auto min-h-0 pt-2">
                 {#if currentTab === 'usage'}
                     <Usage key={refreshKey} {language} />
                 {:else if currentTab === 'price'}

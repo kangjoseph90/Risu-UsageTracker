@@ -80,28 +80,28 @@
     })();
 </script>
 
-<div class="ut-flex ut-flex-col ut-h-full">
+<div class="flex flex-col h-full">
     <!-- Action Header -->
-    <div class="ut-sticky ut-top-0 ut-z-10 ut-bg-zinc-900 ut-border-b ut-border-zinc-700/60 ut-px-3 ut-py-3 ut-flex-shrink-0 ut-shadow-[0_4px_16px_0_rgba(0,0,0,0.25)]">
-        <div class="ut-flex ut-flex-wrap ut-flex-row ut-justify-between ut-items-center ut-gap-3">
+    <div class="sticky top-0 z-10 bg-zinc-900 border-b border-zinc-700/60 px-3 py-3 flex-shrink-0 shadow-[0_4px_16px_0_rgba(0,0,0,0.25)]">
+        <div class="flex flex-wrap flex-row justify-between items-center gap-3">
             <!-- Search and Info Group -->
-            <div class="ut-flex ut-items-center ut-gap-2 ut-text-xs">
-                <span class="ut-text-zinc-400 hidden md:inline">{language.search}:</span>
+            <div class="flex items-center gap-2 text-xs">
+                <span class="text-zinc-400 hidden md:inline">{language.search}:</span>
                 <input
                     type="text"
                     bind:value={searchQuery}
                     placeholder={language.search}
-                    class="ut-bg-zinc-800 ut-text-zinc-200 ut-border ut-border-zinc-700/60 ut-rounded ut-px-2 ut-py-1 ut-text-xs ut-max-w-[200px] placeholder-zinc-500"
+                    class="bg-zinc-800 text-zinc-200 border border-zinc-700/60 rounded px-2 py-1 text-xs max-w-[200px] placeholder-zinc-500"
                 />
-                <span class="ut-text-zinc-500 ut-text-xs">
+                <span class="text-zinc-500 text-xs">
                     {filteredEntries.length} / {entries.length}
                 </span>
             </div>
             
             <!-- Add Button Group -->
-            <div class="ut-flex ut-justify-end">
+            <div class="flex justify-end">
                 <button
-                    class="ut-px-1.5 ut-py-1.5 ut-bg-zinc-700 hover:ut-bg-zinc-600 ut-text-zinc-200 ut-rounded ut-text-xs ut-flex ut-items-center ut-gap-2 ut-transition-colors ut-duration-200 ut-focus:outline-none ut-focus:ring-2 ut-focus:ring-offset-2 ut-focus:ring-offset-zinc-900 ut-focus:ring-blue-500"
+                    class="px-1.5 py-1.5 bg-zinc-700 hover:bg-zinc-600 text-zinc-200 rounded text-xs flex items-center gap-2 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-zinc-900 focus:ring-blue-500"
                     on:click={showAddMappingDialog}
                 >
                     <Plus size={16} />
@@ -112,44 +112,44 @@
     </div>
 
     <!-- Mappings Table Area -->
-    <div class="ut-flex-1 ut-overflow-y-auto ut-overflow-x-auto">
+    <div class="flex-1 overflow-y-auto overflow-x-auto">
         {#if entries.length === 0}
-            <div class="ut-text-center ut-text-zinc-500 ut-py-8">
+            <div class="text-center text-zinc-500 py-8">
                 {language.noRecordsFound}
             </div>
         {:else if filteredEntries.length === 0}
-            <div class="ut-text-center ut-text-zinc-500 ut-py-8">
+            <div class="text-center text-zinc-500 py-8">
                 {language.noRecordsFound}
             </div>
         {:else}
-            <table class="ut-min-w-full ut-divide-y ut-divide-zinc-700/60 ut-table-auto">
-                <thead class="ut-bg-zinc-800 ut-sticky ut-top-0 ut-z-10 ut-shadow-lg">
+            <table class="min-w-full divide-y divide-zinc-700/60 table-auto">
+                <thead class="bg-zinc-800 sticky top-0 z-10 shadow-lg">
                     <tr>
-                        <th scope="col" class="ut-px-4 ut-py-2 ut-text-left ut-text-xs ut-font-medium ut-uppercase ut-tracking-wider ut-text-zinc-400">
+                        <th scope="col" class="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-zinc-400">
                             {language.url}
                         </th>
-                        <th scope="col" class="ut-px-4 ut-py-2 ut-text-left ut-text-xs ut-font-medium ut-uppercase ut-tracking-wider ut-text-zinc-400">
+                        <th scope="col" class="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-zinc-400">
                             {language.provider}
                         </th>
-                        <th scope="col" class="ut-px-4 ut-py-2 ut-text-right ut-text-xs ut-font-medium ut-uppercase ut-tracking-wider ut-text-zinc-400 ut-whitespace-nowrap">
+                        <th scope="col" class="px-4 py-2 text-right text-xs font-medium uppercase tracking-wider text-zinc-400 whitespace-nowrap">
                             {language.actions}
                         </th>
                     </tr>
                 </thead>
-                <tbody class="ut-divide-y ut-divide-zinc-700/60 ut-bg-zinc-900/50">
+                <tbody class="divide-y divide-zinc-700/60 bg-zinc-900/50">
                     {#each filteredEntries as [url, provider] (url)}
-                        <tr class="hover:ut-bg-zinc-800/50 ut-transition-colors">
-                            <td class="ut-px-4 ut-py-2 ut-text-sm ut-text-zinc-200">
-                                <div class="ut-truncate" title={url}>{url}</div>
+                        <tr class="hover:bg-zinc-800/50 transition-colors">
+                            <td class="px-4 py-2 text-sm text-zinc-200">
+                                <div class="truncate" title={url}>{url}</div>
                             </td>
-                            <td class="ut-px-4 ut-py-2 ut-text-sm ut-text-zinc-200">
+                            <td class="px-4 py-2 text-sm text-zinc-200">
                                 {#if editingState?.url === url}
-                                    <div class="ut-flex ut-items-center ut-gap-2">
+                                    <div class="flex items-center gap-2">
                                         <!-- svelte-ignore a11y-autofocus -->
                                         <input
                                             type="text"
                                             bind:value={editProviderInput}
-                                            class="ut-bg-zinc-700 ut-text-zinc-100 ut-px-2 ut-py-1 ut-rounded ut-text-sm ut-flex-1 ut-min-w-0"
+                                            class="bg-zinc-700 text-zinc-100 px-2 py-1 rounded text-sm flex-1 min-w-0"
                                             on:keydown={(e) => {
                                                 if (e.key === 'Enter') confirmProviderEdit(url);
                                                 else if (e.key === 'Escape') cancelEdit();
@@ -158,25 +158,25 @@
                                         />
                                     </div>
                                 {:else}
-                                    <div class="ut-truncate" title={provider}>{provider}</div>
+                                    <div class="truncate" title={provider}>{provider}</div>
                                 {/if}
                             </td>
-                            <td class="ut-px-4 ut-py-2 ut-text-sm ut-whitespace-nowrap">
+                            <td class="px-4 py-2 text-sm whitespace-nowrap">
                                 {#if editingState?.url === url}
-                                    <div class="ut-flex ut-items-center ut-justify-end ut-gap-2">
-                                        <button class="ut-text-green-500 hover:ut-text-green-400 ut-transition-colors" on:click={() => confirmProviderEdit(url)} title={language.confirm}>
+                                    <div class="flex items-center justify-end gap-2">
+                                        <button class="text-green-500 hover:text-green-400 transition-colors" on:click={() => confirmProviderEdit(url)} title={language.confirm}>
                                             <Check size={18} />
                                         </button>
-                                        <button class="ut-text-zinc-400 hover:ut-text-zinc-200 ut-transition-colors" on:click={cancelEdit} title={language.cancel}>
+                                        <button class="text-zinc-400 hover:text-zinc-200 transition-colors" on:click={cancelEdit} title={language.cancel}>
                                             <X size={18} />
                                         </button>
                                     </div>
                                 {:else}
-                                    <div class="ut-flex ut-items-center ut-justify-end ut-gap-2">
-                                        <button class="ut-text-zinc-400 hover:ut-text-zinc-200 ut-transition-colors" on:click={() => startEditingProvider(url, provider)} title={language.edit}>
+                                    <div class="flex items-center justify-end gap-2">
+                                        <button class="text-zinc-400 hover:text-zinc-200 transition-colors" on:click={() => startEditingProvider(url, provider)} title={language.edit}>
                                             <Pencil size={16} />
                                         </button>
-                                        <button class="ut-text-red-600 hover:ut-text-red-500 ut-transition-colors" on:click={() => deleteMapping(url)} title={language.delete}>
+                                        <button class="text-red-600 hover:text-red-500 transition-colors" on:click={() => deleteMapping(url)} title={language.delete}>
                                             <Trash size={16} />
                                         </button>
                                     </div>
