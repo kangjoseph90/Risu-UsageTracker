@@ -183,27 +183,6 @@ export class CurrencyManager {
         }
     }
 
-    /**
-     * Check if API is available
-     * @returns true if API is reachable
-     */
-    static async isAvailable(): Promise<boolean> {
-        try {
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), this.REQUEST_TIMEOUT_MS);
-
-            const response = await fetch(`${this.API_BASE}/currencies.json`, {
-                signal: controller.signal,
-                mode: 'cors'
-            });
-
-            clearTimeout(timeoutId);
-            return response.ok;
-        } catch (e) {
-            Logger.warn('Currency API is unavailable:', e);
-            return false;
-        }
-    }
 
     /**
      * Fetch exchange rate from API

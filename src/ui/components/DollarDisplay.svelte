@@ -83,11 +83,6 @@
         : '';
 
     onMount(() => {
-        // Preload API availability check (non-blocking)
-        CurrencyManager.isAvailable().catch(() => {
-            // API unavailable - no action needed, fallback will work
-        });
-
         window.addEventListener('scroll', handleMouseLeave, true);
     });
 
