@@ -385,7 +385,7 @@
         <div class="ut-flex ut-flex-col sm:ut-flex-row sm:ut-justify-between sm:ut-items-center ut-gap-3">
             <!-- Measure Group -->
             <div class="ut-flex ut-items-center ut-gap-2 ut-text-xs">
-                <span class="ut-text-zinc-400 hidden md:inline">{language.measure}:</span>
+                <span class="ut-text-zinc-400 ut-hidden md:ut-inline">{language.measure}:</span>
                 <select bind:value={globalMeasureBy} on:change={handleFilterChange} class="ut-bg-zinc-800 ut-text-zinc-200 ut-border ut-border-zinc-700/60 ut-rounded ut-px-2 ut-py-1 ut-text-xs ut-max-w-[120px]">
                     <option value="tokens">{language.tokens}</option>
                     <option value="cost">{language.cost}</option>

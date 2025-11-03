@@ -105,13 +105,13 @@
             <div class="ut-flex ut-justify-between ut-items-center ut-w-full ut-mb-2 ut-flex-shrink-0 ut-gap-2 ut-flex-wrap">
                 <h2 class="ut-text-lg sm:ut-text-2xl ut-font-semibold ut-text-zinc-100">{PLUGIN_NAME}</h2>
                 <div class="ut-flex ut-items-center ut-gap-2 ut-flex-wrap">
-                    <button class="ut-px-3 ut-py-2 ut-rounded-lg ut-text-xs sm:ut-text-sm ut-whitespace-nowrap {currentTab === 'usage' ? 'ut-bg-zinc-700' : 'ut-bg-zinc-800'} ut-text-zinc-200 ut-transition-colors ut-font-medium hover:ut-bg-zinc-700" title="Usage Statistics" on:click={() => currentTab = 'usage'} disabled={currentTab === 'usage'}>
+                    <button class="ut-px-3 ut-py-2 ut-rounded-lg ut-text-sm ut-whitespace-nowrap {currentTab === 'usage' ? 'ut-bg-zinc-700' : 'ut-bg-zinc-800'} ut-text-zinc-200 ut-transition-colors ut-font-medium hover:ut-bg-zinc-700" title="Usage Statistics" on:click={() => currentTab = 'usage'} disabled={currentTab === 'usage'}>
                         <span>{language.usage}</span>
                     </button>
 
-                    <button class="ut-px-3 ut-py-2 ut-rounded-lg ut-text-xs sm:ut-text-sm ut-whitespace-nowrap {currentTab === 'price' ? 'ut-bg-zinc-700' : 'ut-bg-zinc-800'} ut-text-zinc-200 ut-transition-colors ut-font-medium hover:ut-text-zinc-100 hover:ut-bg-zinc-700 ut-flex ut-items-center ut-gap-1" title="Price Information" on:click={() => currentTab = 'price'} disabled={currentTab === 'price'}>
+                    <button class="ut-px-3 ut-py-2 ut-rounded-lg ut-text-sm ut-whitespace-nowrap {currentTab === 'price' ? 'ut-bg-zinc-700' : 'ut-bg-zinc-800'} ut-text-zinc-200 ut-transition-colors ut-font-medium hover:ut-text-zinc-100 hover:ut-bg-zinc-700 ut-flex ut-items-center ut-gap-1" title="Price Information" on:click={() => currentTab = 'price'} disabled={currentTab === 'price'}>
                         <span>{language.price}</span>
-                        <span class="price-warning-icon {hasTempPrice ? 'block' : 'hidden'} ut-text-yellow-400">
+                        <span class="{hasTempPrice ? 'ut-block' : 'ut-hidden'} ut-text-yellow-400">
                             <TriangleAlert size={16} />
                         </span>
                     </button>

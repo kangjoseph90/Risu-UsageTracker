@@ -244,7 +244,7 @@
 			<!-- Delete Button Group -->
 			<div class="ut-flex">
 				<button
-					class="ut-w-full sm:ut-w-auto ut-px-3 ut-py-1.5 ut-bg-zinc-800 hover:ut-bg-red-600/90 ut-text-zinc-200 hover:ut-text-white ut-rounded ut-text-sm ut-flex ut-items-center ut-justify-center ut-gap-2 ut-transition-colors ut-duration-200 ut-focus:outline-none ut-focus:ring-2 ut-focus:ring-offset-2 ut-focus:ring-offset-zinc-900 ut-focus:ring-red-500 disabled:ut-opacity-50 disabled:ut-cursor-not-allowed"
+					class="ut-w-full sm:ut-w-auto ut-px-3 ut-py-1.5 ut-bg-zinc-800 hover:ut-bg-red-600/90 ut-text-zinc-200 hover:ut-text-white ut-rounded ut-text-sm ut-flex ut-items-center ut-justify-center ut-gap-2 ut-transition-colors ut-duration-200 focus:ut-outline-none focus:ut-ring-2 focus:ut-ring-offset-2 focus:ut-ring-offset-zinc-900 focus:ut-ring-red-500 disabled:ut-opacity-50 disabled:ut-cursor-not-allowed"
 					on:click={deleteSelectedRecords}
 					disabled={selectedCount === 0}
 				>

@@ -91,7 +91,7 @@
 </script>
 
 <div class="ut-flex ut-items-center ut-gap-2 ut-text-xs ut-flex-wrap">
-	<span class="ut-text-zinc-400 hidden md:inline">{language.filter}:</span>
+	<span class="ut-text-zinc-400 ut-hidden md:ut-inline">{language.filter}:</span>
 	<div class="ut-flex ut-items-center ut-gap-1">
 		<input
 			bind:this={startDateInput}
@@ -106,7 +106,7 @@
 			class="ut-bg-zinc-800 ut-text-zinc-200 ut-border ut-border-zinc-700/60 ut-rounded ut-px-2 ut-py-1 ut-text-xs ut-w-[100px]"
 		/>
 		<button
-			class="ut-p-1.5 ut-bg-zinc-700 hover:ut-bg-zinc-600 ut-text-zinc-200 ut-rounded ut-text-xs ut-flex ut-items-center ut-transition-colors ut-duration-200 ut-focus:outline-none"
+			class="ut-p-1.5 ut-bg-zinc-700 hover:ut-bg-zinc-600 ut-text-zinc-200 ut-rounded ut-text-xs ut-flex ut-items-center ut-transition-colors ut-duration-200 focus:ut-outline-none"
 			on:click={clearDateFilters}
 			title={language.clear}
 		>
@@ -143,7 +143,7 @@
 		</select>
 	</div>
 	<button
-		class="ut-px-1.5 ut-py-1.5 ut-bg-zinc-700 hover:ut-bg-zinc-600 ut-text-zinc-200 ut-rounded ut-text-xs ut-flex ut-items-center ut-gap-2 ut-transition-colors ut-duration-200 ut-focus:outline-none ut-focus:ring-2 ut-focus:ring-offset-2 ut-focus:ring-offset-zinc-900 ut-focus:ring-blue-500"
+		class="ut-px-1.5 ut-py-1.5 ut-bg-zinc-700 hover:ut-bg-zinc-600 ut-text-zinc-200 ut-rounded ut-text-xs ut-flex ut-items-center ut-gap-2 ut-transition-colors ut-duration-200 focus:ut-outline-none focus:ut-ring-2 focus:ut-ring-offset-2 focus:ut-ring-offset-zinc-900 focus:ut-ring-blue-500"
 		on:click={handleApplyFilters}
 	>
 		<Search size={16} />

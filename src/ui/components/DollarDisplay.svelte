@@ -93,7 +93,7 @@
 
 <button
     type="button"
-    class="ut-inline-block ut-relative {textClass} ut-appearance-none ut-bg-transparent ut-border-none ut-p-0 ut-m-0 ut-font-inherit ut-text-inherit ut-text-left ut-cursor-pointer ut-focus:outline-none"
+    class="ut-inline-block ut-relative {textClass} ut-appearance-none ut-bg-transparent ut-border-none ut-p-0 ut-m-0 ut-font-inherit ut-text-inherit ut-text-left ut-cursor-pointer focus:ut-outline-none"
     on:mouseenter={handleMouseEnter}
     on:click={handleMouseEnter}
     on:mouseleave={handleMouseLeave}
