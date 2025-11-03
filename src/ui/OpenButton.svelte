@@ -28,7 +28,7 @@
     }
 </script>
 
-<button class="flex gap-2 items-center hover:text-textcolor text-textcolor2" id={id} on:click={onClick}>
+<button class="ut-flex ut-gap-2 ut-items-center hover:text-textcolor text-textcolor2" id={id} on:click={onClick}>
     <ChartColumn  />
     <span>{language.usage}</span>
 </button>

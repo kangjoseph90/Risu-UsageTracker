@@ -225,11 +225,11 @@
 	}
 </script>
 
-<div class="flex flex-col h-full">
+<div class="ut-flex ut-flex-col ut-h-full">
 	<!-- Header Area (Fixed Scrolling) -->
-	<div class="sticky top-0 z-10 bg-zinc-900 border-b border-zinc-700/60 px-3 py-3 flex-shrink-0 shadow-[0_4px_16px_0_rgba(0,0,0,0.25)]">
+	<div class="ut-sticky ut-top-0 ut-z-10 ut-bg-zinc-900 ut-border-b ut-border-zinc-700/60 ut-px-3 ut-py-3 ut-flex-shrink-0 ut-shadow-[0_4px_16px_0_rgba(0,0,0,0.25)]">
 		<!-- Actions -->
-		<div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+		<div class="ut-flex ut-flex-col sm:ut-flex-row sm:ut-justify-between sm:ut-items-center ut-gap-3">
 			<!-- Filter Group -->
 			<RecordFilters
 				{language}
@@ -242,9 +242,9 @@
 				on:apply={applyFilters}
 			/>
 			<!-- Delete Button Group -->
-			<div class="flex">
+			<div class="ut-flex">
 				<button
-					class="w-full sm:w-auto px-3 py-1.5 bg-zinc-800 hover:bg-red-600/90 text-zinc-200 hover:text-white rounded text-sm flex items-center justify-center gap-2 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-zinc-900 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
+					class="ut-w-full sm:ut-w-auto ut-px-3 ut-py-1.5 ut-bg-zinc-800 hover:ut-bg-red-600/90 ut-text-zinc-200 hover:ut-text-white ut-rounded ut-text-sm ut-flex ut-items-center ut-justify-center ut-gap-2 ut-transition-colors ut-duration-200 ut-focus:outline-none ut-focus:ring-2 ut-focus:ring-offset-2 ut-focus:ring-offset-zinc-900 ut-focus:ring-red-500 disabled:ut-opacity-50 disabled:ut-cursor-not-allowed"
 					on:click={deleteSelectedRecords}
 					disabled={selectedCount === 0}
 				>
@@ -256,35 +256,35 @@
 	</div>
 
 	<!-- Record Area (Scrollable) -->
-	<div class="flex-1 overflow-y-auto overflow-x-auto">
+	<div class="ut-flex-1 ut-overflow-y-auto ut-overflow-x-auto">
 		{#if paginatedRecords.length === 0}
-			<div class="text-center text-zinc-500 py-8">
+			<div class="ut-text-center ut-text-zinc-500 ut-py-8">
 				{language.noRecordsFound}
 			</div>
 		{:else}
-			<table class="min-w-full divide-y divide-zinc-700/60 table-auto">
-				<thead class="bg-zinc-800 sticky top-0 z-10 shadow-lg">
+			<table class="ut-min-w-full ut-divide-y ut-divide-zinc-700/60 ut-table-auto">
+				<thead class="ut-bg-zinc-800 ut-sticky ut-top-0 ut-z-10 ut-shadow-lg">
 					<tr>
-						<th scope="col" class="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-zinc-400 w-12">
+						<th scope="col" class="ut-px-4 ut-py-2 ut-text-left ut-text-xs ut-font-medium ut-uppercase ut-tracking-wider ut-text-zinc-400 ut-w-12">
 							<input
 								id="selectAllCheckbox"
 								type="checkbox"
 								on:change={selectAllRecords}
-								class="w-3 h-3 cursor-pointer"
+								class="ut-w-3 ut-h-3 ut-cursor-pointer"
 							/>
 						</th>
-						<th scope="col" class="pr-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-zinc-400">
+						<th scope="col" class="ut-pr-4 ut-py-2 ut-text-left ut-text-xs ut-font-medium ut-uppercase ut-tracking-wider ut-text-zinc-400">
 							{language.model}
 						</th>
-						<th scope="col" class="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-zinc-400 whitespace-nowrap">
+						<th scope="col" class="ut-px-4 ut-py-2 ut-text-left ut-text-xs ut-font-medium ut-uppercase ut-tracking-wider ut-text-zinc-400 ut-whitespace-nowrap">
 							{language.tokens}
 						</th>
-						<th scope="col" class="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-zinc-400 whitespace-nowrap">
+						<th scope="col" class="ut-px-4 ut-py-2 ut-text-left ut-text-xs ut-font-medium ut-uppercase ut-tracking-wider ut-text-zinc-400 ut-whitespace-nowrap">
 							{language.cost}
 						</th>
 					</tr>
 				</thead>
-					<tbody class="divide-y divide-zinc-700/60 bg-zinc-900/50">
+					<tbody class="ut-divide-y ut-divide-zinc-700/60 ut-bg-zinc-900/50">
 						{#each paginatedRecords as record, index (record.timestamp + record.model + record.url + index)}
 							<RecordRow
 								{record}
@@ -302,10 +302,10 @@
 
 	<!-- Pagination Area (Fixed Scrolling) -->
 	{#if totalPages > 1}
-	<div class="sticky bottom-0 z-10 bg-zinc-900 border-t border-zinc-700/60 px-3 pt-3 pb-2 flex-shrink-0 shadow-[0_-4px_16px_0_rgba(0,0,0,0.25)]">
-		<div class="flex justify-center items-center gap-2">
+	<div class="ut-sticky ut-bottom-0 ut-z-10 ut-bg-zinc-900 ut-border-t ut-border-zinc-700/60 ut-px-3 ut-pt-3 ut-pb-2 ut-flex-shrink-0 ut-shadow-[0_-4px_16px_0_rgba(0,0,0,0.25)]">
+		<div class="ut-flex ut-justify-center ut-items-center ut-gap-2">
 			<button
-				class="px-3 py-1 bg-zinc-700 hover:bg-zinc-600 text-white rounded text-xs transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+				class="ut-px-3 ut-py-1 ut-bg-zinc-700 hover:ut-bg-zinc-600 ut-text-white ut-rounded ut-text-xs ut-transition-colors disabled:ut-opacity-50 disabled:ut-cursor-not-allowed"
 				on:click={() => goToPage(currentPage - 1)}
 				disabled={currentPage === 1}
 			>
@@ -315,18 +315,18 @@
 			{#each Array.from({length: Math.min(totalPages, 10)}, (_, i) => i + 1) as pageNum}
 				{#if pageNum === 1 || pageNum === totalPages || (pageNum >= currentPage - 2 && pageNum <= currentPage + 2)}
 					<button
-						class="px-3 py-1 {pageNum === currentPage ? 'bg-blue-600 text-white' : 'bg-zinc-700 hover:bg-zinc-600 text-white'} rounded text-xs transition-colors"
+						class="ut-px-3 ut-py-1 {pageNum === currentPage ? 'ut-bg-blue-600 ut-text-white' : 'ut-bg-zinc-700 hover:ut-bg-zinc-600 ut-text-white'} ut-rounded ut-text-xs ut-transition-colors"
 						on:click={() => goToPage(pageNum)}
 					>
 						{pageNum}
 					</button>
 				{:else if pageNum === currentPage - 3 || pageNum === currentPage + 3}
-					<span class="text-zinc-400 px-2">...</span>
+					<span class="ut-text-zinc-400 ut-px-2">...</span>
 				{/if}
 			{/each}
 
 			<button
-				class="px-3 py-1 bg-zinc-700 hover:bg-zinc-600 text-white rounded text-xs transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+				class="ut-px-3 ut-py-1 ut-bg-zinc-700 hover:ut-bg-zinc-600 ut-text-white ut-rounded ut-text-xs ut-transition-colors disabled:ut-opacity-50 disabled:ut-cursor-not-allowed"
 				on:click={() => goToPage(currentPage + 1)}
 				disabled={currentPage === totalPages}
 			>
@@ -334,7 +334,7 @@
 			</button>
 		</div>
 
-		<div class="text-center text-xs text-zinc-400 mt-2">
+		<div class="ut-text-center ut-text-xs ut-text-zinc-400 ut-mt-2">
 			{formatString(language.pageInfo, {
 				current: currentPage,
 				total: totalPages,
