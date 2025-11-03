@@ -105,11 +105,11 @@
             <div class="flex justify-between items-center w-full mb-2 flex-shrink-0 gap-2 flex-wrap">
                 <h2 class="text-lg sm:text-2xl font-semibold text-zinc-100">{PLUGIN_NAME}</h2>
                 <div class="flex items-center gap-2 flex-wrap">
-                    <button class="px-3 py-2 rounded-lg text-xs sm:text-sm whitespace-nowrap {currentTab === 'usage' ? 'bg-zinc-700' : 'bg-zinc-800'} text-zinc-200 transition-colors font-medium hover:bg-zinc-700" title="Usage Statistics" on:click={() => currentTab = 'usage'} disabled={currentTab === 'usage'}>
+                    <button class="px-3 py-2 rounded-lg text-sm whitespace-nowrap {currentTab === 'usage' ? 'bg-zinc-700' : 'bg-zinc-800'} text-zinc-200 transition-colors font-medium hover:bg-zinc-700" title="Usage Statistics" on:click={() => currentTab = 'usage'} disabled={currentTab === 'usage'}>
                         <span>{language.usage}</span>
                     </button>
 
-                    <button class="px-3 py-2 rounded-lg text-xs sm:text-sm whitespace-nowrap {currentTab === 'price' ? 'bg-zinc-700' : 'bg-zinc-800'} text-zinc-200 transition-colors font-medium hover:text-zinc-100 hover:bg-zinc-700 flex items-center gap-1" title="Price Information" on:click={() => currentTab = 'price'} disabled={currentTab === 'price'}>
+                    <button class="px-3 py-2 rounded-lg text-sm whitespace-nowrap {currentTab === 'price' ? 'bg-zinc-700' : 'bg-zinc-800'} text-zinc-200 transition-colors font-medium hover:text-zinc-100 hover:bg-zinc-700 flex items-center gap-1" title="Price Information" on:click={() => currentTab = 'price'} disabled={currentTab === 'price'}>
                         <span>{language.price}</span>
                         <span class="price-warning-icon {hasTempPrice ? 'block' : 'hidden'} text-yellow-400">
                             <TriangleAlert size={16} />

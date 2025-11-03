@@ -9,6 +9,7 @@
 
     function onClick(): void { 
         const container = document.createElement('div');
+        container.id = 'usage-tracker-container';
         document.body.appendChild(container);
 
         const modal = new Modal({
