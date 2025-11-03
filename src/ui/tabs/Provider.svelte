@@ -86,12 +86,12 @@
         <div class="ut-flex ut-flex-wrap ut-flex-row ut-justify-between ut-items-center ut-gap-3">
             <!-- Search and Info Group -->
             <div class="ut-flex ut-items-center ut-gap-2 ut-text-xs">
-                <span class="ut-text-zinc-400 ut-hidden md:ut-inline">{language.search}:</span>
+                <span class="ut-text-zinc-400 hidden md:inline">{language.search}:</span>
                 <input
                     type="text"
                     bind:value={searchQuery}
                     placeholder={language.search}
-                    class="ut-bg-zinc-800 ut-text-zinc-200 ut-border ut-border-zinc-700/60 ut-rounded ut-px-2 ut-py-1 ut-text-xs ut-max-w-[200px] ut-placeholder-zinc-500"
+                    class="ut-bg-zinc-800 ut-text-zinc-200 ut-border ut-border-zinc-700/60 ut-rounded ut-px-2 ut-py-1 ut-text-xs ut-max-w-[200px] placeholder-zinc-500"
                 />
                 <span class="ut-text-zinc-500 ut-text-xs">
                     {filteredEntries.length} / {entries.length}
@@ -101,7 +101,7 @@
             <!-- Add Button Group -->
             <div class="ut-flex ut-justify-end">
                 <button
-                    class="ut-px-1.5 ut-py-1.5 ut-bg-zinc-700 hover:ut-bg-zinc-600 ut-text-zinc-200 ut-rounded ut-text-xs ut-flex ut-items-center ut-gap-2 ut-transition-colors ut-duration-200 focus:ut-outline-none focus:ut-ring-2 focus:ut-ring-offset-2 focus:ut-ring-offset-zinc-900 focus:ut-ring-blue-500"
+                    class="ut-px-1.5 ut-py-1.5 ut-bg-zinc-700 hover:ut-bg-zinc-600 ut-text-zinc-200 ut-rounded ut-text-xs ut-flex ut-items-center ut-gap-2 ut-transition-colors ut-duration-200 ut-focus:outline-none ut-focus:ring-2 ut-focus:ring-offset-2 ut-focus:ring-offset-zinc-900 ut-focus:ring-blue-500"
                     on:click={showAddMappingDialog}
                 >
                     <Plus size={16} />

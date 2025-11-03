@@ -60,18 +60,18 @@
             value={editPriceInput}
             on:input={handleInputChange}
             on:keydown={(e) => handlePriceInputKeydown(e, provider, modelId, mode, field)}
-            class="ut-bg-zinc-700 ut-text-zinc-100 ut-px-1 ut-py-0.5 ut-rounded ut-text-xs ut-w-20"
+            class="price-edit-input ut-bg-zinc-700 ut-text-zinc-100 ut-px-1 ut-py-0.5 ut-rounded ut-text-xs ut-w-20"
             autofocus
         />
         <button
-            class="ut-text-green-600 hover:ut-text-green-500 ut-text-xs ut-flex-shrink-0"
+            class="ut-text-green-600 hover:ut-text-green-500 confirm-price-btn ut-text-xs ut-flex-shrink-0"
             on:click={() => confirmPriceEdit(provider, modelId, mode, field)}
             title="Confirm Price Edit"
         >
             <Check size={12} />
         </button>
         <button
-            class="ut-text-zinc-400 hover:ut-text-zinc-200 ut-text-xs ut-flex-shrink-0"
+            class="ut-text-zinc-400 hover:ut-text-zinc-200 cancel-edit-btn ut-text-xs ut-flex-shrink-0"
             on:click={cancelEdit}
             title="Cancel Price Edit"
         >
@@ -89,7 +89,7 @@
             />/M
         </span>
         <button
-            class="ut-text-zinc-400 hover:ut-text-zinc-200 ut-flex-shrink-0"
+            class="ut-text-zinc-400 hover:ut-text-zinc-200 edit-price-btn ut-flex-shrink-0"
             on:click={() => startEditingPrice(provider, modelId, mode, field)}
             title="Edit Price"
         >
@@ -97,7 +97,7 @@
         </button>
         {#if showDisableBtn}
             <button
-                class="ut-text-zinc-400 hover:ut-text-zinc-200 ut-text-xs ut-flex-shrink-0"
+                class="ut-text-zinc-400 hover:ut-text-zinc-200 remove-cached-price-btn ut-text-xs ut-flex-shrink-0"
                 on:click={() => removeCachedPrice(provider, modelId, mode)}
                 title={language.disable}
             >
