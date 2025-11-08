@@ -50,8 +50,6 @@ export class UsageTracker {
         // LLM 요청만 추적됨
         const type = this.requestInfoMap.get(requestData);
         if (!type) return;
-
-        Logger.log('UsageTracker: Processing response for LLM request. type:', type, 'data:', data);
         
         this.requestInfoMap.delete(requestData);
 
@@ -61,12 +59,10 @@ export class UsageTracker {
         const format = getFormat(requestData, response, data);
         if (!format) return;
         
-        Logger.log('UsageTracker: Detected format.', format.constructor.name);
-
         const modelId: string | null = format.getModelId();
         const usageInfo: UsageInfo | null = format.getUsageInfo();
 
-        Logger.log('UsageTracker: Extracted modelId and usageInfo.', modelId, usageInfo);
+        Logger.log(`Got usage info:\n type: ${type}\n modelId: ${modelId}\n url: ${url}\n inputTokens: ${usageInfo?.inputTokens}\n cachedInputTokens: ${usageInfo?.cachedInputTokens}\n outputTokens: ${usageInfo?.outputTokens}`);
 
         if (!modelId || !usageInfo) return;
 

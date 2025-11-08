@@ -72,7 +72,7 @@ function parseBody(body: BodyInit | null | undefined): any | null {
     try {
         return JSON.parse(bodyStr);
     } catch (error) {
-        Logger.error('Failed to parse body as JSON:', error);
+        Logger.debug('Failed to parse body as JSON:', error);
         return null;
     }
 }
@@ -157,6 +157,28 @@ function getRequestUrl(requestData: RequestData): string | null {
 }
 
 function isLLMRequest(requestData: RequestData): boolean {
+    // 1. 먼저 content-type 확인 - LLM 요청은 application/json이어야 함
+    const init = requestData.init;
+    if (init && init.headers) {
+        let contentType: string | null = null;
+        
+        const headers = init.headers;
+        if (headers instanceof Headers) {
+            contentType = headers.get('content-type');
+        } else if (Array.isArray(headers)) {
+            const found = headers.find(([key]) => key.toLowerCase() === 'content-type');
+            contentType = found ? found[1] : null;
+        } else {
+            contentType = (headers as Record<string, string>)['content-type'] || null;
+        }
+        
+        // application/json이 아니면 바로 제외 (PNG 같은 바이너리 데이터 필터링)
+        if (contentType && !contentType.toLowerCase().includes('application/json')) {
+            Logger.debug('Filtering out non-JSON content-type:', contentType);
+            return false;
+        }
+    }
+
     const body = requestData.init?.body;
     if (!body) return false;
 
