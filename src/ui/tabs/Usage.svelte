@@ -37,6 +37,16 @@
     $: if (key) {
         refreshData();
     }
+    
+    $: if (language) {
+        // Update donut chart when language changes to ensure "Other" label is translated
+        if (donutChartData.length > 0) {
+            const filters = getGlobalFilters();
+            const usageFilters = buildUsageFilters(filters);
+            const filteredRecords = UsageManager.getRecords(usageFilters);
+            donutChartData = aggregateForDonut(filteredRecords, donutChartGroupBy, filters.measureBy, filters);
+        }
+    }
 
     let barChartXAxis = 'day';
     let donutChartGroupBy = 'model';
@@ -268,7 +278,7 @@
             groups[key].cost += record.totalCost || 0;
         });
         
-        const data = Object.values(groups);
+        let data = Object.values(groups);
         const total = data.reduce((sum, item) => {
             switch (measureBy) {
                 case 'tokens': return sum + item.tokens;
@@ -278,7 +288,8 @@
             }
         }, 0);
         
-        return data.map(item => {
+        // Calculate values and percentages
+        data = data.map(item => {
             let value = 0;
             switch (measureBy) {
                 case 'tokens': value = item.tokens; break;
@@ -291,6 +302,34 @@
                 percentage: total > 0 ? (value / total * 100) : 0
             };
         }).sort((a, b) => b.value - a.value);
+        
+        // Create "Other" category if there are more than 8 items
+        if (data.length > 8) {
+            const topItems = data.slice(0, 7);
+            const otherItems = data.slice(7);
+            
+            const otherCategory = {
+                name: language.other,
+                requests: otherItems.reduce((sum, item) => sum + item.requests, 0),
+                tokens: otherItems.reduce((sum, item) => sum + item.tokens, 0),
+                cost: otherItems.reduce((sum, item) => sum + item.cost, 0),
+                value: 0,
+                percentage: 0
+            };
+            
+            // Calculate the value for the "Other" category based on measureBy
+            switch (measureBy) {
+                case 'tokens': otherCategory.value = otherCategory.tokens; break;
+                case 'cost': otherCategory.value = otherCategory.cost; break;
+                case 'requests': otherCategory.value = otherCategory.requests; break;
+            }
+            
+            otherCategory.percentage = total > 0 ? (otherCategory.value / total * 100) : 0;
+            
+            return [...topItems, otherCategory];
+        }
+        
+        return data;
     }
 
     function getBucketKey(date: Date, timeRange: string): string {

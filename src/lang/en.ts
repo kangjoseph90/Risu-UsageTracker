@@ -143,4 +143,5 @@ export const languageEn = {
     addModelSuccess: "Model added successfully.",
     deleteModelConfirm: "Delete this model?\nProvider: {{provider}}\nModel: {{modelId}}",
     failToDeleteModel: "Failed to delete model.",
+    other: "Other",
 };

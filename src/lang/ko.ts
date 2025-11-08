@@ -143,4 +143,5 @@ export const languageKo = {
     addModelSuccess: "모델이 추가되었습니다.",
     deleteModelConfirm: "이 모델을 삭제하시겠습니까?\n프로바이더: {{provider}}\n모델: {{modelId}}",
     failToDeleteModel: "모델 삭제에 실패했습니다.",
+    other: "기타",
 }
