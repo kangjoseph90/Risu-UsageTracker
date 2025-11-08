@@ -169,9 +169,11 @@ function isLLMRequest(requestData: RequestData): boolean {
             const found = headers.find(([key]) => key.toLowerCase() === 'content-type');
             contentType = found ? found[1] : null;
         } else {
-            contentType = (headers as Record<string, string>)['content-type'] || null;
+            const headersRecord = headers as Record<string, string>;
+            const contentTypeKey = Object.keys(headersRecord)
+                                         .find(key => key.toLowerCase() === 'content-type');
+            contentType = contentTypeKey ? headersRecord[contentTypeKey] : null;
         }
-        
         // application/json이 아니면 바로 제외 (PNG 같은 바이너리 데이터 필터링)
         if (contentType && !contentType.toLowerCase().includes('application/json')) {
             Logger.debug('Filtering out non-JSON content-type:', contentType);
@@ -179,7 +181,7 @@ function isLLMRequest(requestData: RequestData): boolean {
         }
     }
 
-    const body = requestData.init?.body;
+    const body = init?.body;
     if (!body) return false;
 
     // parseBody로 JSON 파싱
@@ -197,7 +199,7 @@ function isLLMRequest(requestData: RequestData): boolean {
     // 조건 2: body에 contents, messages 키 중 하나가 있어야 함
     const contentKeywords = ["contents", "messages"];
     const hasContent = contentKeywords.some(keyword => keyword in bodyJson);
-
+    Logger.log('isLLMRequest: ', hasModel && hasContent);
     return hasModel && hasContent;
 }
 
