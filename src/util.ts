@@ -199,7 +199,6 @@ function isLLMRequest(requestData: RequestData): boolean {
     // 조건 2: body에 contents, messages 키 중 하나가 있어야 함
     const contentKeywords = ["contents", "messages"];
     const hasContent = contentKeywords.some(keyword => keyword in bodyJson);
-    Logger.log('isLLMRequest: ', hasModel && hasContent);
     return hasModel && hasContent;
 }
 
