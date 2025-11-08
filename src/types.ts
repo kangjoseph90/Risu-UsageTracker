@@ -19,6 +19,7 @@ export type {
 
 enum RequestType {
     Chat = 'chat',
+    Memory = 'memory',
     Emotion = 'emotion',
     Translate = 'translate',
     Other = 'other',

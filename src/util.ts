@@ -29,6 +29,7 @@ function debounce<T extends (...args: any[]) => void>(
 function parseRequestType(mode: string): RequestType {
     switch(mode) {
         case 'model': return RequestType.Chat;
+        case 'memory': return RequestType.Memory;
         case 'emotion': return RequestType.Emotion;
         case 'translate': return RequestType.Translate;
         case 'otherAx':
