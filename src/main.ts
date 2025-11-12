@@ -7,6 +7,14 @@ import { LanguageManager } from './manager/language';
 import { ProviderManager } from './manager/provider';
 import { PriceManager } from './manager/price';
 import { UsageManager } from './manager/usage';
+import { PLUGIN_TITLE } from './plugin';
+
+//@ts-ignore
+const isTauri = !!window.__TAURI_INTERNALS__
+
+if (isTauri) {
+    throw new Error(`${PLUGIN_TITLE} is not supported in Tauri environment.`);
+}
 
 // Initialize all managers
 LanguageManager.init();
