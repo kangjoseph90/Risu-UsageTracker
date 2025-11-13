@@ -159,36 +159,41 @@ function getRequestUrl(requestData: RequestData): string | null {
 }
 
 function isLLMRequest(requestData: RequestData): boolean {
-    // 1. 먼저 content-type 확인 - LLM 요청은 application/json이어야 함
     const init = requestData.init;
-    if (init && init.headers) {
-        let contentType: string | null = null;
-        
-        const headers = init.headers;
-        if (headers instanceof Headers) {
-            contentType = headers.get('content-type');
-        } else if (Array.isArray(headers)) {
-            const found = headers.find(([key]) => key.toLowerCase() === 'content-type');
-            contentType = found ? found[1] : null;
-        } else {
-            const headersRecord = headers as Record<string, string>;
-            const contentTypeKey = Object.keys(headersRecord)
-                                         .find(key => key.toLowerCase() === 'content-type');
-            contentType = contentTypeKey ? headersRecord[contentTypeKey] : null;
-        }
-        // application/json이 아니면 바로 제외 (PNG 같은 바이너리 데이터 필터링)
-        if (!contentType || !contentType.toLowerCase().includes('application/json')) {
-            return false;
-        }
+    
+    // 헤더가 없는 요청은 LLM 요청이 아님
+    if (!init || !init.headers) {
+        return false;
     }
 
-    const body = init?.body;
+    // LLM 요청은 content-type이 application/json이어야 함
+    let contentType: string | null = null;
+    const headers = init.headers;
+    
+    if (headers instanceof Headers) {
+        contentType = headers.get('content-type');
+    } else if (Array.isArray(headers)) {
+        const found = headers.find(([key]) => key.toLowerCase() === 'content-type');
+        contentType = found ? found[1] : null;
+    } else {
+        const headersRecord = headers as Record<string, string>;
+        const contentTypeKey = Object.keys(headersRecord)
+                                     .find(key => key.toLowerCase() === 'content-type');
+        contentType = contentTypeKey ? headersRecord[contentTypeKey] : null;
+    }
+    
+    // content-type이 없거나 application/json이 아니면 제외
+    if (!contentType || !contentType.toLowerCase().includes('application/json')) {
+        return false;
+    }
+
+    const body = init.body;
     if (!body) return false;
 
     // parseBody로 JSON 파싱
     const bodyJson = parseBody(body);
     if (!bodyJson) return false;
-
+    
     // 조건 1: body에 model 키가 있거나 url에 models, model이 있어야 함
     const hasModelKey = 'model' in bodyJson;
     
