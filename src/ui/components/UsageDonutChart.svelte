@@ -2,6 +2,7 @@
     import { onMount } from 'svelte';
     import { fade } from 'svelte/transition';
     import type { Language } from "../../lang";
+    import { formatNumber } from "../../util";
     import DollarDisplay from "./DollarDisplay.svelte";
 
     export let data: Array<{
@@ -104,10 +105,6 @@
         window.addEventListener('scroll', hideTooltip, true);
         return () => window.removeEventListener('scroll', hideTooltip, true);
     });
-
-    function formatNumber(num: number): string {
-        return num >= 1000 ? (num / 1000).toFixed(1) + 'K' : num.toString();
-    }
 </script>
 
 {#if data.length === 0}
@@ -152,7 +149,7 @@
                                 language={language}
                                 textClass="text-white font-medium" />
                         {:else if measureBy === 'tokens'}
-                            <span class="text-white font-medium">{(item.value / 1000).toFixed(1)}K</span>
+                            <span class="text-white font-medium">{formatNumber(item.value)}</span>
                         {:else}
                             <span class="text-white font-medium">{item.value}</span>
                         {/if}

@@ -2,6 +2,7 @@
     import { onMount, onDestroy } from 'svelte';
     import { fade } from 'svelte/transition';
     import type { Language } from "../../lang";
+    import { formatNumber } from "../../util";
     import DollarDisplay from "./DollarDisplay.svelte";
 
     export let data: Array<{
@@ -152,10 +153,6 @@
         window.addEventListener('scroll', hideTooltip, true);
         return () => window.removeEventListener('scroll', hideTooltip, true);
     });
-
-    function formatNumber(num: number): string {
-        return num >= 1000 ? (num / 1000).toFixed(1) + 'K' : num.toString();
-    }
 </script>
 
 {#if maxValue === 0 || data.length === 0}
@@ -167,7 +164,7 @@
             <svg width={yAxisWidth} height={chartHeight + 30} class="block">
                 {#each yGridLines as gridValue}
                     {@const y = chartHeight - (gridValue / maxValue) * chartHeight}
-                    {@const label = gridValue >= 1000 ? (gridValue / 1000).toFixed(0) + 'K' : gridValue.toString()}
+                    {@const label = formatNumber(gridValue)}
                     <text x={yAxisWidth - 10} y={y + 3} fill="#a1a1aa" font-size="10" text-anchor="end">{label}</text>
                 {/each}
             </svg>
@@ -196,6 +193,7 @@
                         {@const inputY = cachedY - inputHeight}
                         {@const outputY = inputY - outputHeight}
 
+                        <!-- svelte-ignore a11y-no-static-element-interactions -->
                         <g 
                             on:mouseenter={(e) => handleBarInteraction(e, bucket, index)}
                             on:mousemove={handleBarMove}
@@ -221,6 +219,7 @@
                         {@const inputY = chartHeight - inputCostHeight}
                         {@const outputY = inputY - outputCostHeight}
                         
+                        <!-- svelte-ignore a11y-no-static-element-interactions -->
                         <g 
                             on:mouseenter={(e) => handleBarInteraction(e, bucket, index)}
                             on:mousemove={handleBarMove}
@@ -240,6 +239,7 @@
                     {:else}
                         {@const height = (bucket.requests / maxValue) * chartHeight}
                         {@const y = chartHeight - height}
+                        <!-- svelte-ignore a11y-no-static-element-interactions -->
                         <g 
                             on:mouseenter={(e) => handleBarInteraction(e, bucket, index)}
                             on:mousemove={handleBarMove}
