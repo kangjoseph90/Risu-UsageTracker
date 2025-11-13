@@ -1,4 +1,6 @@
 <script lang="ts">
+    import { onMount } from 'svelte';
+    import { fade } from 'svelte/transition';
     import type { Language } from "../../lang";
     import DollarDisplay from "./DollarDisplay.svelte";
 
@@ -18,6 +20,11 @@
     const radius = 70;
     const innerRadius = 45;
     const colors = ['#3b82f6', '#8b5cf6', '#f97316', '#10b981', '#ef4444', '#eab308', '#ec4899', '#06b6d4'];
+
+    let tooltipData: typeof data[0] | null = null;
+    let tooltipX = 0;
+    let tooltipY = 0;
+    let hoveredIndex: number | null = null;
 
     $: topData = data.slice(0, 8);
 
@@ -69,6 +76,38 @@
 
         return `M ${x1} ${y1} A ${radius} ${radius} 0 ${largeArc} 1 ${x2} ${y2} L ${x3} ${y3} A ${innerRadius} ${innerRadius} 0 ${largeArc} 0 ${x4} ${y4} Z`;
     }
+
+    function handleSegmentInteraction(event: MouseEvent | TouchEvent, item: typeof data[0], index: number) {
+        const clientX = 'touches' in event ? event.touches[0].clientX : event.clientX;
+        const clientY = 'touches' in event ? event.touches[0].clientY : event.clientY;
+        
+        tooltipData = item;
+        tooltipX = clientX;
+        tooltipY = clientY;
+        hoveredIndex = index;
+    }
+
+    function handleSegmentMove(event: MouseEvent) {
+        if (tooltipData) {
+            tooltipX = event.clientX;
+            tooltipY = event.clientY;
+        }
+    }
+
+    function handleSegmentLeave() {
+        tooltipData = null;
+        hoveredIndex = null;
+    }
+
+    onMount(() => {
+        const hideTooltip = () => tooltipData = null;
+        window.addEventListener('scroll', hideTooltip, true);
+        return () => window.removeEventListener('scroll', hideTooltip, true);
+    });
+
+    function formatNumber(num: number): string {
+        return num >= 1000 ? (num / 1000).toFixed(1) + 'K' : num.toString();
+    }
 </script>
 
 {#if data.length === 0}
@@ -81,10 +120,17 @@
                 {#each topData as item, index}
                     {@const angle = (item.percentage / 100) * 360}
                     {@const startAngle = topData.slice(0, index).reduce((sum, d) => sum + (d.percentage / 100) * 360, -90)}
+                    <!-- svelte-ignore a11y-no-static-element-interactions -->
                     <path 
                         d={createSegmentPath(startAngle, angle, index)} 
                         fill={colors[index % colors.length]} 
-                        opacity="0.9"
+                        opacity={hoveredIndex === index ? 1 : 0.9}
+                        on:mouseenter={(e) => handleSegmentInteraction(e, item, index)}
+                        on:mousemove={handleSegmentMove}
+                        on:mouseleave={handleSegmentLeave}
+                        on:touchstart={(e) => handleSegmentInteraction(e, item, index)}
+                        on:touchend={handleSegmentLeave}
+                        style="cursor: pointer; transition: opacity 150ms;"
                     />
                 {/each}
             </svg>
@@ -115,4 +161,23 @@
             {/each}
         </div>
     </div>
+
+    <!-- Tooltip -->
+    {#if tooltipData}
+        <div
+            class="fixed z-[9999] rounded-md bg-gray-900 px-3 py-2 text-xs font-medium text-white shadow-lg pointer-events-none"
+            style="top: {tooltipY}px; left: {tooltipX}px; transform: translate(12px, -50%);"
+            transition:fade={{ duration: 150 }}
+        >
+            <div class="font-semibold mb-1 text-zinc-100">{tooltipData.name}</div>
+            <div class="space-y-0.5 text-zinc-300">
+                <div>{language.tokens}: {formatNumber(tooltipData.tokens)}</div>
+                <div class="flex items-center gap-1">
+                    <span>{language.cost}:</span>
+                    <DollarDisplay amount={tooltipData.cost} {language} textClass="text-zinc-300" showHint={false} />
+                </div>
+                <div>{language.requests}: {tooltipData.requests}</div>
+            </div>
+        </div>
+    {/if}
 {/if}

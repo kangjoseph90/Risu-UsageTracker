@@ -1,5 +1,8 @@
 <script lang="ts">
+    import { onMount, onDestroy } from 'svelte';
+    import { fade } from 'svelte/transition';
     import type { Language } from "../../lang";
+    import DollarDisplay from "./DollarDisplay.svelte";
 
     export let data: Array<{
         timestamp: string;
@@ -16,6 +19,10 @@
     export let language: Language;
     
     let scrollContainer: HTMLDivElement;
+    let tooltipData: typeof data[0] | null = null;
+    let tooltipX = 0;
+    let tooltipY = 0;
+    let hoveredIndex: number | null = null;
 
     $: maxValue = calculateMaxValue(data, measureBy);
     $: yGridLines = calculateGridLines(maxValue);
@@ -117,6 +124,38 @@
             scrollToEnd();
         }, 0);
     }
+
+    function handleBarInteraction(event: MouseEvent | TouchEvent, bucket: typeof data[0], index: number) {
+        const clientX = 'touches' in event ? event.touches[0].clientX : event.clientX;
+        const clientY = 'touches' in event ? event.touches[0].clientY : event.clientY;
+        
+        tooltipData = bucket;
+        tooltipX = clientX;
+        tooltipY = clientY;
+        hoveredIndex = index;
+    }
+
+    function handleBarMove(event: MouseEvent) {
+        if (tooltipData) {
+            tooltipX = event.clientX;
+            tooltipY = event.clientY;
+        }
+    }
+
+    function handleBarLeave() {
+        tooltipData = null;
+        hoveredIndex = null;
+    }
+
+    onMount(() => {
+        const hideTooltip = () => tooltipData = null;
+        window.addEventListener('scroll', hideTooltip, true);
+        return () => window.removeEventListener('scroll', hideTooltip, true);
+    });
+
+    function formatNumber(num: number): string {
+        return num >= 1000 ? (num / 1000).toFixed(1) + 'K' : num.toString();
+    }
 </script>
 
 {#if maxValue === 0 || data.length === 0}
@@ -157,33 +196,63 @@
                         {@const inputY = cachedY - inputHeight}
                         {@const outputY = inputY - outputHeight}
 
-                        {#if outputHeight > 0}
-                            <rect x={x} y={outputY} width={barWidth} height={outputHeight} fill="#f97316" rx="2"/>
-                        {/if}
-                        {#if inputHeight > 0}
-                            <rect x={x} y={inputY} width={barWidth} height={inputHeight} fill="#8b5cf6" rx="2"/>
-                        {/if}
-                        {#if cachedHeight > 0}
-                            <rect x={x} y={cachedY} width={barWidth} height={cachedHeight} fill="#3b82f6" rx="2"/>
-                        {/if}
+                        <g 
+                            on:mouseenter={(e) => handleBarInteraction(e, bucket, index)}
+                            on:mousemove={handleBarMove}
+                            on:mouseleave={handleBarLeave}
+                            on:touchstart={(e) => handleBarInteraction(e, bucket, index)}
+                            on:touchend={handleBarLeave}
+                            style="cursor: pointer;"
+                        >
+                            {#if outputHeight > 0}
+                                <rect x={x} y={outputY} width={barWidth} height={outputHeight} fill="#f97316" rx="2" opacity={hoveredIndex === index ? 1 : 0.9} style="transition: opacity 150ms;"/>
+                            {/if}
+                            {#if inputHeight > 0}
+                                <rect x={x} y={inputY} width={barWidth} height={inputHeight} fill="#8b5cf6" rx="2" opacity={hoveredIndex === index ? 1 : 0.9} style="transition: opacity 150ms;"/>
+                            {/if}
+                            {#if cachedHeight > 0}
+                                <rect x={x} y={cachedY} width={barWidth} height={cachedHeight} fill="#3b82f6" rx="2" opacity={hoveredIndex === index ? 1 : 0.9} style="transition: opacity 150ms;"/>
+                            {/if}
+                            <rect x={x} y={0} width={barWidth} height={chartHeight} fill="transparent"/>
+                        </g>
                     {:else if measureBy === 'cost'}
                         {@const outputCostHeight = (bucket.outputCost / maxValue) * chartHeight}
                         {@const inputCostHeight = (bucket.inputCost / maxValue) * chartHeight}
                         {@const inputY = chartHeight - inputCostHeight}
                         {@const outputY = inputY - outputCostHeight}
                         
-                        {#if outputCostHeight > 0}
-                            <rect x={x} y={outputY} width={barWidth} height={outputCostHeight} fill="#f97316" rx="2"/>
-                        {/if}
-                        {#if inputCostHeight > 0}
-                            <rect x={x} y={inputY} width={barWidth} height={inputCostHeight} fill="#8b5cf6" rx="2"/>
-                        {/if}
+                        <g 
+                            on:mouseenter={(e) => handleBarInteraction(e, bucket, index)}
+                            on:mousemove={handleBarMove}
+                            on:mouseleave={handleBarLeave}
+                            on:touchstart={(e) => handleBarInteraction(e, bucket, index)}
+                            on:touchend={handleBarLeave}
+                            style="cursor: pointer;"
+                        >
+                            {#if outputCostHeight > 0}
+                                <rect x={x} y={outputY} width={barWidth} height={outputCostHeight} fill="#f97316" rx="2" opacity={hoveredIndex === index ? 1 : 0.9} style="transition: opacity 150ms;"/>
+                            {/if}
+                            {#if inputCostHeight > 0}
+                                <rect x={x} y={inputY} width={barWidth} height={inputCostHeight} fill="#8b5cf6" rx="2" opacity={hoveredIndex === index ? 1 : 0.9} style="transition: opacity 150ms;"/>
+                            {/if}
+                            <rect x={x} y={0} width={barWidth} height={chartHeight} fill="transparent"/>
+                        </g>
                     {:else}
                         {@const height = (bucket.requests / maxValue) * chartHeight}
                         {@const y = chartHeight - height}
-                        {#if height > 0}
-                            <rect x={x} y={y} width={barWidth} height={height} fill="#3b82f6" rx="2"/>
-                        {/if}
+                        <g 
+                            on:mouseenter={(e) => handleBarInteraction(e, bucket, index)}
+                            on:mousemove={handleBarMove}
+                            on:mouseleave={handleBarLeave}
+                            on:touchstart={(e) => handleBarInteraction(e, bucket, index)}
+                            on:touchend={handleBarLeave}
+                            style="cursor: pointer;"
+                        >
+                            {#if height > 0}
+                                <rect x={x} y={y} width={barWidth} height={height} fill="#3b82f6" rx="2" opacity={hoveredIndex === index ? 1 : 0.9} style="transition: opacity 150ms;"/>
+                            {/if}
+                            <rect x={x} y={0} width={barWidth} height={chartHeight} fill="transparent"/>
+                        </g>
                     {/if}
 
                     <!-- Label -->
@@ -226,4 +295,29 @@
             </div>
         {/if}
     </div>
+
+    <!-- Tooltip -->
+    {#if tooltipData}
+        <div
+            class="fixed z-[9999] rounded-md bg-gray-900 px-3 py-2 text-xs font-medium text-white shadow-lg pointer-events-none"
+            style="top: {tooltipY}px; left: {tooltipX}px; transform: translate(12px, -50%);"
+            transition:fade={{ duration: 150 }}
+        >
+            <div class="font-semibold mb-1 text-zinc-100">{tooltipData.timestamp}</div>
+            <div class="space-y-0.5 text-zinc-300">
+                <div>{language.cachedTokens}: {formatNumber(tooltipData.cachedInputTokens)}</div>
+                <div>{language.inputTokens}: {formatNumber(tooltipData.inputTokens)}</div>
+                <div>{language.outputTokens}: {formatNumber(tooltipData.outputTokens)}</div>
+                <div class="flex items-center gap-1">
+                    <span>{language.inputCostLabel}:</span>
+                    <DollarDisplay amount={tooltipData.inputCost} {language} textClass="text-zinc-300" showHint={false} />
+                </div>
+                <div class="flex items-center gap-1">
+                    <span>{language.outputCostLabel}:</span>
+                    <DollarDisplay amount={tooltipData.outputCost} {language} textClass="text-zinc-300" showHint={false} />
+                </div>
+                <div>{language.requests}: {tooltipData.requests}</div>
+            </div>
+        </div>
+    {/if}
 {/if}
