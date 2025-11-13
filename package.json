@@ -1,6 +1,6 @@
 {
   "name": "usage-tracker",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "RisuAI Plugin for tracking API usage.",
   "type": "module",
   "main": "dist/usage-tracker.js",
