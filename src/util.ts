@@ -176,8 +176,7 @@ function isLLMRequest(requestData: RequestData): boolean {
             contentType = contentTypeKey ? headersRecord[contentTypeKey] : null;
         }
         // application/json이 아니면 바로 제외 (PNG 같은 바이너리 데이터 필터링)
-        if (contentType && !contentType.toLowerCase().includes('application/json')) {
-            Logger.debug('Filtering out non-JSON content-type:', contentType);
+        if (!contentType || !contentType.toLowerCase().includes('application/json')) {
             return false;
         }
     }
