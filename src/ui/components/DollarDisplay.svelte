@@ -105,7 +105,7 @@
     <!-- Tooltip Container -->
     {#if isHovering}
         <div
-            class="fixed z-[9999] rounded-md bg-gray-900 px-2 py-1 text-xs text-white shadow-lg whitespace-nowrap pointer-events-none"
+            class="fixed z-[9999] rounded-md bg-gray-900 px-2 py-1 text-xs font-medium text-white shadow-lg whitespace-nowrap pointer-events-none"
             style="top: {tooltipTop}px; left: {tooltipLeft}px;"
             transition:fade={{ duration: 150 }}
         >
