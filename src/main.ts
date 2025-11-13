@@ -13,19 +13,20 @@ import { PLUGIN_TITLE } from './plugin';
 const isTauri = !!window.__TAURI_INTERNALS__
 
 if (isTauri) {
-    throw new Error(`${PLUGIN_TITLE} is not supported in Tauri environment.`);
+    alert(`${PLUGIN_TITLE} is not supported in Tauri environment.`);;
+} else {
+    // Initialize all managers
+    LanguageManager.init();
+    ProviderManager.init();
+    PriceManager.init();
+    UsageManager.init();
+    
+    const usageTracker = new UsageTracker();
+    const ui = new UI();
+    
+    RisuAPI.onUnload(() => {
+        usageTracker.destroy();
+        ui.destroy();
+    });
 }
 
-// Initialize all managers
-LanguageManager.init();
-ProviderManager.init();
-PriceManager.init();
-UsageManager.init();
-
-const usageTracker = new UsageTracker();
-const ui = new UI();
-
-RisuAPI.onUnload(() => {
-    usageTracker.destroy();
-    ui.destroy();
-});
