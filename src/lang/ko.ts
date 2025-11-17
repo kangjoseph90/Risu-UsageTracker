@@ -144,4 +144,9 @@ export const languageKo = {
     deleteModelConfirm: "이 모델을 삭제하시겠습니까?\n프로바이더: {{provider}}\n모델: {{modelId}}",
     failToDeleteModel: "모델 삭제에 실패했습니다.",
     other: "기타",
+    exportFail: "내보내기 실패.",
+    backupToBrowser: "브라우저에 백업",
+    exportToFile: "파일로 내보내기",
+    restoreFromBrowser: "브라우저에서 복원",
+    importFromFile: "파일에서 가져오기",
 }

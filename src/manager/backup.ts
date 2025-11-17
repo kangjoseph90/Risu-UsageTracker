@@ -5,6 +5,7 @@ import { LanguageManager } from "./language";
 import { ProviderManager } from "./provider";
 import { PriceManager } from "./price";
 import { UsageManager } from "./usage";
+import { downloadFile, readFileAsText } from "../util";
 
 interface BackupData {
     version: string;
@@ -28,20 +29,7 @@ export class BackupManager {
 
     static async backup(): Promise<boolean> {
         try {
-            const backupData: BackupData = {
-                version: this.VERSION,
-                timestamp: new Date().toISOString(),
-                data: {}
-            };
-
-            // 등록된 모든 arg 데이터 수집 (자동)
-            const argNames = getAllArgNames();
-            for (const argName of argNames) {
-                const value = RisuAPI.getArg(argName);
-                if (value !== undefined) {
-                    backupData.data[argName] = String(value);
-                }
-            }
+            const backupData = await this.gatherData();
 
             // IndexedDB에 저장
             await this.saveToIndexedDB(backupData);
@@ -61,23 +49,76 @@ export class BackupManager {
                 return false;
             }
 
-            // 복구된 데이터를 RisuAPI에 설정 (자동)
-            for (const [argName, value] of Object.entries(backupData.data)) {
-                if (this.isValidArgName(argName)) {
-                    RisuAPI.setArg(argName, value);
-                }
-            }
-
-            LanguageManager.init();
-            ProviderManager.init();
-            PriceManager.init();
-            UsageManager.init();
+            await this.applyData(backupData);
 
             return true;
         } catch (e) {
             Logger.error('Restore failed:', e);
             return false;
         }
+    }
+
+    static async exportBackupToFile(): Promise<boolean> {
+        try {
+            const backupData = await this.gatherData();
+            const jsonString = JSON.stringify(backupData, null, 2);
+            const date = new Date().toISOString().split('T')[0];
+            downloadFile(jsonString, `risu-usage-tracker-backup-${date}.json`, 'application/json');
+            return true;
+        } catch (e) {
+            Logger.error('Export failed:', e);
+            return false;
+        }
+    }
+
+    static async importBackupFromFile(file: File): Promise<boolean> {
+        try {
+            const jsonString = await readFileAsText(file);
+            const backupData = JSON.parse(jsonString) as BackupData;
+
+            // Basic validation
+            if (!backupData || backupData.version !== this.VERSION || !backupData.data) {
+                throw new Error('Invalid or incompatible backup file.');
+            }
+
+            await this.applyData(backupData);
+            return true;
+        } catch (e) {
+            Logger.error('Import failed:', e);
+            return false;
+        }
+    }
+
+    private static async gatherData(): Promise<BackupData> {
+        const backupData: BackupData = {
+            version: this.VERSION,
+            timestamp: new Date().toISOString(),
+            data: {}
+        };
+
+        // 등록된 모든 arg 데이터 수집 (자동)
+        const argNames = getAllArgNames();
+        for (const argName of argNames) {
+            const value = RisuAPI.getArg(argName);
+            if (value !== undefined) {
+                backupData.data[argName] = String(value);
+            }
+        }
+        return backupData;
+    }
+
+    private static async applyData(backupData: BackupData): Promise<void> {
+        // 복구된 데이터를 RisuAPI에 설정 (자동)
+        for (const [argName, value] of Object.entries(backupData.data)) {
+            if (this.isValidArgName(argName)) {
+                RisuAPI.setArg(argName, value);
+            }
+        }
+
+        LanguageManager.init();
+        ProviderManager.init();
+        PriceManager.init();
+        UsageManager.init();
     }
 
     static async hasBackup(): Promise<boolean> {

@@ -144,4 +144,9 @@ export const languageEn = {
     deleteModelConfirm: "Delete this model?\nProvider: {{provider}}\nModel: {{modelId}}",
     failToDeleteModel: "Failed to delete model.",
     other: "Other",
+    exportFail: "Export failed.",
+    backupToBrowser: "Backup to Browser",
+    exportToFile: "Export to File",
+    restoreFromBrowser: "Restore from Browser",
+    importFromFile: "Import from File",
 };
