@@ -30,6 +30,20 @@
 
 	// UI states
 	let exportOptionsExpanded = false;
+	let exportDropdownRef: HTMLDivElement | null = null;
+    let exportButtonRef: HTMLButtonElement | null = null;
+
+	function handleDocumentClick(event: MouseEvent) {
+        if (exportOptionsExpanded && exportDropdownRef && !exportDropdownRef.contains(event.target as Node) && !exportButtonRef?.contains(event.target as Node)) {
+            exportOptionsExpanded = false;
+        }
+    }
+
+    $: if (exportOptionsExpanded) {
+        document.addEventListener('mousedown', handleDocumentClick);
+    } else {
+        document.removeEventListener('mousedown', handleDocumentClick);
+    }
 
 	$: uniqueProviders = getUniqueProviders();
 	$: uniqueModels = getUniqueModels(allRecords);
@@ -378,6 +392,7 @@
 			<!-- Export Dropdown -->
 			<div class="relative">
 				<button
+					bind:this={exportButtonRef}
 					class="px-2.5 py-1 bg-zinc-800 hover:bg-zinc-700 text-zinc-400 rounded text-xs flex items-center justify-center gap-2 transition-colors duration-200"
 					on:click={toggleExportOptions}
 				>
@@ -385,7 +400,7 @@
 					<span>{language.export}</span>
 				</button>
 				{#if exportOptionsExpanded}
-					<div class="absolute bottom-full mb-2 left-0 p-1 w-40 bg-zinc-800 rounded-lg shadow-xl flex flex-col gap-1 text-zinc-100 border border-zinc-700/60 z-20">
+					<div bind:this={exportDropdownRef} class="absolute bottom-full mb-2 left-0 p-1 w-40 bg-zinc-800 rounded-lg shadow-xl flex flex-col gap-1 text-zinc-100 border border-zinc-700/60 z-20">
 						<button class="w-full text-left px-2 py-1.5 rounded text-xs transition-colors text-zinc-400 hover:bg-zinc-700 hover:text-zinc-200" on:click={exportRecordsAsJSON}>{language.exportAsJSON}</button>
 						<button class="w-full text-left px-2 py-1.5 rounded text-xs transition-colors text-zinc-400 hover:bg-zinc-700 hover:text-zinc-200" on:click={exportRecordsAsCSV}>{language.exportAsCSV}</button>
 					</div>
