@@ -1,11 +1,12 @@
 <script lang="ts">
     import { PriceManager } from "../manager/price";
     import { PLUGIN_NAME } from "../plugin";
-    import { TriangleAlert, Settings, X, Columns2, Database, Globe, Upload, Download } from 'lucide-svelte';
+    import { TriangleAlert, Settings, X, Columns2, Database, Globe, Upload, Download, CircleDollarSign } from 'lucide-svelte';
     import Usage from "./tabs/Usage.svelte";
     import Price from "./tabs/Price.svelte";
     import Provider from "./tabs/Provider.svelte";
     import Record from "./tabs/Record.svelte";
+    import Budget from "./tabs/Budget.svelte";
     import { BackupManager } from "../manager/backup";
     import { LanguageManager } from "../manager/language";
     import type { Language } from '../lang';
@@ -14,7 +15,7 @@
     
     export let onClose: () => void;
     export let language: Language;
-    let currentTab: 'usage' | 'price' | 'provider' | 'record' = 'usage';
+    let currentTab: 'usage' | 'price' | 'provider' | 'record' | 'budget' = 'usage';
     let hasTempPrice: boolean = PriceManager.hasTemporaryPrice();
     let settingsExpanded: boolean = false;
     let settingsDropdownRef: HTMLDivElement | null = null;
@@ -162,6 +163,10 @@
                         <span>{language.usage}</span>
                     </button>
 
+                    <button class="px-3 py-2 rounded-lg text-sm whitespace-nowrap {currentTab === 'budget' ? 'bg-zinc-700' : 'bg-zinc-800'} text-zinc-200 transition-colors font-medium hover:bg-zinc-700" title="Budget" on:click={() => currentTab = 'budget'} disabled={currentTab === 'budget'}>
+                        <span>{language.budget}</span>
+                    </button>
+
                     <button class="px-3 py-2 rounded-lg text-sm whitespace-nowrap {currentTab === 'price' ? 'bg-zinc-700' : 'bg-zinc-800'} text-zinc-200 transition-colors font-medium hover:text-zinc-100 hover:bg-zinc-700 flex items-center gap-1" title="Price Information" on:click={() => currentTab = 'price'} disabled={currentTab === 'price'}>
                         <span>{language.price}</span>
                         <span class="price-warning-icon {hasTempPrice ? 'block' : 'hidden'} text-yellow-400">
@@ -250,6 +255,8 @@
                     <Provider key={refreshKey} {language} />
                 {:else if currentTab === 'record'}
                     <Record key={refreshKey} {language} />
+                {:else if currentTab === 'budget'}
+                    <Budget key={refreshKey} {language} />
                 {/if}
             </div>
         </div>

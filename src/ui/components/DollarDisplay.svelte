@@ -93,7 +93,7 @@
 
 <button
     type="button"
-    class="inline-block relative {textClass} appearance-none bg-transparent border-none p-0 m-0 font-inherit text-inherit text-left cursor-pointer focus:outline-none"
+    class="inline-block relative {textClass} appearance-none bg-transparent border-none p-0 m-0 text-left cursor-pointer focus:outline-none"
     on:mouseenter={handleMouseEnter}
     on:click={handleMouseEnter}
     on:mouseleave={handleMouseLeave}

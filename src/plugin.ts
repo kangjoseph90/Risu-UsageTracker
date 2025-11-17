@@ -64,6 +64,16 @@ const PRICE_TEMP_ARG = 'price_temp_info'
 const PROVIDER_MAP_ARG = 'provider_map'
 
 /*
+{
+    id: string,
+    name: string,
+    period: 'daily' | 'weekly' | 'monthly',
+    limit: number,
+}[]
+*/
+const BUDGET_RULE_ARG = 'budget_rules'
+
+/*
 LanguageType // 'en' | 'ko'
 */
 const LANGUAGE_ARG = 'language'
@@ -73,6 +83,7 @@ const RISU_ARGS: RisuArgs = {
     [PRICE_ARG]: RisuArgType.String,
     [PRICE_TEMP_ARG]: RisuArgType.String,
     [PROVIDER_MAP_ARG]: RisuArgType.String,
+    [BUDGET_RULE_ARG]: RisuArgType.String,
     [LANGUAGE_ARG]: RisuArgType.String,
 }
 

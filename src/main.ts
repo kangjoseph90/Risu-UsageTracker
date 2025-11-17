@@ -7,13 +7,14 @@ import { LanguageManager } from './manager/language';
 import { ProviderManager } from './manager/provider';
 import { PriceManager } from './manager/price';
 import { UsageManager } from './manager/usage';
-import { PLUGIN_TITLE } from './plugin';
+import { BudgetManager } from './manager/budget';
 
 // Initialize all managers
 LanguageManager.init();
 ProviderManager.init();
 PriceManager.init();
 UsageManager.init();
+BudgetManager.init();
 
 const usageTracker = new UsageTracker();
 const ui = new UI();

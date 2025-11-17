@@ -1,5 +1,6 @@
 export {
-    RequestType
+    RequestType,
+    BudgetPeriod
 };
 
 export type {
@@ -14,7 +15,8 @@ export type {
     OnRequestCallback,
     OnResponseCallback,
     RequestData,
-    ProviderMap
+    ProviderMap,
+    BudgetRule
 };
 
 enum RequestType {
@@ -24,6 +26,12 @@ enum RequestType {
     Translate = 'translate',
     Other = 'other',
     Unknown = 'unknown',
+}
+
+enum BudgetPeriod {
+    Daily = 'daily',
+    Weekly = 'weekly',
+    Monthly = 'monthly',
 }
 
 interface PriceInfo { // per 1M tokens
@@ -76,4 +84,14 @@ type OnResponseCallback = (requestData: RequestData, response: Response, data?: 
 
 interface ProviderMap {
     [url: string]: string; // url -> providerName
+}
+
+interface BudgetRule {
+    id: string,
+    name: string,
+    period: BudgetPeriod,
+    limit: number,
+    model?: string, // Optional filter for specific model
+    provider?: string, // Optional filter for specific provider
+    requestType?: string, // Optional filter for specific request type
 }
