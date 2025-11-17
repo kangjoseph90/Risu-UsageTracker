@@ -159,6 +159,8 @@ function getRequestUrl(requestData: RequestData): string | null {
 }
 
 function isLLMRequest(requestData: RequestData): boolean {
+    // globalFetch, fetchNative 만 추적하므로 헤더 검증은 생략
+    /*
     const init = requestData.init;
     
     // 헤더가 없는 요청은 LLM 요청이 아님
@@ -186,8 +188,9 @@ function isLLMRequest(requestData: RequestData): boolean {
     if (!contentType || !contentType.toLowerCase().includes('application/json')) {
         return false;
     }
+    */
 
-    const body = init.body;
+    const body = requestData.init?.body;
     if (!body) return false;
 
     // parseBody로 JSON 파싱

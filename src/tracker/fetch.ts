@@ -1,6 +1,37 @@
 import { Logger } from "../logger";
 import type { OnRequestCallback, OnResponseCallback, RequestData } from "../types";
 
+// globalFetch와 fetchNative의 타입 정의
+interface GlobalFetchArgs {
+    plainFetchForce?: boolean;
+    plainFetchDeforce?: boolean;
+    body?: any;
+    headers?: { [key: string]: string };
+    rawResponse?: boolean;
+    method?: 'POST' | 'GET';
+    abortSignal?: AbortSignal;
+    useRisuToken?: boolean;
+    chatId?: string;
+}
+
+interface GlobalFetchResult {
+    ok: boolean;
+    data: any;
+    headers: { [key: string]: string };
+    status: number;
+}
+
+type GlobalFetchFunction = (url: string, arg?: GlobalFetchArgs) => Promise<GlobalFetchResult>;
+
+type FetchNativeFunction = (url: string, arg?: {
+    body?: string | Uint8Array | ArrayBuffer;
+    headers?: { [key: string]: string };
+    method?: "POST" | "GET" | "PUT" | "DELETE";
+    signal?: AbortSignal;
+    useRisuTk?: boolean;
+    chatId?: string;
+}) => Promise<Response>;
+
 /**
  * addOnRequest,
  * removeOnRequest,
@@ -8,23 +39,60 @@ import type { OnRequestCallback, OnResponseCallback, RequestData } from "../type
  * removeOnResponse,
  */
 export class FetchWrapper {
-    private originalFetch: typeof fetch;
+    private originalGlobalFetch: GlobalFetchFunction | null = null;
+    private originalFetchNative: FetchNativeFunction | null = null;
     private onRequest: Set<OnRequestCallback> = new Set();
     private onResponse: Set<OnResponseCallback> = new Set();
 
     constructor() {
-        this.originalFetch = window.fetch.bind(window);
-        window.fetch = this.wrappedFetch.bind(this);
+        this.patchGlobalFunctions();
     }
 
-    private async wrappedFetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
-        let modifiedInput: RequestInfo | URL = input;
-        let modifiedInit: RequestInit | undefined = init;
+    private patchGlobalFunctions() {
+        //@ts-ignore
+        if (typeof globalFetch === 'function') {
+            //@ts-ignore
+            this.originalGlobalFetch = globalFetch;
+            //@ts-ignore
+            globalFetch = this.wrappedGlobalFetch.bind(this);
+        }
+
+        //@ts-ignore
+        if (typeof fetchNative === 'function') {
+            //@ts-ignore
+            this.originalFetchNative = fetchNative;
+            //@ts-ignore
+            fetchNative = this.wrappedFetchNative.bind(this);
+        }
+    }
+
+    private async wrappedGlobalFetch(url: string, arg: GlobalFetchArgs = {}): Promise<GlobalFetchResult> {
+        // body를 안전하게 변환
+        let parsedBody: BodyInit | null | undefined;
+        if (arg.body !== undefined && arg.body !== null) {
+            if (typeof arg.body === 'string') {
+                parsedBody = arg.body;
+            } else if (arg.body instanceof URLSearchParams || 
+                       arg.body instanceof FormData || 
+                       arg.body instanceof Blob || 
+                       arg.body instanceof ArrayBuffer ||
+                       arg.body instanceof ReadableStream) {
+                parsedBody = arg.body;
+            } else {
+                // 객체나 기타 타입은 JSON으로 변환
+                parsedBody = JSON.stringify(arg.body);
+            }
+        }
 
         // request 데이터 저장
         const requestData: RequestData = {
-            input: modifiedInput,
-            init: modifiedInit,
+            input: url,
+            init: {
+                method: arg.method || 'POST',
+                headers: arg.headers,
+                body: parsedBody,
+                signal: arg.abortSignal,
+            },
         };
 
         // onRequest 콜백 실행
@@ -37,8 +105,53 @@ export class FetchWrapper {
         }
 
         try {
-            // 원본 fetch 실행
-            const response = await this.originalFetch(modifiedInput, modifiedInit);
+            // 원본 globalFetch 실행
+            const result = await this.originalGlobalFetch!(url, arg);
+
+            // onResponse 콜백 실행
+            this.handleGlobalFetchResponse(result, requestData).catch(error => {
+                Logger.error('Error handling globalFetch response:', error);
+            });
+
+            return result;
+        } catch (error) {
+            Logger.error('globalFetch error:', error);
+            throw error;
+        }
+    }
+
+    private async wrappedFetchNative(url: string, arg: {
+        body?: string | Uint8Array | ArrayBuffer;
+        headers?: { [key: string]: string };
+        method?: "POST" | "GET" | "PUT" | "DELETE";
+        signal?: AbortSignal;
+        useRisuTk?: boolean;
+        chatId?: string;
+    } = {}): Promise<Response> {
+        Logger.log('wrappedFetchNative called with URL:', url);
+        // request 데이터 저장
+        const requestData: RequestData = {
+            input: url,
+            init: {
+                method: arg.method || 'POST',
+                headers: arg.headers,
+                body: arg.body as BodyInit | null | undefined,
+                signal: arg.signal,
+            },
+        };
+
+        // onRequest 콜백 실행
+        try {
+            for (const callback of this.onRequest) {
+                callback(requestData);
+            }
+        } catch (error) {
+            Logger.error('Error in onRequest callback:', error);
+        }
+
+        try {
+            // 원본 fetchNative 실행
+            const response = await this.originalFetchNative!(url, arg);
 
             const contentType = response.headers.get("content-type") || "";
             const isStream = contentType.includes("text/event-stream") || 
@@ -74,8 +187,40 @@ export class FetchWrapper {
             }
         } catch (error) {
             // fetch 에러도 콜백에 전달 (선택적)
-            Logger.error('Fetch error:', error);
+            Logger.error('fetchNative error:', error);
             throw error;
+        }
+    }
+
+    private async handleGlobalFetchResponse(result: GlobalFetchResult, requestData: RequestData): Promise<void> {
+        try {
+            let responseData: string | undefined;
+
+            // data가 Uint8Array인 경우 (rawResponse: true)
+            if (result.data instanceof Uint8Array) {
+                responseData = '[Binary Data: Uint8Array]';
+            }
+            // data가 문자열인 경우
+            else if (typeof result.data === 'string') {
+                responseData = result.data;
+            }
+            // data가 객체인 경우 (JSON 파싱된 결과)
+            else {
+                responseData = JSON.stringify(result.data);
+            }
+
+            // 콜백 실행 - Response 객체 대신 가짜 Response 객체 생성
+            const mockResponse = {
+                status: result.status,
+                ok: result.ok,
+                headers: new Map(Object.entries(result.headers)),
+            } as any;
+
+            for (const callback of this.onResponse) {
+                callback(requestData, mockResponse, responseData);
+            }
+        } catch (error) {
+            Logger.error('Error in handleGlobalFetchResponse:', error);
         }
     }
 
@@ -197,7 +342,16 @@ export class FetchWrapper {
     }
 
     public destroy() {
-        window.fetch = this.originalFetch;
+        // 원본 함수 복원
+        if (this.originalGlobalFetch) {
+            //@ts-ignore
+            globalFetch = this.originalGlobalFetch;
+        }
+        if (this.originalFetchNative) {
+            //@ts-ignore
+            fetchNative = this.originalFetchNative;
+        }
+        
         this.onRequest.clear();
         this.onResponse.clear();
     }
