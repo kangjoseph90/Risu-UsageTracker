@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Search, X } from 'lucide-svelte';
 	import type { Language } from '../../lang';
-	import { onMount } from 'svelte';
+	import { onMount, onDestroy } from 'svelte';
 	import flatpickr from 'flatpickr';
 	import 'flatpickr/dist/flatpickr.css';
 
@@ -23,6 +23,14 @@
 	let fpEndDate: flatpickr.Instance | null = null;
 
 	onMount(() => {
+		// Clean up any existing instances before creating new ones
+		if (fpStartDate) {
+			fpStartDate.destroy();
+		}
+		if (fpEndDate) {
+			fpEndDate.destroy();
+		}
+
 		fpStartDate = flatpickr(startDateInput, {
 			enableTime: true,
 			dateFormat: 'y-m-d H:i',
@@ -48,6 +56,18 @@
 				}
 			}
 		});
+	});
+
+	onDestroy(() => {
+		// Clean up flatpickr instances when component is destroyed
+		if (fpStartDate) {
+			fpStartDate.destroy();
+			fpStartDate = null;
+		}
+		if (fpEndDate) {
+			fpEndDate.destroy();
+			fpEndDate = null;
+		}
 	});
 
 	/**
