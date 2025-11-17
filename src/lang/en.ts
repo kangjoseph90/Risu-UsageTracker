@@ -149,4 +149,8 @@ export const languageEn = {
     exportToFile: "Export to File",
     restoreFromBrowser: "Restore from Browser",
     importFromFile: "Import from File",
+    export: "Export",
+    exportAsJSON: "Export as JSON",
+    exportAsCSV: "Export as CSV",
+    exportSuccess: "Export successful.",
 };

@@ -5,9 +5,10 @@
 	import type { UsageRecord } from '../../types';
 	import { RequestType } from '../../types';
 	import { formatString, type Language } from '../../lang';
-	import { Trash } from 'lucide-svelte';
+	import { Trash, Download } from 'lucide-svelte';
 	import RecordFilters from '../components/RecordFilters.svelte';
 	import RecordRow from '../components/RecordRow.svelte';
+	import { downloadFile } from '../../util';
 
 	export let key: number = 0;
 	export let language: Language;
@@ -28,6 +29,7 @@
 	let totalPages = 1;
 
 	// UI states
+	let exportOptionsExpanded = false;
 
 	$: uniqueProviders = getUniqueProviders();
 	$: uniqueModels = getUniqueModels(allRecords);
@@ -223,6 +225,34 @@
 	function handleRecordDelete(event: CustomEvent<UsageRecord>) {
 		deleteRecord(event.detail);
 	}
+
+	function toggleExportOptions() {
+		exportOptionsExpanded = !exportOptionsExpanded;
+	}
+
+	function exportRecordsAsJSON() {
+		try {
+			const jsonString = UsageManager.exportToJSON(filteredRecords);
+			const date = new Date().toISOString().split('T')[0];
+			downloadFile(jsonString, `risu-usage-records-${date}.json`, 'application/json');
+			alert(language.exportSuccess);
+		} catch (e) {
+			alert(language.exportFail);
+		}
+		exportOptionsExpanded = false;
+	}
+
+	function exportRecordsAsCSV() {
+		try {
+			const csvString = UsageManager.exportToCSV(filteredRecords);
+			const date = new Date().toISOString().split('T')[0];
+			downloadFile(csvString, `risu-usage-records-${date}.csv`, 'text/csv');
+			alert(language.exportSuccess);
+		} catch (e) {
+			alert(language.exportFail);
+		}
+		exportOptionsExpanded = false;
+	}
 </script>
 
 <div class="flex flex-col h-full">
@@ -301,18 +331,20 @@
 	</div>
 
 	<!-- Pagination Area (Fixed Scrolling) -->
-	{#if totalPages > 1}
-	<div class="sticky bottom-0 z-10 bg-zinc-900 border-t border-zinc-700/60 px-3 pt-3 pb-2 flex-shrink-0 shadow-[0_-4px_16px_0_rgba(0,0,0,0.25)]">
-		<div class="flex justify-center items-center gap-2">
+	<div class="sticky bottom-0 z-10 bg-zinc-900 border-t border-zinc-700/60 px-3 pt-2 flex-shrink-0 shadow-[0_-4px_16px_0_rgba(0,0,0,0.25)]">
+		{#if totalPages > 1}
+		<div class="flex justify-center items-center gap-2 mb-2">
+			<!-- Pagination Controls -->
 			<button
-				class="px-3 py-1 bg-zinc-700 hover:bg-zinc-600 text-white rounded text-xs transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+				class="px-2.5 py-1 bg-zinc-700 hover:bg-zinc-600 text-white rounded text-xs transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 				on:click={() => goToPage(currentPage - 1)}
 				disabled={currentPage === 1}
 			>
 				&lt;
 			</button>
 
-			{#each Array.from({length: Math.min(totalPages, 10)}, (_, i) => i + 1) as pageNum}
+			{#each Array(totalPages) as _, i}
+				{@const pageNum = i + 1}
 				{#if pageNum === 1 || pageNum === totalPages || (pageNum >= currentPage - 2 && pageNum <= currentPage + 2)}
 					<button
 						class="px-3 py-1 {pageNum === currentPage ? 'bg-blue-600 text-white' : 'bg-zinc-700 hover:bg-zinc-600 text-white'} rounded text-xs transition-colors"
@@ -333,14 +365,32 @@
 				&gt;
 			</button>
 		</div>
+		{/if}
 
-		<div class="text-center text-xs text-zinc-400 mt-2">
-			{formatString(language.pageInfo, {
-				current: currentPage,
-				total: totalPages,
-				count: filteredRecords.length
-			})}
+		<div class="flex justify-center items-center gap-2">
+			<span class="text-xs text-zinc-400">
+				{formatString(language.pageInfo, {
+					current: currentPage,
+					total: totalPages,
+					count: filteredRecords.length
+				})}
+			</span>
+			<!-- Export Dropdown -->
+			<div class="relative">
+				<button
+					class="px-2.5 py-1 bg-zinc-800 hover:bg-zinc-700 text-zinc-400 rounded text-xs flex items-center justify-center gap-2 transition-colors duration-200"
+					on:click={toggleExportOptions}
+				>
+					<Download size={16} />
+					<span>{language.export}</span>
+				</button>
+				{#if exportOptionsExpanded}
+					<div class="absolute bottom-full mb-2 left-0 p-1 w-40 bg-zinc-800 rounded-lg shadow-xl flex flex-col gap-1 text-zinc-100 border border-zinc-700/60 z-20">
+						<button class="w-full text-left px-2 py-1.5 rounded text-xs transition-colors text-zinc-400 hover:bg-zinc-700 hover:text-zinc-200" on:click={exportRecordsAsJSON}>{language.exportAsJSON}</button>
+						<button class="w-full text-left px-2 py-1.5 rounded text-xs transition-colors text-zinc-400 hover:bg-zinc-700 hover:text-zinc-200" on:click={exportRecordsAsCSV}>{language.exportAsCSV}</button>
+					</div>
+				{/if}
+			</div>
 		</div>
 	</div>
-	{/if}
 </div>

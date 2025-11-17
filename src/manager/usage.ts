@@ -91,4 +91,44 @@ export class UsageManager {
 
         return updatedCount;
     }
+
+    static exportToJSON(records: UsageRecord[]): string {
+        return JSON.stringify(records, null, 2);
+    }
+
+    static exportToCSV(records: UsageRecord[]): string {
+        if (records.length === 0) {
+            return '';
+        }
+
+        const headers = [
+            'timestamp',
+            'model',
+            'requestType',
+            'url',
+            'inputTokens',
+            'cachedInputTokens',
+            'outputTokens',
+            'inputCost',
+            'outputCost',
+            'totalCost'
+        ];
+
+        const csvRows = [headers.join(',')];
+
+        for (const record of records) {
+            const values = headers.map(header => {
+                const key = header as keyof UsageRecord;
+                let value = record[key];
+
+                if (typeof value === 'string') {
+                    value = `"${value.replace(/"/g, '""')}"`;
+                }
+                return value;
+            });
+            csvRows.push(values.join(','));
+        }
+
+        return csvRows.join('\\n');
+    }
 }

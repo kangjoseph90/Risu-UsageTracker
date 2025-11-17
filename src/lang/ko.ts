@@ -149,4 +149,8 @@ export const languageKo = {
     exportToFile: "파일로 내보내기",
     restoreFromBrowser: "브라우저에서 복원",
     importFromFile: "파일에서 가져오기",
+    export: "내보내기",
+    exportAsJSON: "JSON으로 내보내기",
+    exportAsCSV: "CSV로 내보내기",
+    exportSuccess: "내보내기 성공.",
 }
