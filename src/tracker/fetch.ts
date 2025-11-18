@@ -58,15 +58,32 @@ export class FetchWrapper {
         }
 
         //@ts-ignore
+        if (typeof globalThis.__pluginApis__.risuFetch === 'function') {
+            //@ts-ignore
+            this.originalGlobalFetch = globalThis.__pluginApis__.risuFetch;
+            //@ts-ignore
+            globalThis.__pluginApis__.risuFetch = this.wrappedGlobalFetch.bind(this);
+        }
+
+        //@ts-ignore
         if (typeof fetchNative === 'function') {
             //@ts-ignore
             this.originalFetchNative = fetchNative;
             //@ts-ignore
             fetchNative = this.wrappedFetchNative.bind(this);
         }
+
+        //@ts-ignore
+        if (typeof globalThis.__pluginApis__.nativeFetch === 'function') {
+            //@ts-ignore
+            this.originalFetchNative = globalThis.__pluginApis__.nativeFetch;
+            //@ts-ignore
+            globalThis.__pluginApis__.nativeFetch = this.wrappedFetchNative.bind(this);
+        }
     }
 
     private async wrappedGlobalFetch(url: string, arg: GlobalFetchArgs = {}): Promise<GlobalFetchResult> {
+        Logger.debug('wrappedGlobalFetch called:', url, arg);
         // body를 안전하게 변환
         let parsedBody: BodyInit | null | undefined;
         if (arg.body !== undefined && arg.body !== null) {
@@ -128,7 +145,7 @@ export class FetchWrapper {
         useRisuTk?: boolean;
         chatId?: string;
     } = {}): Promise<Response> {
-        Logger.log('wrappedFetchNative called with URL:', url);
+        Logger.debug('wrappedFetchNative called:', url, arg);
         // request 데이터 저장
         const requestData: RequestData = {
             input: url,
