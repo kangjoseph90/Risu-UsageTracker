@@ -363,10 +363,14 @@ export class FetchWrapper {
         if (this.originalGlobalFetch) {
             //@ts-ignore
             globalFetch = this.originalGlobalFetch;
+            //@ts-ignore
+            globalThis.__pluginApis__.risuFetch = this.originalGlobalFetch;
         }
         if (this.originalFetchNative) {
             //@ts-ignore
             fetchNative = this.originalFetchNative;
+            //@ts-ignore
+            globalThis.__pluginApis__.nativeFetch = this.originalFetchNative;
         }
         
         this.onRequest.clear();
