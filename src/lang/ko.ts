@@ -143,6 +143,8 @@ export const languageKo = {
     addModelNamePrompt: "모델 이름을 입력하세요:",
     addModelSuccess: "모델이 추가되었습니다.",
     deleteModelConfirm: "이 모델을 삭제하시겠습니까?\n프로바이더: {{provider}}\n모델: {{modelId}}",
+    applyToPastRecordsConfirm: "가격 변경을 과거 기록에 소급 적용하시겠습니까?\n\n예: 과거 사용 기록의 비용이 새 가격으로 재계산됩니다.\n아니오: 새 요청부터만 새 가격이 적용됩니다.",
+    editModel: "모델 편집",
     failToDeleteModel: "모델 삭제에 실패했습니다.",
     other: "기타",
     exportFail: "내보내기 실패.",

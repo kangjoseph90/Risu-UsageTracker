@@ -57,21 +57,33 @@ export class PriceManager {
     }
 
     static setTemporaryPrice(modelId: string, provider: string, priceInfo: PriceInfo): void {
+        this.setTemporaryPriceWithRetroactive(modelId, provider, priceInfo, true);
+    }
+
+    static setTemporaryPriceWithRetroactive(modelId: string, provider: string, priceInfo: PriceInfo, applyRetroactive: boolean): void {
         if (!this.cachedTemporary[provider]) {
             this.cachedTemporary[provider] = {};
         }
         this.cachedTemporary[provider][modelId] = priceInfo;
         this.debouncedSaveTemporary();
-        UsageManager.updateCostsForModel(provider, modelId, priceInfo);
+        if (applyRetroactive) {
+            UsageManager.updateCostsForModel(provider, modelId, priceInfo);
+        }
     }
 
     static setConfirmedPrice(modelId: string, provider: string, priceInfo: PriceInfo): void {
+        this.setConfirmedPriceWithRetroactive(modelId, provider, priceInfo, true);
+    }
+
+    static setConfirmedPriceWithRetroactive(modelId: string, provider: string, priceInfo: PriceInfo, applyRetroactive: boolean): void {
         if (!this.cachedConfirmed[provider]) {
             this.cachedConfirmed[provider] = {};
         }
         this.cachedConfirmed[provider][modelId] = priceInfo;
         this.debouncedSaveConfirmed();
-        UsageManager.updateCostsForModel(provider, modelId, priceInfo);
+        if (applyRetroactive) {
+            UsageManager.updateCostsForModel(provider, modelId, priceInfo);
+        }
     }
 
     static removeTemporaryModel(modelId: string, provider: string): boolean {

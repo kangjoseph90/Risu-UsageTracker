@@ -143,6 +143,8 @@ export const languageEn = {
     addModelNamePrompt: "Enter model name:",
     addModelSuccess: "Model added successfully.",
     deleteModelConfirm: "Delete this model?\nProvider: {{provider}}\nModel: {{modelId}}",
+    applyToPastRecordsConfirm: "Apply price changes to past records retroactively?\n\nYes: Past usage records will be recalculated with new prices.\nNo: New prices will only apply to new requests.",
+    editModel: "Edit Model",
     failToDeleteModel: "Failed to delete model.",
     other: "Other",
     exportFail: "Export failed.",
