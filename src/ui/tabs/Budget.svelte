@@ -207,29 +207,26 @@
     <div class="flex-shrink-0 px-3 pt-3 pb-2">
         <div class="rounded-lg bg-zinc-800 border border-zinc-700/60 hover:border-zinc-600/60 transition-colors overflow-hidden">
             <!-- Header: Click to toggle -->
-            <div class="flex items-center justify-between px-3 py-2">
-                <button 
-                    class="flex items-center gap-2 text-left focus:outline-none group flex-grow"
-                    on:click={() => isAddRuleExpanded = !isAddRuleExpanded}
-                >
+            <button on:click={() => isAddRuleExpanded = !isAddRuleExpanded} class="flex w-full items-center justify-between px-3 py-2">
+                <div class="flex items-center gap-2 text-left focus:outline-none group flex-grow">
                     <div class="text-zinc-500 group-hover:text-zinc-400" class:rotate-180={isAddRuleExpanded}>
                         <ChevronDown size={16} /> 
                     </div>
                     <h3 class="text-sm font-semibold text-zinc-200 group-hover:text-zinc-100 transition-colors">{language.addRule}</h3>
-                </button>
+                </div>
 
                 <button
-                    on:click={handleAddRule}
+                    on:click|stopPropagation={handleAddRule}
                     class="p-1.5 bg-zinc-700 hover:bg-zinc-600 text-zinc-200 rounded transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-zinc-900 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                     disabled={!newRuleName || newRuleLimit <= 0}
                     title={language.add}
                 >
                     <Plus size={16} />
                 </button>
-            </div>
+            </button>
 
             {#if isAddRuleExpanded}
-                <div class="px-3 py-3 border-t border-zinc-700/60">
+                <div class="px-3 pt-2 pb-3 border-t border-zinc-700/60">
                     <!-- Grid: 2x3 on PC, 3x2 on mobile -->
                     <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
                         <!-- Rule Name -->
