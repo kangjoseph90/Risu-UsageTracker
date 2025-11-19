@@ -159,15 +159,15 @@
             <div class="flex justify-between items-center w-full mb-2 flex-shrink-0 gap-2 flex-wrap">
                 <h2 class="text-lg sm:text-2xl font-semibold text-zinc-100">{PLUGIN_NAME}</h2>
                 <div class="flex items-center gap-2 flex-wrap">
-                    <button class="px-3 py-2 rounded-lg text-sm whitespace-nowrap {currentTab === 'usage' ? 'bg-zinc-700' : 'bg-zinc-800'} text-zinc-200 transition-colors font-medium hover:bg-zinc-700" title="Usage Statistics" on:click={() => currentTab = 'usage'} disabled={currentTab === 'usage'}>
+                    <button class="px-3 py-2 rounded-lg text-sm whitespace-nowrap {currentTab === 'usage' ? 'bg-zinc-700' : 'bg-zinc-800'} text-zinc-200 transition-colors font-medium hover:bg-zinc-700" title={language.usageTab} on:click={() => currentTab = 'usage'} disabled={currentTab === 'usage'}>
                         <span>{language.usage}</span>
                     </button>
 
-                    <button class="px-3 py-2 rounded-lg text-sm whitespace-nowrap {currentTab === 'budget' ? 'bg-zinc-700' : 'bg-zinc-800'} text-zinc-200 transition-colors font-medium hover:bg-zinc-700" title="Budget" on:click={() => currentTab = 'budget'} disabled={currentTab === 'budget'}>
+                    <button class="px-3 py-2 rounded-lg text-sm whitespace-nowrap {currentTab === 'budget' ? 'bg-zinc-700' : 'bg-zinc-800'} text-zinc-200 transition-colors font-medium hover:bg-zinc-700" title={language.budget} on:click={() => currentTab = 'budget'} disabled={currentTab === 'budget'}>
                         <span>{language.budget}</span>
                     </button>
 
-                    <button class="px-3 py-2 rounded-lg text-sm whitespace-nowrap {currentTab === 'price' ? 'bg-zinc-700' : 'bg-zinc-800'} text-zinc-200 transition-colors font-medium hover:text-zinc-100 hover:bg-zinc-700 flex items-center gap-1" title="Price Information" on:click={() => currentTab = 'price'} disabled={currentTab === 'price'}>
+                    <button class="px-3 py-2 rounded-lg text-sm whitespace-nowrap {currentTab === 'price' ? 'bg-zinc-700' : 'bg-zinc-800'} text-zinc-200 transition-colors font-medium hover:text-zinc-100 hover:bg-zinc-700 flex items-center gap-1" title={language.priceTab} on:click={() => currentTab = 'price'} disabled={currentTab === 'price'}>
                         <span>{language.price}</span>
                         <span class="price-warning-icon {hasTempPrice ? 'block' : 'hidden'} text-yellow-400">
                             <TriangleAlert size={16} />
@@ -176,7 +176,7 @@
 
                     <!-- Settings Button and Dropdown Wrapper -->
                     <div class="relative">
-                        <button bind:this={settingsButtonRef} class="p-2 rounded-lg bg-zinc-800 text-zinc-200 hover:bg-zinc-700 transition-colors" title="Settings" on:click={() => {settingsExpanded = !settingsExpanded; languagesExpanded = false; backupOptionsExpanded = false; restoreOptionsExpanded = false;}}>
+                        <button bind:this={settingsButtonRef} class="p-2 rounded-lg bg-zinc-800 text-zinc-200 hover:bg-zinc-700 transition-colors" title={language.settings} on:click={() => {settingsExpanded = !settingsExpanded; languagesExpanded = false; backupOptionsExpanded = false; restoreOptionsExpanded = false;}}>
                             <Settings size={20} />
                         </button>
                         
@@ -239,7 +239,7 @@
                         {/if}
                     </div>
 
-                    <button class="p-2 rounded-lg bg-zinc-800 text-zinc-200 hover:bg-zinc-700 transition-colors" title="Close" on:click={onClose}>
+                    <button class="p-2 rounded-lg bg-zinc-800 text-zinc-200 hover:bg-zinc-700 transition-colors" title={language.close} on:click={onClose}>
                         <X size={20} />
                     </button>
                 </div>

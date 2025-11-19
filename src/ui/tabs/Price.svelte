@@ -402,7 +402,7 @@
                 <button
                     class="px-1.5 py-1.5 bg-zinc-700 hover:bg-zinc-600 text-zinc-200 rounded text-xs flex items-center gap-2 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-zinc-900 focus:ring-blue-500"
                     on:click={showAddModelDialog}
-                    title="Add Model"
+                    title={language.addModel}
                 >
                     <Plus size={16} />
                     <span>{language.addModel}</span>
@@ -453,14 +453,14 @@
                                         class="text-green-600 hover:text-green-500 confirm-provider-btn flex-shrink-0"
                                         on:click={() =>
                                             confirmProviderEdit(provider)}
-                                        title="Confirm Edit"
+                                        title={language.confirmEdit}
                                     >
                                         <Check size={16} />
                                     </button>
                                     <button
                                         class="text-zinc-400 hover:text-zinc-200 cancel-edit-btn flex-shrink-0"
                                         on:click={cancelEdit}
-                                        title="Cancel Edit"
+                                        title={language.cancelEdit}
                                     >
                                         <X size={16} />
                                     </button>
@@ -474,7 +474,7 @@
                                         class="text-zinc-400 hover:text-zinc-200 edit-provider-btn flex-shrink-0"
                                         on:click={() =>
                                             startEditingProvider(provider)}
-                                        title="Edit Provider"
+                                        title={language.editProvider}
                                     >
                                         <Pencil size={16} />
                                     </button>
@@ -536,14 +536,14 @@
                                                                 modelId,
                                                                 "temp",
                                                             )}
-                                                        title="Confirm Edit"
+                                                        title={language.confirmEdit}
                                                     >
                                                         <Check size={14} />
                                                     </button>
                                                     <button
                                                         class="text-zinc-400 hover:text-zinc-200 cancel-edit-btn flex-shrink-0"
                                                         on:click={cancelEdit}
-                                                        title="Cancel Edit"
+                                                        title={language.cancelEdit}
                                                     >
                                                         <X size={14} />
                                                     </button>
@@ -600,7 +600,7 @@
                                                         provider,
                                                         modelId,
                                                     )}
-                                                title="Confirm Model"
+                                                title={language.confirmModel}
                                             >
                                                 <Check size={18} />
                                             </button>
@@ -612,7 +612,7 @@
                                                         modelId,
                                                         "temp",
                                                     )}
-                                                title="Delete Model"
+                                                title={language.deleteModel}
                                             >
                                                 <Trash size={18} />
                                             </button>
@@ -655,14 +655,14 @@
                                                                 modelId,
                                                                 "confirmed",
                                                             )}
-                                                        title="Confirm Edit"
+                                                        title={language.confirmEdit}
                                                     >
                                                         <Check size={14} />
                                                     </button>
                                                     <button
                                                         class="text-zinc-400 hover:text-zinc-200 cancel-edit-btn flex-shrink-0"
                                                         on:click={cancelEdit}
-                                                        title="Cancel Edit"
+                                                        title={language.cancelEdit}
                                                     >
                                                         <X size={14} />
                                                     </button>
@@ -720,7 +720,7 @@
                                                         modelId,
                                                         "confirmed",
                                                     )}
-                                                title="Delete Model"
+                                                title={language.deleteModel}
                                             >
                                                 <Trash size={18} />
                                             </button>

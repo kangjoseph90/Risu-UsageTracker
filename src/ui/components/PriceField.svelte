@@ -48,7 +48,7 @@
                 <button
                     class="text-zinc-400 hover:text-zinc-200 add-cached-price-btn text-xs flex-shrink-0"
                     on:click={() => addCachedPrice(provider, modelId, mode)}
-                    title="Add Cached Price"
+                    title={language.addCachedPrice}
                 >
                     <Plus size={12} />
                 </button>
