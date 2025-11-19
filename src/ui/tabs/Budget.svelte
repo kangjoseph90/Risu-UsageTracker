@@ -7,7 +7,7 @@
     import { BudgetPeriod, RequestType } from '../../types';
     import DollarDisplay from '../components/DollarDisplay.svelte';
     import type { Language } from '../../lang';
-    import { Plus, Check, X, Pencil, Trash } from 'lucide-svelte';
+    import { Plus, Check, X, Pencil, Trash, ChevronDown } from 'lucide-svelte';
     import { confirm } from '../popup';
 
     export let key: number = 0;
@@ -16,6 +16,8 @@
     let rules: BudgetRule[] = [];
     let allRecords: UsageRecord[] = [];
     
+    let isAddRuleExpanded = false;
+
     // Filter states for new rule
     let newRuleName = '';
     let newRulePeriod = BudgetPeriod.Monthly;
@@ -150,6 +152,7 @@
         newRuleProvider = '';
         newRuleRequestType = '';
         
+        isAddRuleExpanded = false;
         await refreshData();
     }
 
@@ -202,108 +205,120 @@
 <div class="flex flex-col h-full">
     <!-- Add Rule Section (Top) -->
     <div class="flex-shrink-0 px-3 pt-3 pb-2">
-        <div class="rounded-lg bg-zinc-800 border border-zinc-700/60 hover:border-zinc-600/60 transition-colors px-3 pb-3 pt-2">
-            <!-- Header: Title and Add Button -->
-            <div class="flex items-center justify-between mb-2">
-                <h3 class="text-sm font-semibold text-zinc-200">{language.addRule}</h3>
+        <div class="rounded-lg bg-zinc-800 border border-zinc-700/60 hover:border-zinc-600/60 transition-colors overflow-hidden">
+            <!-- Header: Click to toggle -->
+            <div class="flex items-center justify-between px-3 py-2">
+                <button 
+                    class="flex items-center gap-2 text-left focus:outline-none group flex-grow"
+                    on:click={() => isAddRuleExpanded = !isAddRuleExpanded}
+                >
+                    <div class="text-zinc-500 group-hover:text-zinc-400" class:rotate-180={isAddRuleExpanded}>
+                        <ChevronDown size={16} /> 
+                    </div>
+                    <h3 class="text-sm font-semibold text-zinc-200 group-hover:text-zinc-100 transition-colors">{language.addRule}</h3>
+                </button>
+
                 <button
                     on:click={handleAddRule}
-                    class="px-2.5 py-1.5 bg-zinc-700 hover:bg-zinc-600 text-zinc-200 rounded text-xs flex items-center justify-center gap-1.5 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-zinc-900 focus:ring-blue-500"
+                    class="p-1.5 bg-zinc-700 hover:bg-zinc-600 text-zinc-200 rounded transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-zinc-900 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                     disabled={!newRuleName || newRuleLimit <= 0}
                     title={language.add}
                 >
                     <Plus size={16} />
-                    <span class="hidden sm:inline">{language.add}</span>
                 </button>
             </div>
 
-            <!-- Grid: 2x3 on PC, 3x2 on mobile -->
-            <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
-                <!-- Rule Name -->
-                <div class="flex flex-col gap-1">
-                    <label for="newRuleName" class="text-zinc-400 text-xs whitespace-nowrap">{language.ruleName}</label>
-                    <input
-                        type="text"
-                        id="newRuleName"
-                        bind:value={newRuleName}
-                        placeholder={language.ruleNamePlaceholder}
-                        class="bg-zinc-700 text-zinc-200 border border-zinc-700/60 rounded px-2 py-1 text-xs w-full"
-                    />
-                </div>
+            {#if isAddRuleExpanded}
+                <div class="px-3 pb-3 pt-1 border-t border-zinc-700/60">
+                    <!-- Grid: 2x3 on PC, 3x2 on mobile -->
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                        <!-- Rule Name -->
+                        <div class="flex flex-col gap-1">
+                            <label for="newRuleName" class="text-zinc-400 text-xs whitespace-nowrap">{language.ruleName}</label>
+                            <input
+                                type="text"
+                                id="newRuleName"
+                                bind:value={newRuleName}
+                                placeholder={language.ruleNamePlaceholder}
+                                class="bg-zinc-700 text-zinc-200 border border-zinc-700/60 rounded px-2 py-1 text-xs w-full"
+                            />
+                        </div>
 
-                <!-- Limit -->
-                <div class="flex flex-col gap-1">
-                    <label for="newRuleLimit" class="text-zinc-400 text-xs whitespace-nowrap">{language.limit}</label>
-                    <input
-                        type="number"
-                        id="newRuleLimit"
-                        bind:value={newRuleLimit}
-                        placeholder={language.limitPlaceholder}
-                        min="0"
-                        step="0.01"
-                        class="bg-zinc-700 text-zinc-200 border border-zinc-700/60 rounded px-2 py-1 text-xs w-full"
-                    />
-                </div>
+                        <!-- Limit -->
+                        <div class="flex flex-col gap-1">
+                            <label for="newRuleLimit" class="text-zinc-400 text-xs whitespace-nowrap">{language.limit}</label>
+                            <input
+                                type="number"
+                                id="newRuleLimit"
+                                bind:value={newRuleLimit}
+                                placeholder={language.limitPlaceholder}
+                                min="0"
+                                step="0.01"
+                                class="bg-zinc-700 text-zinc-200 border border-zinc-700/60 rounded px-2 py-1 text-xs w-full"
+                            />
+                        </div>
 
-                <!-- Period -->
-                <div class="flex flex-col gap-1">
-                    <label for="newRulePeriod" class="text-zinc-400 text-xs whitespace-nowrap">{language.period}</label>
-                    <select
-                        id="newRulePeriod"
-                        bind:value={newRulePeriod}
-                        class="bg-zinc-700 text-zinc-200 border border-zinc-700/60 rounded px-2 py-1 text-xs w-full"
-                    >
-                        <option value={BudgetPeriod.Daily}>{language.daily}</option>
-                        <option value={BudgetPeriod.Weekly}>{language.weekly}</option>
-                        <option value={BudgetPeriod.Monthly}>{language.monthly}</option>
-                    </select>
-                </div>
+                        <!-- Period -->
+                        <div class="flex flex-col gap-1">
+                            <label for="newRulePeriod" class="text-zinc-400 text-xs whitespace-nowrap">{language.period}</label>
+                            <select
+                                id="newRulePeriod"
+                                bind:value={newRulePeriod}
+                                class="bg-zinc-700 text-zinc-200 border border-zinc-700/60 rounded px-2 py-1 text-xs w-full"
+                            >
+                                <option value={BudgetPeriod.Daily}>{language.daily}</option>
+                                <option value={BudgetPeriod.Weekly}>{language.weekly}</option>
+                                <option value={BudgetPeriod.Monthly}>{language.monthly}</option>
+                            </select>
+                        </div>
 
-                <!-- Model -->
-                <div class="flex flex-col gap-1">
-                    <label for="newRuleModel" class="text-zinc-400 text-xs whitespace-nowrap">{language.model}</label>
-                    <select
-                        id="newRuleModel"
-                        bind:value={newRuleModel}
-                        class="bg-zinc-700 text-zinc-200 border border-zinc-700/60 rounded px-2 py-1 text-xs w-full"
-                    >
-                        <option value="">{language.allModels}</option>
-                        {#each uniqueModels as model}
-                            <option value={model}>{model}</option>
-                        {/each}
-                    </select>
-                </div>
+                        <!-- Model -->
+                        <div class="flex flex-col gap-1">
+                            <label for="newRuleModel" class="text-zinc-400 text-xs whitespace-nowrap">{language.model}</label>
+                            <select
+                                id="newRuleModel"
+                                bind:value={newRuleModel}
+                                class="bg-zinc-700 text-zinc-200 border border-zinc-700/60 rounded px-2 py-1 text-xs w-full"
+                            >
+                                <option value="">{language.allModels}</option>
+                                {#each uniqueModels as model}
+                                    <option value={model}>{model}</option>
+                                {/each}
+                            </select>
+                        </div>
 
-                <!-- Provider -->
-                <div class="flex flex-col gap-1">
-                    <label for="newRuleProvider" class="text-zinc-400 text-xs whitespace-nowrap">{language.provider}</label>
-                    <select
-                        id="newRuleProvider"
-                        bind:value={newRuleProvider}
-                        class="bg-zinc-700 text-zinc-200 border border-zinc-700/60 rounded px-2 py-1 text-xs w-full"
-                    >
-                        <option value="">{language.allProviders}</option>
-                        {#each uniqueProviders as provider}
-                            <option value={provider}>{provider}</option>
-                        {/each}
-                    </select>
-                </div>
+                        <!-- Provider -->
+                        <div class="flex flex-col gap-1">
+                            <label for="newRuleProvider" class="text-zinc-400 text-xs whitespace-nowrap">{language.provider}</label>
+                            <select
+                                id="newRuleProvider"
+                                bind:value={newRuleProvider}
+                                class="bg-zinc-700 text-zinc-200 border border-zinc-700/60 rounded px-2 py-1 text-xs w-full"
+                            >
+                                <option value="">{language.allProviders}</option>
+                                {#each uniqueProviders as provider}
+                                    <option value={provider}>{provider}</option>
+                                {/each}
+                            </select>
+                        </div>
 
-                <!-- Type -->
-                <div class="flex flex-col gap-1">
-                    <label for="newRuleRequestType" class="text-zinc-400 text-xs whitespace-nowrap">{language.type}</label>
-                    <select
-                        id="newRuleRequestType"
-                        bind:value={newRuleRequestType}
-                        class="bg-zinc-700 text-zinc-200 border border-zinc-700/60 rounded px-2 py-1 text-xs w-full"
-                    >
-                        <option value="">{language.allTypes}</option>
-                        {#each uniqueRequestTypes as type}
-                            <option value={type}>{type}</option>
-                        {/each}
-                    </select>
+                        <!-- Type -->
+                        <div class="flex flex-col gap-1">
+                            <label for="newRuleRequestType" class="text-zinc-400 text-xs whitespace-nowrap">{language.type}</label>
+                            <select
+                                id="newRuleRequestType"
+                                bind:value={newRuleRequestType}
+                                class="bg-zinc-700 text-zinc-200 border border-zinc-700/60 rounded px-2 py-1 text-xs w-full"
+                            >
+                                <option value="">{language.allTypes}</option>
+                                {#each uniqueRequestTypes as type}
+                                    <option value={type}>{type}</option>
+                                {/each}
+                            </select>
+                        </div>
+                    </div>
                 </div>
-            </div>
+            {/if}
         </div>
     </div>
 
