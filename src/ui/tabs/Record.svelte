@@ -9,6 +9,7 @@
 	import RecordFilters from '../components/RecordFilters.svelte';
 	import RecordRow from '../components/RecordRow.svelte';
 	import { downloadFile } from '../../util';
+	import { alert, confirm } from '../popup';
 
 	export let key: number = 0;
 	export let language: Language;
@@ -170,8 +171,8 @@
 		selectedRecords = new Set<UsageRecord>(selectedRecords);
 	}
 
-	function deleteRecord(record: UsageRecord) {
-		const confirmed = confirm(language.deleteRecordConfirm);
+	async function deleteRecord(record: UsageRecord) {
+		const confirmed = await confirm(language.deleteRecordConfirm);
 		if (!confirmed) return;
 
 		const success = UsageManager.removeRecord(record);
@@ -179,15 +180,15 @@
 			clearSelection();
 			refreshData();
 		} else {
-			alert(language.failToDelete);
+			await alert(language.failToDelete);
 		}
 	}
 
-	function deleteSelectedRecords() {
+	async function deleteSelectedRecords() {
 		if (selectedCount === 0) return;
 
 		const confirmText = formatString(language.deleteSelectedRecordsConfirm, { count: selectedCount });
-		const confirmed = confirm(confirmText);
+		const confirmed = await confirm(confirmText);
 		if (!confirmed) return;
 
 		let deletedCount = 0;
@@ -198,7 +199,7 @@
 		});
 
 		const deletedText = formatString(language.deletedRecords, { count: deletedCount });
-		alert(deletedText);
+		await alert(deletedText);
 		clearSelection();
 		refreshData();
 	}
@@ -244,26 +245,26 @@
 		exportOptionsExpanded = !exportOptionsExpanded;
 	}
 
-	function exportRecordsAsJSON() {
+	async function exportRecordsAsJSON() {
 		try {
 			const jsonString = UsageManager.exportToJSON(filteredRecords);
 			const date = new Date().toISOString().split('T')[0];
 			downloadFile(jsonString, `risu-usage-records-${date}.json`, 'application/json');
-			alert(language.exportSuccess);
+			await alert(language.exportSuccess);
 		} catch (e) {
-			alert(language.exportFail);
+			await alert(language.exportFail);
 		}
 		exportOptionsExpanded = false;
 	}
 
-	function exportRecordsAsCSV() {
+	async function exportRecordsAsCSV() {
 		try {
 			const csvString = UsageManager.exportToCSV(filteredRecords);
 			const date = new Date().toISOString().split('T')[0];
 			downloadFile(csvString, `risu-usage-records-${date}.csv`, 'text/csv');
-			alert(language.exportSuccess);
+			await alert(language.exportSuccess);
 		} catch (e) {
-			alert(language.exportFail);
+			await alert(language.exportFail);
 		}
 		exportOptionsExpanded = false;
 	}

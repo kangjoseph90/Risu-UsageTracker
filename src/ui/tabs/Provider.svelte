@@ -3,6 +3,7 @@
     import { ProviderManager } from '../../manager/provider';
     import { formatString, type Language } from '../../lang';
     import { Plus, Check, X, Pencil, Trash } from 'lucide-svelte';
+    import { alert, confirm, prompt } from '../popup';
 
     export let key: number = 0;
     export let language: Language;
@@ -27,11 +28,11 @@
         entries = Object.entries(providerMap);
     }
 
-    function showAddMappingDialog() {
-        const url = prompt(language.mappingUrlPrompt);
+    async function showAddMappingDialog() {
+        const url = await prompt(language.mappingUrlPrompt);
         if (!url) return;
 
-        const provider = prompt(language.mappingProviderPrompt);
+        const provider = await prompt(language.mappingProviderPrompt);
         if (!provider) return;
 
         ProviderManager.setProvider(url, provider);
@@ -58,16 +59,16 @@
         editProviderInput = '';
     }
 
-    function deleteMapping(url: string) {
+    async function deleteMapping(url: string) {
         const confirmText = formatString(language.mappingDeleteConfirm, { url });
-        const confirmed = confirm(confirmText);
+        const confirmed = await confirm(confirmText);
         if (!confirmed) return;
 
         const success = ProviderManager.removeProvider(url);
         if (success) {
             refreshData();
         } else {
-            alert(language.failToDeleteMapping);
+            await alert(language.failToDeleteMapping);
         }
     }
 

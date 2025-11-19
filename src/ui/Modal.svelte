@@ -12,6 +12,7 @@
     import type { Language } from '../lang';
     import { LanguageType, LanguageTypeLabels } from '../lang';
     import { createEventDispatcher } from "svelte";
+    import { alert, confirm } from './popup';
     
     export let onClose: () => void;
     export let language: Language;
@@ -67,25 +68,25 @@
     }
 
     async function backupToBrowser() {
-        const confirmed = confirm(language.backupConfirm);
+        const confirmed = await confirm(language.backupConfirm);
         if (confirmed) {
             const success = await BackupManager.backup();
             if (success) {
-                alert(language.backupSuccess);
+                await alert(language.backupSuccess);
             } else {
-                alert(language.backupFail);
+                await alert(language.backupFail);
             }
         }
     }
     async function restoreFromBrowser() {
-        const confirmed = confirm(language.restoreConfirm);
+        const confirmed = await confirm(language.restoreConfirm);
         if (confirmed) {
             const success = await BackupManager.restore();
             if (success) {
-                alert(language.restoreSuccess);
+                await alert(language.restoreSuccess);
                 forceRefresh();
             } else {
-                alert(language.restoreFail);
+                await alert(language.restoreFail);
             }
         }
     }
@@ -93,7 +94,7 @@
     async function backupToFile() {
         const success = await BackupManager.exportBackupToFile();
         if (!success) {
-            alert(language.exportFail);
+            await alert(language.exportFail);
         }
     }
 
@@ -108,14 +109,14 @@
         }
         const file = input.files[0];
 
-        const confirmed = confirm(language.restoreConfirm);
+        const confirmed = await confirm(language.restoreConfirm);
         if (confirmed) {
             const success = await BackupManager.importBackupFromFile(file);
             if (success) {
-                alert(language.restoreSuccess);
+                await alert(language.restoreSuccess);
                 forceRefresh();
             } else {
-                alert(language.restoreFail);
+                await alert(language.restoreFail);
             }
         }
         // Reset file input to allow selecting the same file again

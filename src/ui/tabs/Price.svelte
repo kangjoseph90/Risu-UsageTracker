@@ -14,6 +14,7 @@
     } from "lucide-svelte";
     import type { Language } from "../../lang";
     import { formatString } from "../../lang";
+    import { alert, confirm, prompt } from '../popup';
 
     export let key: number = 0;
     export let language: Language;
@@ -118,7 +119,7 @@
         }
     }
 
-    function confirmModelEdit(
+    async function confirmModelEdit(
         provider: string,
         modelId: string,
         mode: "temp" | "confirmed",
@@ -131,7 +132,7 @@
         const newOutputPrice = parseFloat(editPriceInputs.outputPrice);
 
         if (isNaN(newInputPrice) || isNaN(newOutputPrice)) {
-            alert("Invalid price values");
+            await alert("Invalid price values");
             return;
         }
 
@@ -150,7 +151,7 @@
         }
 
         // Ask user if they want to apply retroactively
-        const applyRetroactive = confirm(language.applyToPastRecordsConfirm);
+        const applyRetroactive = await confirm(language.applyToPastRecordsConfirm);
 
         if (mode === "temp") {
             PriceManager.setTemporaryPriceWithRetroactive(
@@ -300,11 +301,11 @@
         return div.innerHTML;
     }
 
-    function showAddModelDialog() {
-        const provider = prompt(language.addModelProviderPrompt);
+    async function showAddModelDialog() {
+        const provider = await prompt(language.addModelProviderPrompt);
         if (!provider) return;
 
-        const modelId = prompt(language.addModelNamePrompt);
+        const modelId = await prompt(language.addModelNamePrompt);
         if (!modelId) return;
 
         const initialPrice = {
@@ -317,7 +318,7 @@
         dispatch("change");
     }
 
-    function handleDeleteModel(
+    async function handleDeleteModel(
         provider: string,
         modelId: string,
         mode: "temp" | "confirmed",
@@ -326,7 +327,7 @@
             provider,
             modelId,
         });
-        const confirmed = confirm(confirmText);
+        const confirmed = await confirm(confirmText);
         if (!confirmed) return;
 
         deleteModel(provider, modelId, mode);

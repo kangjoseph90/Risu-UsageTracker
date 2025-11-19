@@ -8,6 +8,7 @@
     import DollarDisplay from '../components/DollarDisplay.svelte';
     import type { Language } from '../../lang';
     import { Plus, Check, X, Pencil, Trash } from 'lucide-svelte';
+    import { confirm } from '../popup';
 
     export let key: number = 0;
     export let language: Language;
@@ -153,7 +154,7 @@
     }
 
     async function handleDeleteRule(ruleId: string) {
-        if (confirm(language.deleteRuleConfirm)) {
+        if (await confirm(language.deleteRuleConfirm)) {
             await BudgetManager.deleteRule(ruleId);
             await refreshData();
         }
