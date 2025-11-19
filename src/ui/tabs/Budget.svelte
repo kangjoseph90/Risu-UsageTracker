@@ -352,19 +352,19 @@
             <table class="min-w-full divide-y divide-zinc-700/60 table-auto">
                 <thead class="bg-zinc-800 sticky top-0 z-10 shadow-lg">
                     <tr>
-                        <th scope="col" class="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-zinc-400">
+                        <th scope="col" class="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-zinc-400 whitespace-nowrap">
                             {language.ruleName}
                         </th>
-                        <th scope="col" class="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-zinc-400">
+                        <th scope="col" class="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-zinc-400 whitespace-nowrap">
                             {language.period}
                         </th>
-                        <th scope="col" class="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-zinc-400">
+                        <th scope="col" class="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-zinc-400 whitespace-nowrap">
                             {language.limit}
                         </th>
-                        <th scope="col" class="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-zinc-400">
+                        <th scope="col" class="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-zinc-400 whitespace-nowrap">
                             {language.filters}
                         </th>
-                        <th scope="col" class="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-zinc-400">
+                        <th scope="col" class="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-zinc-400 whitespace-nowrap">
                             {language.currentUsage}
                         </th>
                         <th scope="col" class="px-4 py-2 text-right text-xs font-medium uppercase tracking-wider text-zinc-400 whitespace-nowrap">
@@ -375,7 +375,7 @@
                 <tbody class="divide-y divide-zinc-700/60 bg-zinc-900/50">
                     {#each sortedRules as { rule, usage, percentage } (rule.id)}
                         <tr class="hover:bg-zinc-800/50 transition-colors">
-                            <td class="px-4 py-2 text-sm text-zinc-200">
+                            <td class="px-4 py-2 text-sm text-zinc-200 whitespace-nowrap">
                                 {#if editingRuleId === rule.id}
                                     <input
                                         type="text"
@@ -386,7 +386,7 @@
                                     <div class="truncate" title={rule.name}>{rule.name}</div>
                                 {/if}
                             </td>
-                            <td class="px-4 py-2 text-sm text-zinc-200">
+                            <td class="px-4 py-2 text-sm text-zinc-200 whitespace-nowrap">
                                 {#if editingRuleId === rule.id}
                                     <select
                                         bind:value={editingRulePeriod}
@@ -400,7 +400,7 @@
                                     {getPeriodLabel(rule.period)}
                                 {/if}
                             </td>
-                            <td class="px-4 py-2 text-sm text-zinc-200">
+                            <td class="px-4 py-2 text-sm text-zinc-200 whitespace-nowrap">
                                 {#if editingRuleId === rule.id}
                                     <input
                                         type="number"
@@ -413,7 +413,7 @@
                                     <DollarDisplay amount={rule.limit} {language} />
                                 {/if}
                             </td>
-                            <td class="px-4 py-2 text-sm">
+                            <td class="px-4 py-2 text-sm whitespace-nowrap">
                                 {#if editingRuleId === rule.id}
                                     <div class="flex flex-col gap-2 min-w-[300px]">
                                         <select
@@ -473,7 +473,7 @@
                                     </div>
                                 {/if}
                             </td>
-                            <td class="px-4 py-2 text-sm">
+                            <td class="px-4 py-2 text-sm whitespace-nowrap">
                                 <div class="flex flex-col gap-1">
                                     <DollarDisplay 
                                         amount={usage} 
