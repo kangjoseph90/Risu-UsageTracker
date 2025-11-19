@@ -229,7 +229,7 @@
             </div>
 
             {#if isAddRuleExpanded}
-                <div class="px-3 pb-3 pt-1 border-t border-zinc-700/60">
+                <div class="px-3 py-3 border-t border-zinc-700/60">
                     <!-- Grid: 2x3 on PC, 3x2 on mobile -->
                     <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
                         <!-- Rule Name -->
