@@ -8,6 +8,7 @@ export {
     PRICE_TEMP_ARG,
     PROVIDER_MAP_ARG,
     LANGUAGE_ARG,
+    BUDGET_RULE_ARG,
     RisuArgType
 };
 

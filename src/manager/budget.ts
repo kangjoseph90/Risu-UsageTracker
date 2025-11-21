@@ -1,20 +1,19 @@
 import type { BudgetRule } from '../types';
 import { RisuAPI } from '../api';
+import { BUDGET_RULE_ARG } from '../plugin';
 import { debounce } from '../util';
-
-const BUDGET_RULES_ARG = 'budget_rules';
 
 export class BudgetManager {
     private static rules: BudgetRule[] = [];
     private static readonly DEBOUNCE_WAIT = 500;
 
     private static debouncedSave = debounce(() => {
-        RisuAPI.setArg(BUDGET_RULES_ARG, JSON.stringify(BudgetManager.rules));
+        RisuAPI.setArg(BUDGET_RULE_ARG, JSON.stringify(BudgetManager.rules));
     }, BudgetManager.DEBOUNCE_WAIT);
 
     static async init() {
         try {
-            const storedMap = RisuAPI.getArg(BUDGET_RULES_ARG) as string;
+            const storedMap = RisuAPI.getArg(BUDGET_RULE_ARG) as string;
             this.rules = storedMap ? JSON.parse(storedMap) : [];
         } catch (e) {
             this.rules = [];
