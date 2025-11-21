@@ -50,6 +50,9 @@ const DEFAULT_PROVIDER_PATTERN: ProviderPattern = {
     "DeepSeek": [
         /https:\/\/api\.deepseek\.com\/chat\/completions/,
         /https:\/\/api\.deepseek\.com\/anthropic\/v1\/messages/
+    ],
+    "GeminiCodeAssist": [
+        /https:\/\/cloudcode-pa\.googleapis\.com\/v1internal:(generateContent|streamGenerateContent)/
     ]
 }
 

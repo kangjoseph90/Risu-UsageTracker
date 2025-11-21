@@ -5,10 +5,13 @@ import type { ProviderPrice } from "../types";
  */
 export const DEFAULT_PRICE: ProviderPrice = {
     "OpenAI": {
+        "gpt-5.1": { inputPrice: 1.25, cachedInputPrice: 0.125, outputPrice: 10.0 },
         "gpt-5": { inputPrice: 1.25, cachedInputPrice: 0.125, outputPrice: 10.0 },
         "gpt-5-mini": { inputPrice: 0.25, cachedInputPrice: 0.025, outputPrice: 2.0 },
         "gpt-5-nano": { inputPrice: 0.05, cachedInputPrice: 0.005, outputPrice: 0.4 },
+        "gpt-5.1-chat-latest": { inputPrice: 1.25, cachedInputPrice: 0.125, outputPrice: 10.0 },
         "gpt-5-chat-latest": { inputPrice: 1.25, cachedInputPrice: 0.125, outputPrice: 10.0 },
+        "gpt-5.1-codex": { inputPrice: 1.25, cachedInputPrice: 0.125, outputPrice: 10.0 },
         "gpt-5-codex": { inputPrice: 1.25, cachedInputPrice: 0.125, outputPrice: 10.0 },
         "gpt-5-pro": { inputPrice: 15.0, outputPrice: 120.0 },
         "gpt-4.1": { inputPrice: 2.0, cachedInputPrice: 0.5, outputPrice: 8.0 },
@@ -20,10 +23,13 @@ export const DEFAULT_PRICE: ProviderPrice = {
         "chatgpt-4o-latest": { inputPrice: 5.0, outputPrice: 15.0 },
     },
     "Azure": {
+        "gpt-5.1": { inputPrice: 1.25, cachedInputPrice: 0.125, outputPrice: 10.0 },
         "gpt-5": { inputPrice: 1.25, cachedInputPrice: 0.125, outputPrice: 10.0 },
         "gpt-5-mini": { inputPrice: 0.25, cachedInputPrice: 0.025, outputPrice: 2.0 },
         "gpt-5-nano": { inputPrice: 0.05, cachedInputPrice: 0.005, outputPrice: 0.4 },
+        "gpt-5.1-chat-latest": { inputPrice: 1.25, cachedInputPrice: 0.125, outputPrice: 10.0 },
         "gpt-5-chat-latest": { inputPrice: 1.25, cachedInputPrice: 0.125, outputPrice: 10.0 },
+        "gpt-5.1-codex": { inputPrice: 1.25, cachedInputPrice: 0.125, outputPrice: 10.0 },
         "gpt-5-codex": { inputPrice: 1.25, cachedInputPrice: 0.125, outputPrice: 10.0 },
         "gpt-5-pro": { inputPrice: 15.0, outputPrice: 120.0 },
         "gpt-4.1": { inputPrice: 2.0, cachedInputPrice: 0.5, outputPrice: 8.0 },
@@ -52,6 +58,7 @@ export const DEFAULT_PRICE: ProviderPrice = {
         "claude-opus-4-0": { inputPrice: 15, cachedInputPrice: 1.5, outputPrice: 75 },
     },
     "Cerebras": {
+        "glm-4.6": { inputPrice: 2.25, outputPrice: 2.75 },
         "gpt-oss-120b": { inputPrice: 0.35, outputPrice: 0.75 },
         "llama-3.3-70b": { inputPrice: 0.85, outputPrice: 1.20 },
         "llama-4-scout-17b-16e-instruct": { inputPrice: 0.65, outputPrice: 0.85 },
@@ -81,6 +88,7 @@ export const DEFAULT_PRICE: ProviderPrice = {
         "devstral-small-2507": { inputPrice: 0.1, outputPrice: 0.3 },
     },
     "GoogleAI": {
+        "gemini-3-pro-preview": { inputPrice: 2.0, cachedInputPrice: 0.2, outputPrice: 12.0 },
         "gemini-2.5-pro": { inputPrice: 1.25, cachedInputPrice: 0.125, outputPrice: 10.0 },
         "gemini-2.5-flash": { inputPrice: 0.3, cachedInputPrice: 0.03, outputPrice: 2.5 },
         "gemini-2.5-flash-preview-09-2025": { inputPrice: 0.3, cachedInputPrice: 0.03, outputPrice: 2.5 },
@@ -93,6 +101,7 @@ export const DEFAULT_PRICE: ProviderPrice = {
         "gemini-2.0-flash-lite": { inputPrice: 0.075, outputPrice: 0.3 },
     },
     "VertexAI": {
+        "gemini-3-pro-preview": { inputPrice: 2.0, cachedInputPrice: 0.2, outputPrice: 12.0 },
         "gemini-2.5-pro": { inputPrice: 1.25, cachedInputPrice: 0.125, outputPrice: 10.0 },
         "gemini-2.5-flash": { inputPrice: 0.3, cachedInputPrice: 0.03, outputPrice: 2.5 },
         "gemini-2.5-flash-preview-09-2025": { inputPrice: 0.3, cachedInputPrice: 0.03, outputPrice: 2.5 },
@@ -159,6 +168,11 @@ export const DEFAULT_PRICE: ProviderPrice = {
         "microsoft/phi-4": { inputPrice: 0.07, outputPrice: 0.14 }
     },
     "XAI": {
+        "grok-4-1-fast-reasoning": { inputPrice: 0.2, cachedInputPrice: 0.05, outputPrice: 0.5 },
+        "grok-4-1-fast": { inputPrice: 0.2, cachedInputPrice: 0.05, outputPrice: 0.5 },
+        "grok-4-1-fast-reasoning-latest": { inputPrice: 0.2, cachedInputPrice: 0.05, outputPrice: 0.5 },
+        "grok-4-1-fast-non-reasoning": { inputPrice: 0.2, cachedInputPrice: 0.05, outputPrice: 0.5 },
+        "grok-4-1-fast-non-reasoning-latest": { inputPrice: 0.2, cachedInputPrice: 0.05, outputPrice: 0.5 },
         "grok-code-fast-1": { inputPrice: 0.2, cachedInputPrice: 0.02, outputPrice: 1.5 },
         "grok-code-fast-1-0825": { inputPrice: 0.2, cachedInputPrice: 0.02, outputPrice: 1.5 },
         "grok-4-fast-reasoning": { inputPrice: 0.2, cachedInputPrice: 0.05, outputPrice: 0.5 },
@@ -175,5 +189,11 @@ export const DEFAULT_PRICE: ProviderPrice = {
     "DeepSeek": {
         "deepseek-chat": { inputPrice: 0.28, cachedInputPrice: 0.028, outputPrice: 0.42 },
         "deepseek-reasoner": { inputPrice: 0.28, cachedInputPrice: 0.028, outputPrice: 0.42 }
+    },
+    "GeminiCodeAssist": {
+        "gemini-3-pro-preview": { inputPrice: 2.0, cachedInputPrice: 0.2, outputPrice: 12.0 },
+        "gemini-2.5-pro": { inputPrice: 1.25, cachedInputPrice: 0.125, outputPrice: 10.0 },
+        "gemini-2.5-flash": { inputPrice: 0.3, cachedInputPrice: 0.03, outputPrice: 2.5 },
+        "gemini-2.5-flash-lite": { inputPrice: 0.1, cachedInputPrice: 0.01, outputPrice: 0.4 },
     }
 };
