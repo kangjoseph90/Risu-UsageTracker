@@ -22,7 +22,7 @@ interface RisuArgs {
 }
 
 const PLUGIN_TITLE = 'UsageTracker'
-const PLUGIN_VERSION = '0.3.2' 
+const PLUGIN_VERSION = '0.3.3' 
 const PLUGIN_NAME = `${PLUGIN_TITLE} v${PLUGIN_VERSION}`
 
 /*
