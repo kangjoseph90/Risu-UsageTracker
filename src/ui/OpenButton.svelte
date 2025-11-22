@@ -1,40 +1,23 @@
 <script lang="ts">
     import { ChartColumn } from "lucide-svelte";
     import Modal from "./Modal.svelte";
-    import { PopupContainer } from "./popup";
-    import { language as languageImport, type Language } from "../lang";
+    import { language } from "../lang";
 
     export let id: string;
-
-    let language: Language = { ...languageImport };
 
     function onClick(): void {
         const container = document.createElement("div");
         container.id = "usage-tracker-container";
         document.body.appendChild(container);
 
-        const popupContainer = new PopupContainer({
-            target: container,
-            props: {
-                language: language,
-            },
-        });
-
         const modal = new Modal({
             target: container,
             props: {
                 onClose: () => {
                     modal.$destroy();
-                    popupContainer.$destroy();
                     document.body.removeChild(container);
                 },
-                language: language,
             },
-        });
-        modal.$on("change", (event) => {
-            language = { ...languageImport };
-            modal.$set({ language: language });
-            popupContainer.$set({ language: language });
         });
     }
 </script>
@@ -45,5 +28,5 @@
     on:click={onClick}
 >
     <ChartColumn />
-    <span>{language.usage}</span>
+    <span>{$language.usage}</span>
 </button>

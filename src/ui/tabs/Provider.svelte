@@ -1,19 +1,18 @@
 <script lang="ts">
-    import { onMount } from 'svelte';
-    import { ProviderManager } from '../../manager/provider';
-    import { formatString, type Language } from '../../lang';
-    import { Plus, Check, X, Pencil, Trash } from 'lucide-svelte';
-    import { alert, confirm, prompt } from '../popup';
+    import { onMount } from "svelte";
+    import { ProviderManager } from "../../manager/provider";
+    import { formatString, language, type Language } from "../../lang";
+    import { Plus, Check, X, Pencil, Trash } from "lucide-svelte";
+    import { alert, confirm, prompt } from "../popup";
 
     export let key: number = 0;
-    export let language: Language;
 
     let providerMap: Record<string, string> = {};
     let entries: [string, string][] = [];
 
     let editingState: { url?: string } | null = null;
-    let editProviderInput = '';
-    let searchQuery = '';
+    let editProviderInput = "";
+    let searchQuery = "";
 
     onMount(() => {
         refreshData();
@@ -29,10 +28,10 @@
     }
 
     async function showAddMappingDialog() {
-        const url = await prompt(language.mappingUrlPrompt);
+        const url = await prompt($language.mappingUrlPrompt);
         if (!url) return;
 
-        const provider = await prompt(language.mappingProviderPrompt);
+        const provider = await prompt($language.mappingProviderPrompt);
         if (!provider) return;
 
         ProviderManager.setProvider(url, provider);
@@ -51,16 +50,18 @@
             refreshData();
         }
         editingState = null;
-        editProviderInput = '';
+        editProviderInput = "";
     }
 
     function cancelEdit() {
         editingState = null;
-        editProviderInput = '';
+        editProviderInput = "";
     }
 
     async function deleteMapping(url: string) {
-        const confirmText = formatString(language.mappingDeleteConfirm, { url });
+        const confirmText = formatString($language.mappingDeleteConfirm, {
+            url,
+        });
         const confirmed = await confirm(confirmText);
         if (!confirmed) return;
 
@@ -68,37 +69,43 @@
         if (success) {
             refreshData();
         } else {
-            await alert(language.failToDeleteMapping);
+            await alert($language.failToDeleteMapping);
         }
     }
 
     $: filteredEntries = (() => {
         if (!searchQuery.trim()) return entries;
         const query = searchQuery.toLowerCase();
-        return entries.filter(([url, provider]) => 
-            url.toLowerCase().includes(query) || provider.toLowerCase().includes(query)
+        return entries.filter(
+            ([url, provider]) =>
+                url.toLowerCase().includes(query) ||
+                provider.toLowerCase().includes(query)
         );
     })();
 </script>
 
 <div class="flex flex-col h-full">
     <!-- Action Header -->
-    <div class="sticky top-0 z-10 bg-zinc-900 border-b border-zinc-700/60 px-3 py-3 flex-shrink-0 shadow-[0_4px_16px_0_rgba(0,0,0,0.25)]">
+    <div
+        class="sticky top-0 z-10 bg-zinc-900 border-b border-zinc-700/60 px-3 py-3 flex-shrink-0 shadow-[0_4px_16px_0_rgba(0,0,0,0.25)]"
+    >
         <div class="flex flex-wrap flex-row justify-between items-center gap-3">
             <!-- Search and Info Group -->
             <div class="flex items-center gap-2 text-xs">
-                <span class="text-zinc-400 hidden md:inline">{language.search}:</span>
+                <span class="text-zinc-400 hidden md:inline"
+                    >{$language.search}:</span
+                >
                 <input
                     type="text"
                     bind:value={searchQuery}
-                    placeholder={language.search}
+                    placeholder={$language.search}
                     class="bg-zinc-800 text-zinc-200 border border-zinc-700/60 rounded px-2 py-1 text-xs max-w-[200px] placeholder-zinc-500"
                 />
                 <span class="text-zinc-500 text-xs">
                     {filteredEntries.length} / {entries.length}
                 </span>
             </div>
-            
+
             <!-- Add Button Group -->
             <div class="flex justify-end">
                 <button
@@ -106,7 +113,7 @@
                     on:click={showAddMappingDialog}
                 >
                     <Plus size={16} />
-                    <span>{language.addMapping}</span>
+                    <span>{$language.addMapping}</span>
                 </button>
             </div>
         </div>
@@ -116,24 +123,33 @@
     <div class="flex-1 overflow-y-auto overflow-x-auto">
         {#if entries.length === 0}
             <div class="text-center text-zinc-500 py-8">
-                {language.noRecordsFound}
+                {$language.noRecordsFound}
             </div>
         {:else if filteredEntries.length === 0}
             <div class="text-center text-zinc-500 py-8">
-                {language.noRecordsFound}
+                {$language.noRecordsFound}
             </div>
         {:else}
             <table class="min-w-full divide-y divide-zinc-700/60 table-auto">
                 <thead class="bg-zinc-800 sticky top-0 z-10 shadow-lg">
                     <tr>
-                        <th scope="col" class="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-zinc-400">
-                            {language.url}
+                        <th
+                            scope="col"
+                            class="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-zinc-400"
+                        >
+                            {$language.url}
                         </th>
-                        <th scope="col" class="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-zinc-400">
-                            {language.provider}
+                        <th
+                            scope="col"
+                            class="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-zinc-400"
+                        >
+                            {$language.provider}
                         </th>
-                        <th scope="col" class="px-4 py-2 text-right text-xs font-medium uppercase tracking-wider text-zinc-400 whitespace-nowrap">
-                            {language.actions}
+                        <th
+                            scope="col"
+                            class="px-4 py-2 text-right text-xs font-medium uppercase tracking-wider text-zinc-400 whitespace-nowrap"
+                        >
+                            {$language.actions}
                         </th>
                     </tr>
                 </thead>
@@ -152,32 +168,61 @@
                                             bind:value={editProviderInput}
                                             class="bg-zinc-700 text-zinc-100 px-2 py-1 rounded text-sm flex-1 min-w-0"
                                             on:keydown={(e) => {
-                                                if (e.key === 'Enter') confirmProviderEdit(url);
-                                                else if (e.key === 'Escape') cancelEdit();
+                                                if (e.key === "Enter")
+                                                    confirmProviderEdit(url);
+                                                else if (e.key === "Escape")
+                                                    cancelEdit();
                                             }}
                                             autofocus
                                         />
                                     </div>
                                 {:else}
-                                    <div class="truncate" title={provider}>{provider}</div>
+                                    <div class="truncate" title={provider}>
+                                        {provider}
+                                    </div>
                                 {/if}
                             </td>
                             <td class="px-4 py-2 text-sm whitespace-nowrap">
                                 {#if editingState?.url === url}
-                                    <div class="flex items-center justify-end gap-2">
-                                        <button class="text-green-500 hover:text-green-400 transition-colors" on:click={() => confirmProviderEdit(url)} title={language.confirm}>
+                                    <div
+                                        class="flex items-center justify-end gap-2"
+                                    >
+                                        <button
+                                            class="text-green-500 hover:text-green-400 transition-colors"
+                                            on:click={() =>
+                                                confirmProviderEdit(url)}
+                                            title={$language.confirm}
+                                        >
                                             <Check size={18} />
                                         </button>
-                                        <button class="text-zinc-400 hover:text-zinc-200 transition-colors" on:click={cancelEdit} title={language.cancel}>
+                                        <button
+                                            class="text-zinc-400 hover:text-zinc-200 transition-colors"
+                                            on:click={cancelEdit}
+                                            title={$language.cancel}
+                                        >
                                             <X size={18} />
                                         </button>
                                     </div>
                                 {:else}
-                                    <div class="flex items-center justify-end gap-2">
-                                        <button class="text-zinc-400 hover:text-zinc-200 transition-colors" on:click={() => startEditingProvider(url, provider)} title={language.edit}>
+                                    <div
+                                        class="flex items-center justify-end gap-2"
+                                    >
+                                        <button
+                                            class="text-zinc-400 hover:text-zinc-200 transition-colors"
+                                            on:click={() =>
+                                                startEditingProvider(
+                                                    url,
+                                                    provider
+                                                )}
+                                            title={$language.edit}
+                                        >
                                             <Pencil size={16} />
                                         </button>
-                                        <button class="text-red-600 hover:text-red-500 transition-colors" on:click={() => deleteMapping(url)} title={language.delete}>
+                                        <button
+                                            class="text-red-600 hover:text-red-500 transition-colors"
+                                            on:click={() => deleteMapping(url)}
+                                            title={$language.delete}
+                                        >
                                             <Trash size={16} />
                                         </button>
                                     </div>

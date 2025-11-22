@@ -12,12 +12,10 @@
         TriangleAlert,
         Plus,
     } from "lucide-svelte";
-    import type { Language } from "../../lang";
-    import { formatString } from "../../lang";
-    import { alert, confirm, prompt } from '../popup';
+    import { formatString, language } from "../../lang";
+    import { alert, confirm, prompt } from "../popup";
 
     export let key: number = 0;
-    export let language: Language;
 
     const dispatch = createEventDispatcher();
 
@@ -102,7 +100,7 @@
     function startEditingModel(
         provider: string,
         modelId: string,
-        mode: "temp" | "confirmed",
+        mode: "temp" | "confirmed"
     ) {
         const prices = mode === "temp" ? tempPrices : confirmedPrices;
         const currentPrice = prices[provider]?.[modelId];
@@ -122,7 +120,7 @@
     async function confirmModelEdit(
         provider: string,
         modelId: string,
-        mode: "temp" | "confirmed",
+        mode: "temp" | "confirmed"
     ) {
         const prices = mode === "temp" ? tempPrices : confirmedPrices;
         const currentPrice = prices[provider]?.[modelId];
@@ -143,7 +141,7 @@
 
         if (editPriceInputs.cachedInputPrice !== null) {
             const newCachedInputPrice = parseFloat(
-                editPriceInputs.cachedInputPrice,
+                editPriceInputs.cachedInputPrice
             );
             if (!isNaN(newCachedInputPrice)) {
                 updatedPrice.cachedInputPrice = newCachedInputPrice;
@@ -151,21 +149,23 @@
         }
 
         // Ask user if they want to apply retroactively
-        const applyRetroactive = await confirm(language.applyToPastRecordsConfirm);
+        const applyRetroactive = await confirm(
+            $language.applyToPastRecordsConfirm
+        );
 
         if (mode === "temp") {
             PriceManager.setTemporaryPriceWithRetroactive(
                 modelId,
                 provider,
                 updatedPrice,
-                applyRetroactive,
+                applyRetroactive
             );
         } else {
             PriceManager.setConfirmedPriceWithRetroactive(
                 modelId,
                 provider,
                 updatedPrice,
-                applyRetroactive,
+                applyRetroactive
             );
         }
 
@@ -192,7 +192,7 @@
     function deleteModel(
         provider: string,
         modelId: string,
-        mode: "temp" | "confirmed",
+        mode: "temp" | "confirmed"
     ) {
         if (mode === "temp") {
             PriceManager.removeTemporaryModel(modelId, provider);
@@ -206,7 +206,7 @@
     function addCachedPrice(
         provider: string,
         modelId: string,
-        mode: "temp" | "confirmed",
+        mode: "temp" | "confirmed"
     ) {
         // If currently editing this model, just update the edit state
         if (
@@ -246,7 +246,7 @@
     function removeCachedPrice(
         provider: string,
         modelId: string,
-        mode: "temp" | "confirmed",
+        mode: "temp" | "confirmed"
     ) {
         // If currently editing this model, just update the edit state
         if (
@@ -286,7 +286,7 @@
     }
 
     function handlePriceUpdate(
-        event: CustomEvent<{ field: string; value: string }>,
+        event: CustomEvent<{ field: string; value: string }>
     ) {
         const { field, value } = event.detail;
         editPriceInputs = {
@@ -302,10 +302,10 @@
     }
 
     async function showAddModelDialog() {
-        const provider = await prompt(language.addModelProviderPrompt);
+        const provider = await prompt($language.addModelProviderPrompt);
         if (!provider) return;
 
-        const modelId = await prompt(language.addModelNamePrompt);
+        const modelId = await prompt($language.addModelNamePrompt);
         if (!modelId) return;
 
         const initialPrice = {
@@ -321,9 +321,9 @@
     async function handleDeleteModel(
         provider: string,
         modelId: string,
-        mode: "temp" | "confirmed",
+        mode: "temp" | "confirmed"
     ) {
-        const confirmText = formatString(language.deleteModelConfirm, {
+        const confirmText = formatString($language.deleteModelConfirm, {
             provider,
             modelId,
         });
@@ -337,7 +337,7 @@
         provider: string,
         modelId: string,
         originalPrice: PriceInfo,
-        _inputs: any,
+        _inputs: any
     ): PriceInfo {
         if (
             editingState?.type === "model" &&
@@ -385,12 +385,12 @@
             <!-- Search Group -->
             <div class="flex items-center gap-2 text-xs">
                 <span class="text-zinc-400 hidden md:inline"
-                    >{language.search}:</span
+                    >{$language.search}:</span
                 >
                 <input
                     type="text"
                     bind:value={searchQuery}
-                    placeholder={language.search}
+                    placeholder={$language.search}
                     class="bg-zinc-800 text-zinc-200 border border-zinc-700/60 rounded px-2 py-1 text-xs max-w-[200px] placeholder-zinc-500"
                 />
                 <span class="text-zinc-500 text-xs">
@@ -403,10 +403,10 @@
                 <button
                     class="px-1.5 py-1.5 bg-zinc-700 hover:bg-zinc-600 text-zinc-200 rounded text-xs flex items-center gap-2 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-zinc-900 focus:ring-blue-500"
                     on:click={showAddModelDialog}
-                    title={language.addModel}
+                    title={$language.addModel}
                 >
                     <Plus size={16} />
-                    <span>{language.addModel}</span>
+                    <span>{$language.addModel}</span>
                 </button>
             </div>
         </div>
@@ -416,11 +416,11 @@
     <div class="flex-1 overflow-y-auto">
         {#if allProviders.length === 0}
             <div class="text-center text-zinc-500 py-8">
-                {language.noRecordsFound}
+                {$language.noRecordsFound}
             </div>
         {:else if filteredProviders.length === 0}
             <div class="text-center text-zinc-500 py-8">
-                {language.noRecordsFound}
+                {$language.noRecordsFound}
             </div>
         {:else}
             <div class="space-y-2 px-3 pt-3">
@@ -446,7 +446,7 @@
                                         on:keydown={(e) =>
                                             handleProviderInputKeydown(
                                                 e,
-                                                provider,
+                                                provider
                                             )}
                                         autofocus
                                     />
@@ -454,14 +454,14 @@
                                         class="text-green-600 hover:text-green-500 confirm-provider-btn flex-shrink-0"
                                         on:click={() =>
                                             confirmProviderEdit(provider)}
-                                        title={language.confirmEdit}
+                                        title={$language.confirmEdit}
                                     >
                                         <Check size={16} />
                                     </button>
                                     <button
                                         class="text-zinc-400 hover:text-zinc-200 cancel-edit-btn flex-shrink-0"
                                         on:click={cancelEdit}
-                                        title={language.cancelEdit}
+                                        title={$language.cancelEdit}
                                     >
                                         <X size={16} />
                                     </button>
@@ -475,7 +475,7 @@
                                         class="text-zinc-400 hover:text-zinc-200 edit-provider-btn flex-shrink-0"
                                         on:click={() =>
                                             startEditingProvider(provider)}
-                                        title={language.editProvider}
+                                        title={$language.editProvider}
                                     >
                                         <Pencil size={16} />
                                     </button>
@@ -499,7 +499,7 @@
                                     provider,
                                     modelId,
                                     currentPrice,
-                                    editPriceInputs,
+                                    editPriceInputs
                                 )}
 
                                 {#if tempPrice}
@@ -521,9 +521,9 @@
                                                             startEditingModel(
                                                                 provider,
                                                                 modelId,
-                                                                "temp",
+                                                                "temp"
                                                             )}
-                                                        title={language.editModel}
+                                                        title={$language.editModel}
                                                     >
                                                         <Pencil size={14} />
                                                     </button>
@@ -535,16 +535,16 @@
                                                             confirmModelEdit(
                                                                 provider,
                                                                 modelId,
-                                                                "temp",
+                                                                "temp"
                                                             )}
-                                                        title={language.confirmEdit}
+                                                        title={$language.confirmEdit}
                                                     >
                                                         <Check size={14} />
                                                     </button>
                                                     <button
                                                         class="text-zinc-400 hover:text-zinc-200 cancel-edit-btn flex-shrink-0"
                                                         on:click={cancelEdit}
-                                                        title={language.cancelEdit}
+                                                        title={$language.cancelEdit}
                                                     >
                                                         <X size={14} />
                                                     </button>
@@ -562,7 +562,6 @@
                                                     {isEditingModel}
                                                     {addCachedPrice}
                                                     {removeCachedPrice}
-                                                    {language}
                                                     on:updatePrice={handlePriceUpdate}
                                                 />
                                                 <PriceField
@@ -574,7 +573,6 @@
                                                     {isEditingModel}
                                                     {addCachedPrice}
                                                     {removeCachedPrice}
-                                                    {language}
                                                     on:updatePrice={handlePriceUpdate}
                                                 />
                                                 <PriceField
@@ -586,7 +584,6 @@
                                                     {isEditingModel}
                                                     {addCachedPrice}
                                                     {removeCachedPrice}
-                                                    {language}
                                                     on:updatePrice={handlePriceUpdate}
                                                 />
                                             </div>
@@ -599,9 +596,9 @@
                                                 on:click={() =>
                                                     confirmModel(
                                                         provider,
-                                                        modelId,
+                                                        modelId
                                                     )}
-                                                title={language.confirmModel}
+                                                title={$language.confirmModel}
                                             >
                                                 <Check size={18} />
                                             </button>
@@ -611,9 +608,9 @@
                                                     handleDeleteModel(
                                                         provider,
                                                         modelId,
-                                                        "temp",
+                                                        "temp"
                                                     )}
-                                                title={language.deleteModel}
+                                                title={$language.deleteModel}
                                             >
                                                 <Trash size={18} />
                                             </button>
@@ -640,9 +637,9 @@
                                                             startEditingModel(
                                                                 provider,
                                                                 modelId,
-                                                                "confirmed",
+                                                                "confirmed"
                                                             )}
-                                                        title={language.editModel}
+                                                        title={$language.editModel}
                                                     >
                                                         <Pencil size={14} />
                                                     </button>
@@ -654,16 +651,16 @@
                                                             confirmModelEdit(
                                                                 provider,
                                                                 modelId,
-                                                                "confirmed",
+                                                                "confirmed"
                                                             )}
-                                                        title={language.confirmEdit}
+                                                        title={$language.confirmEdit}
                                                     >
                                                         <Check size={14} />
                                                     </button>
                                                     <button
                                                         class="text-zinc-400 hover:text-zinc-200 cancel-edit-btn flex-shrink-0"
                                                         on:click={cancelEdit}
-                                                        title={language.cancelEdit}
+                                                        title={$language.cancelEdit}
                                                     >
                                                         <X size={14} />
                                                     </button>
@@ -681,7 +678,6 @@
                                                     {isEditingModel}
                                                     {addCachedPrice}
                                                     {removeCachedPrice}
-                                                    {language}
                                                     on:updatePrice={handlePriceUpdate}
                                                 />
                                                 <PriceField
@@ -693,7 +689,6 @@
                                                     {isEditingModel}
                                                     {addCachedPrice}
                                                     {removeCachedPrice}
-                                                    {language}
                                                     on:updatePrice={handlePriceUpdate}
                                                 />
                                                 <PriceField
@@ -705,7 +700,6 @@
                                                     {isEditingModel}
                                                     {addCachedPrice}
                                                     {removeCachedPrice}
-                                                    {language}
                                                     on:updatePrice={handlePriceUpdate}
                                                 />
                                             </div>
@@ -719,9 +713,9 @@
                                                     handleDeleteModel(
                                                         provider,
                                                         modelId,
-                                                        "confirmed",
+                                                        "confirmed"
                                                     )}
-                                                title={language.deleteModel}
+                                                title={$language.deleteModel}
                                             >
                                                 <Trash size={18} />
                                             </button>

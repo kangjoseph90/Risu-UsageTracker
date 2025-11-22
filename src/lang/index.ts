@@ -1,6 +1,7 @@
 import { merge } from "lodash";
 import { languageEn } from "./en";
 import { languageKo } from "./ko";
+import { writable, type Writable } from "svelte/store";
 
 export enum LanguageType {
     EN = "en",
@@ -12,18 +13,18 @@ export const LanguageTypeLabels: Record<LanguageType, string> = {
     [LanguageType.KO]: "한국어",
 };
 
-export type Language = typeof languageEn;
+export type Language = Writable<typeof languageEn>;
 
-export let language: Language = languageEn;
+export let language: Language = writable(languageEn);
 
 
 export function setLanguage(lang: LanguageType) {
     switch (lang) {
         case LanguageType.EN:
-            language = languageEn;
+            language.set(languageEn);
             break;
         default:
-            language = merge(structuredClone(languageEn), languageKo);
+            language.set(merge(structuredClone(languageEn), languageKo));
             break;
     }
 }

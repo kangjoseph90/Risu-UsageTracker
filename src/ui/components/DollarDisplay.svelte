@@ -1,25 +1,23 @@
 <script lang="ts">
-    import { onMount, onDestroy } from 'svelte';
-    import { fade } from 'svelte/transition';
-    import { Loader } from 'lucide-svelte';
-    import { LanguageManager } from '../../manager/language';
-    import { CurrencyManager, Currency } from '../../manager/currency';
-    import { LanguageType, type Language } from '../../lang';
-    import { Logger } from '../../logger';
+    import { onMount, onDestroy } from "svelte";
+    import { fade } from "svelte/transition";
+    import { Loader } from "lucide-svelte";
+    import { LanguageManager } from "../../manager/language";
+    import { CurrencyManager, Currency } from "../../manager/currency";
+    import { language, LanguageType, type Language } from "../../lang";
+    import { Logger } from "../../logger";
 
     /**
      * Props
      */
     export let amount: number;
-    export let language: Language;
-    export let textClass: string = '';
+    export let textClass: string = "";
     export let showHint: boolean = true;
 
     /**
      * Get effective language
      */
-    
-    
+
     /**
      * State
      */
@@ -31,7 +29,6 @@
     let tooltipLeft = 0;
     let effectiveLanguage: LanguageType;
 
-    
     /**
      * Fetch converted amount on hover
      */
@@ -40,7 +37,9 @@
         if (!showHint || effectiveLanguage == LanguageType.EN) return;
 
         // Calculate tooltip position
-        const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+        const rect = (
+            event.currentTarget as HTMLElement
+        ).getBoundingClientRect();
         tooltipTop = rect.bottom + window.scrollY + 4; // 4px below the element
         tooltipLeft = rect.left + window.scrollX;
 
@@ -53,11 +52,14 @@
         error = null;
 
         try {
-            const converted = await CurrencyManager.convertFromUSD(amount, effectiveLanguage);
+            const converted = await CurrencyManager.convertFromUSD(
+                amount,
+                effectiveLanguage
+            );
             convertedAmount = converted;
         } catch (e) {
-            error = 'Failed to convert';
-            Logger.error('Currency conversion failed:', e);
+            error = "Failed to convert";
+            Logger.error("Currency conversion failed:", e);
         } finally {
             isLoading = false;
         }
@@ -73,21 +75,25 @@
     /**
      * Reactive formatting - updates when amount or language changes
      */
-    $: if (language !== null && amount !== null) {
+    $: if ($language !== null && amount !== null) {
         convertedAmount = null;
         effectiveLanguage = LanguageManager.getLanguage();
     }
     $: formattedUSD = CurrencyManager.formatAmount(amount, Currency.USD);
-    $: formattedConverted = convertedAmount !== null
-        ? CurrencyManager.formatAmount(convertedAmount, CurrencyManager.getCurrencyForLanguage(effectiveLanguage))
-        : '';
+    $: formattedConverted =
+        convertedAmount !== null
+            ? CurrencyManager.formatAmount(
+                  convertedAmount,
+                  CurrencyManager.getCurrencyForLanguage(effectiveLanguage)
+              )
+            : "";
 
     onMount(() => {
-        window.addEventListener('scroll', handleMouseLeave, true);
+        window.addEventListener("scroll", handleMouseLeave, true);
     });
 
     onDestroy(() => {
-        window.removeEventListener('scroll', handleMouseLeave, true);
+        window.removeEventListener("scroll", handleMouseLeave, true);
     });
 </script>
 

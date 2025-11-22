@@ -12,23 +12,22 @@
     export let addCachedPrice: (
         provider: string,
         modelId: string,
-        mode: "temp" | "confirmed",
+        mode: "temp" | "confirmed"
     ) => void;
     export let removeCachedPrice: (
         provider: string,
         modelId: string,
-        mode: "temp" | "confirmed",
+        mode: "temp" | "confirmed"
     ) => void;
-    export let language: Language;
 
     import { createEventDispatcher } from "svelte";
-    import type { Language } from "../../lang";
+    import { language, type Language } from "../../lang";
     const dispatch = createEventDispatcher();
 
     const fieldLabels = {
-        inputPrice: language.inputPrice,
-        cachedInputPrice: language.cachedInputPrice,
-        outputPrice: language.outputPrice,
+        inputPrice: $language.inputPrice,
+        cachedInputPrice: $language.cachedInputPrice,
+        outputPrice: $language.outputPrice,
     };
 
     $: value = price[field];
@@ -43,12 +42,12 @@
 {#if value === undefined}
     {#if field === "cachedInputPrice"}
         <div class="flex items-center gap-1 min-w-0">
-            <span class="text-zinc-500">{language.cacheNotSupported}</span>
+            <span class="text-zinc-500">{$language.cacheNotSupported}</span>
             {#if isEditingModel}
                 <button
                     class="text-zinc-400 hover:text-zinc-200 add-cached-price-btn text-xs flex-shrink-0"
                     on:click={() => addCachedPrice(provider, modelId, mode)}
-                    title={language.addCachedPrice}
+                    title={$language.addCachedPrice}
                 >
                     <Plus size={12} />
                 </button>
@@ -69,7 +68,7 @@
             <button
                 class="text-zinc-400 hover:text-zinc-200 remove-cached-price-btn text-xs flex-shrink-0"
                 on:click={() => removeCachedPrice(provider, modelId, mode)}
-                title={language.disable}
+                title={$language.disable}
             >
                 <Trash size={12} />
             </button>
@@ -80,7 +79,6 @@
         <span class="truncate">
             {fieldLabels[field]}: <DollarDisplay
                 amount={value}
-                {language}
                 textClass="text-xs"
                 showHint={true}
             />/M

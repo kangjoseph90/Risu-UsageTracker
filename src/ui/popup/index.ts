@@ -1,6 +1,6 @@
 import { popupStore } from './store';
 
-export { default as PopupContainer } from './PopupContainer.svelte';
+export { default as Popup } from './Popup.svelte';
 
 // Convenience functions for easy imports
 export const alert = (message: string) => popupStore.alert(message);
