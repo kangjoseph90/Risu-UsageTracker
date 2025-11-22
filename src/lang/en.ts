@@ -177,4 +177,8 @@ export const languageEn = {
     addBudgetRule: "Add Budget Rule",
     editRule: "Edit Rule",
     budgetCards: "Budget Overview",
+    updateAvailable: "New version available: {{title}} v{{version}}.\nDo you want to update?",
+    updateSuccess: "Update completed successfully",
+    updateFailed: "Failed to update",
+    duplicatePluginsWarning: "Found duplicate plugins: {{plugins}}",
 };

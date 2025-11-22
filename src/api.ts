@@ -100,6 +100,12 @@ const rawAPI = {
     removeRisuReplacer,
     //@ts-ignore
     onUnload,
+    //@ts-ignore
+    getDatabase,
+    //@ts-ignore
+    setDatabaseLite,
+    //@ts-ignore
+    loadPlugins,
 }
 
 function getFullName(name: string) {
@@ -170,6 +176,15 @@ class RisuAPI {
     }
     static onUnload(callback: () => void) {
         rawAPI.onUnload(callback);
+    }
+    static getDatabase() {
+        return rawAPI.getDatabase();
+    }
+    static setDatabaseLite(db: any) {
+        rawAPI.setDatabaseLite(db);
+    }
+    static loadPlugins() {
+        rawAPI.loadPlugins();
     }
 }
 

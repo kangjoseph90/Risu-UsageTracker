@@ -1,6 +1,11 @@
+import { RisuAPI } from "./api";
 import { Logger } from "./logger";
+import { PLUGIN_NAME, PLUGIN_TITLE } from "./plugin";
 import type { CostInfo, PriceInfo, RequestData, UsageInfo } from "./types";
 import { RequestType } from "./types";
+import { warn } from "./ui/popup";
+import { language, formatString } from "./lang";
+import { get } from "svelte/store";
 
 export {
     debounce,
@@ -11,7 +16,45 @@ export {
     calculateCost,
     formatNumber,
     downloadFile,
-    readFileAsText
+    readFileAsText,
+    movePluginToTop,
+    checkDuplicate,
+}
+
+async function checkDuplicate(): Promise<boolean> {
+    const db: {
+        plugins: {
+            name: string,
+            realArg?: any
+        }[];
+    } = RisuAPI.getDatabase();
+    const plugin = db.plugins.filter((p: any) => p.name.startsWith(`${PLUGIN_TITLE}`));
+    if (plugin.length > 1) {
+        const lang = get(language);
+        await warn(formatString(lang.duplicatePluginsWarning, { plugins: plugin.map((p: any) => p.name).join(', ') }));
+        return true;
+    }
+    return false;
+}
+
+function movePluginToTop(): boolean {
+    const db: {
+        plugins: {
+            name: string,
+        }[];
+    } = RisuAPI.getDatabase()
+
+    const index = db.plugins.findIndex((p) => p.name === PLUGIN_NAME);
+
+    if (index > 0) {
+        Logger.log(`Moving ${PLUGIN_NAME} to the top of the plugins.`);
+        const pluginData = db.plugins.splice(index, 1)[0];
+        db.plugins.unshift(pluginData);
+        RisuAPI.setDatabaseLite(db);
+        RisuAPI.loadPlugins();
+        return true;
+    }
+    return false;
 }
 
 /**

@@ -177,4 +177,8 @@ export const languageKo = {
     addBudgetRule: "예산 규칙 추가",
     editRule: "규칙 수정",
     budgetCards: "예산 개요",
+    updateAvailable: "새 버전이 있습니다: {{title}} v{{version}}.\n업데이트하시겠습니까?",
+    updateSuccess: "업데이트가 완료되었습니다",
+    updateFailed: "업데이트에 실패했습니다",
+    duplicatePluginsWarning: "중복 플러그인 발견: {{plugins}}",
 }

@@ -16,8 +16,8 @@ export default defineConfig({
   build: {
     lib: {
       entry: 'src/main.ts',
-      name: 'usage-tracker',
-      fileName: () => 'usage-tracker.js',
+      name: 'risu-usage-tracker',
+      fileName: () => 'risu-usage-tracker.js',
       formats: ['umd']
     },
     rollupOptions: {
