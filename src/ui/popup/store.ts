@@ -1,6 +1,6 @@
 import { writable } from 'svelte/store';
 
-export type PopupType = 'alert' | 'confirm' | 'prompt';
+export type PopupType = 'alert' | 'confirm' | 'prompt' | 'warn';
 
 export interface PopupConfig {
     type: PopupType;
@@ -19,6 +19,18 @@ function createPopupStore() {
             return new Promise((resolve) => {
                 set({
                     type: 'alert',
+                    message,
+                    onConfirm: () => {
+                        set(null);
+                        resolve();
+                    }
+                });
+            });
+        },
+        warn: (message: string): Promise<void> => {
+            return new Promise((resolve) => {
+                set({
+                    type: 'warn',
                     message,
                     onConfirm: () => {
                         set(null);

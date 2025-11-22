@@ -6,3 +6,4 @@ export { default as Popup } from './Popup.svelte';
 export const alert = (message: string) => popupStore.alert(message);
 export const confirm = (message: string) => popupStore.confirm(message);
 export const prompt = (message: string, defaultValue?: string) => popupStore.prompt(message, defaultValue || '');
+export const warn = (message: string) => popupStore.warn(message);

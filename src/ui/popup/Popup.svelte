@@ -28,7 +28,7 @@
 
     function handleKeydown(e: KeyboardEvent) {
         if (e.key === "Escape") {
-            if (config?.type === "alert") {
+            if (config?.type === "alert" || config?.type === "warn") {
                 handleConfirm();
             } else {
                 handleCancel();
@@ -67,7 +67,9 @@
     <div
         class="fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-4 pointer-events-auto"
         on:click={() =>
-            config.type === "alert" ? handleConfirm() : handleCancel()}
+            config.type === "alert" || config.type === "warn"
+                ? handleConfirm()
+                : handleCancel()}
         on:keydown|stopPropagation
     >
         <!-- svelte-ignore a11y-no-static-element-interactions -->
@@ -91,6 +93,11 @@
                             size={18}
                             class="text-yellow-400 flex-shrink-0"
                         />
+                    {:else if config.type === "warn"}
+                        <AlertTriangle
+                            size={18}
+                            class="text-red-400 flex-shrink-0"
+                        />
                     {:else}
                         <AlertCircle
                             size={18}
@@ -102,6 +109,8 @@
                             Alert
                         {:else if config.type === "confirm"}
                             Confirm
+                        {:else if config.type === "warn"}
+                            Warning
                         {:else}
                             Input
                         {/if}
@@ -110,7 +119,7 @@
                 <button
                     class="p-1 rounded-md hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 transition-colors flex-shrink-0"
                     on:click|stopPropagation={() =>
-                        config.type === "alert"
+                        config.type === "alert" || config.type === "warn"
                             ? handleConfirm()
                             : handleCancel()}
                     title="Close"
@@ -150,7 +159,7 @@
             <div
                 class="flex items-center justify-end gap-2 px-5 py-2 bg-zinc-800/50 rounded-b-lg border-t border-zinc-800"
             >
-                {#if config.type === "alert"}
+                {#if config.type === "alert" || config.type === "warn"}
                     <button
                         type="button"
                         class="px-4 py-2 rounded text-sm font-medium text-zinc-100 bg-zinc-700 hover:bg-zinc-600 transition-colors focus:outline-none focus:ring-1 focus:ring-zinc-500"
