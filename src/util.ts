@@ -20,6 +20,7 @@ export {
     readFileAsText,
     movePluginToTop,
     checkDuplicate,
+    getModelFromRequest,
 }
 
 function formatLatency(ms?: number): string {
@@ -246,6 +247,29 @@ function getRequestUrl(requestData: RequestData): string | null {
         const queryIndex = url.indexOf('?');
         return queryIndex > -1 ? url.substring(0, queryIndex) : url;
     }
+}
+
+function getModelFromRequest(requestData: RequestData): string | null {
+    // 1. Check request body
+    const body = requestData.init?.body;
+    if (body) {
+        const bodyJson = parseBody(body);
+        if (bodyJson && typeof bodyJson === 'object' && 'model' in bodyJson) {
+            return bodyJson.model;
+        }
+    }
+
+    // 2. Check URL pattern (e.g. Google Gemini: .../models/gemini-pro:generateContent)
+    const url = getRequestUrl(requestData);
+    if (url) {
+        // Match /models/{modelName}
+        const match = url.match(/\/models\/([^/:]+)/);
+        if (match && match[1]) {
+            return match[1];
+        }
+    }
+
+    return null;
 }
 
 function isLLMRequest(requestData: RequestData): boolean {

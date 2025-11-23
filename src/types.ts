@@ -11,6 +11,8 @@ export type {
     CostInfo,
     UsageRecord,
     UsageDB,
+    ErrorRecord,
+    ErrorDB,
     UsageFilter,
     OnRequestCallback,
     OnResponseCallback,
@@ -71,6 +73,20 @@ interface UsageRecord extends UsageInfo, CostInfo {
 interface UsageDB {
     records: UsageRecord[],
     lastUpdated: string,
+}
+
+interface ErrorRecord {
+    timestamp: string;
+    provider: string;
+    model: string;
+    statusCode: number;
+    url: string;
+    requestType?: RequestType;
+}
+
+interface ErrorDB {
+    records: ErrorRecord[];
+    lastUpdated: string;
 }
 
 type UsageFilter = (record: UsageRecord) => boolean

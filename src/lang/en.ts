@@ -182,4 +182,7 @@ export const languageEn = {
     updateFailed: "Failed to update",
     duplicatePluginsWarning: "Found duplicate plugins: {{plugins}}",
     latency: "Latency",
+    error: "Error",
+    errorTab: "Error Log",
+    statusCode: "Status Code",
 };

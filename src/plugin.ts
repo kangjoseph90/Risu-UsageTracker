@@ -4,6 +4,7 @@ export {
     PLUGIN_NAME, 
     RISU_ARGS, 
     DB_ARG, 
+    ERROR_DB_ARG,
     PRICE_ARG,
     PRICE_TEMP_ARG,
     PROVIDER_MAP_ARG,
@@ -38,11 +39,26 @@ const PLUGIN_NAME = `${PLUGIN_TITLE} v${PLUGIN_VERSION}`
         inputCost: number;
         outputCost: number;
         totalCost: number;
+        latency?: number;
     }[];
     lastUpdated: string;
 }
  */
 const DB_ARG = 'usage_db'
+
+/*
+{
+    records: {
+        timestamp: string;
+        model: string;
+        provider: string;
+        statusCode: number;
+        statusText: string;
+        url: string;
+    }[];
+}
+*/
+const ERROR_DB_ARG = 'error_db'
 
 /*
 {
@@ -81,6 +97,7 @@ const LANGUAGE_ARG = 'language'
 
 const RISU_ARGS: RisuArgs = {
     [DB_ARG]: RisuArgType.String,
+    [ERROR_DB_ARG]: RisuArgType.String,
     [PRICE_ARG]: RisuArgType.String,
     [PRICE_TEMP_ARG]: RisuArgType.String,
     [PROVIDER_MAP_ARG]: RisuArgType.String,

@@ -2,11 +2,12 @@ import { Logger } from "../logger";
 import { getFormat } from "../format";
 import { PriceManager } from "../manager/price";
 import { UsageManager } from "../manager/usage";
+import { ErrorManager } from "../manager/error";
 import type { CostInfo, OnRequestCallback, OnResponseCallback, PriceInfo, RequestData, UsageInfo, UsageRecord } from "../types";
 import { RequestType } from "../types";
 import { FetchWrapper } from "./fetch";
 import { ModeTracker } from "./mode";
-import { calculateCost, getRequestUrl, isLLMRequest } from "../util";
+import { calculateCost, getRequestUrl, isLLMRequest, getModelFromRequest } from "../util";
 import { ProviderManager } from "../manager/provider";
 
 function getUsageRecord(type: RequestType, modelId: string, url: string, usageInfo: UsageInfo, priceInfo: PriceInfo, latency?: number): UsageRecord {
@@ -26,7 +27,7 @@ function getUsageRecord(type: RequestType, modelId: string, url: string, usageIn
 export class UsageTracker {
     private modeTracker: ModeTracker = new ModeTracker();
     private fetchWrapper: FetchWrapper = new FetchWrapper();
-    private requestInfoMap: Map<RequestData, { type: RequestType, startTime: number }> = new Map();
+    private requestInfoMap: Map<RequestData, { type: RequestType, startTime: number, model: string | null }> = new Map();
     private onRequest: OnRequestCallback;
     private onResponse: OnResponseCallback;
 
@@ -44,7 +45,8 @@ export class UsageTracker {
         }
 
         const type = this.modeTracker.getCurrentMode();
-        this.requestInfoMap.set(requestData, { type, startTime: Date.now() });
+        const model = getModelFromRequest(requestData);
+        this.requestInfoMap.set(requestData, { type, startTime: Date.now(), model });
     }
 
     private processResponse: OnResponseCallback = (requestData: RequestData, response: Response, data?: string) => {
@@ -54,11 +56,25 @@ export class UsageTracker {
         
         this.requestInfoMap.delete(requestData);
 
-        const { type, startTime } = info;
+        const { type, startTime, model } = info;
         const latency = Date.now() - startTime;
 
         const url = getRequestUrl(requestData);
         if (!url) return;
+
+        if (!response.ok) {
+            const provider = ProviderManager.getProvider(url);
+            Logger.log(`Got error response: ${response.status}`);
+            ErrorManager.addRecord({
+                timestamp: new Date().toISOString(),
+                provider,
+                model: model || 'unknown',
+                statusCode: response.status,
+                url,
+                requestType: type
+            });
+            return;
+        }
 
         const format = getFormat(requestData, response, data);
         if (!format) return;

@@ -17,6 +17,7 @@
     import Provider from "./tabs/Provider.svelte";
     import Record from "./tabs/Record.svelte";
     import Budget from "./tabs/Budget.svelte";
+    import Error from "./tabs/Error.svelte";
     import { BackupManager } from "../manager/backup";
     import { LanguageManager } from "../manager/language";
     import { language, LanguageType, LanguageTypeLabels } from "../lang";
@@ -24,7 +25,7 @@
     import { alert, confirm } from "./popup";
 
     export let onClose: () => void;
-    let currentTab: "usage" | "price" | "provider" | "record" | "budget" =
+    let currentTab: "usage" | "price" | "provider" | "record" | "budget" | "error" =
         "usage";
     let hasTempPrice: boolean = PriceManager.hasTemporaryPrice();
     let settingsExpanded: boolean = false;
@@ -94,6 +95,7 @@
             const success = await BackupManager.restore();
             if (success) {
                 await alert($language.restoreSuccess);
+                currentLanguage = LanguageManager.getLanguage();
                 forceRefresh();
             } else {
                 await alert($language.restoreFail);
@@ -124,6 +126,7 @@
             const success = await BackupManager.importBackupFromFile(file);
             if (success) {
                 await alert($language.restoreSuccess);
+                currentLanguage = LanguageManager.getLanguage();
                 forceRefresh();
             } else {
                 await alert($language.restoreFail);
@@ -271,6 +274,17 @@
                                     <Database size={16} />
                                     <span>{$language.record}</span>
                                 </button>
+                                <button
+                                    class="flex items-center gap-2 px-3 py-2 rounded-lg {currentTab ===
+                                    'error'
+                                        ? 'bg-zinc-700'
+                                        : ''} hover:bg-zinc-700 text-zinc-200 transition-colors text-sm w-full justify-start"
+                                    on:click={() => (currentTab = "error")}
+                                    disabled={currentTab === "error"}
+                                >
+                                    <TriangleAlert size={16} />
+                                    <span>{$language.errorTab}</span>
+                                </button>
 
                                 <div
                                     class="border-t border-zinc-700/60 my-1"
@@ -378,6 +392,8 @@
                     <Record key={refreshKey} />
                 {:else if currentTab === "budget"}
                     <Budget key={refreshKey} />
+                {:else if currentTab === "error"}
+                    <Error key={refreshKey} />
                 {/if}
             </div>
         </div>

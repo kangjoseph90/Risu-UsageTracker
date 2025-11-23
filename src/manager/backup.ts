@@ -7,6 +7,7 @@ import { PriceManager } from "./price";
 import { UsageManager } from "./usage";
 import { downloadFile, readFileAsText } from "../util";
 import { BudgetManager } from "./budget";
+import { ErrorManager } from "./error";
 
 interface BackupData {
     version: string;
@@ -121,6 +122,7 @@ export class BackupManager {
         PriceManager.init();
         UsageManager.init();
         BudgetManager.init();
+        ErrorManager.init();
     }
 
     static async hasBackup(): Promise<boolean> {
