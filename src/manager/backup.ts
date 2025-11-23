@@ -8,6 +8,7 @@ import { UsageManager } from "./usage";
 import { downloadFile, readFileAsText } from "../util";
 import { BudgetManager } from "./budget";
 import { ErrorManager } from "./error";
+import { initManagers } from ".";
 
 interface BackupData {
     version: string;
@@ -117,12 +118,7 @@ export class BackupManager {
             }
         }
 
-        LanguageManager.init();
-        ProviderManager.init();
-        PriceManager.init();
-        UsageManager.init();
-        BudgetManager.init();
-        ErrorManager.init();
+        initManagers();
     }
 
     static async hasBackup(): Promise<boolean> {
