@@ -1,7 +1,7 @@
 <script lang="ts">
     import { onMount } from "svelte";
     import { fade } from "svelte/transition";
-    import { formatNumber } from "../../util";
+    import { formatNumber, formatLatency } from "../../util";
     import DollarDisplay from "./DollarDisplay.svelte";
     import { language } from "../../lang";
 
@@ -10,10 +10,11 @@
         requests: number;
         tokens: number;
         cost: number;
+        latency?: number;
         value: number;
         percentage: number;
     }>;
-    export let measureBy: "tokens" | "cost" | "requests";
+    export let measureBy: "tokens" | "cost" | "requests" | "latency";
 
     const size = 200;
     const center = size / 2;
@@ -187,6 +188,10 @@
                             <span class="text-white font-medium"
                                 >{formatNumber(item.value)}</span
                             >
+                        {:else if measureBy === "latency"}
+                            <span class="text-white font-medium"
+                                >{formatLatency(item.value)}</span
+                            >
                         {:else}
                             <span class="text-white font-medium"
                                 >{item.value}</span
@@ -221,6 +226,9 @@
                     />
                 </div>
                 <div>{$language.requests}: {tooltipData.requests}</div>
+                {#if tooltipData.latency && tooltipData.latency > 0}
+                    <div>{$language.latency}: {formatLatency(tooltipData.latency)}</div>
+                {/if}
             </div>
         </div>
     {/if}

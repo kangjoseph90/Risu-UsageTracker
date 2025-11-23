@@ -23,7 +23,7 @@
         totalOutputTokens: 0,
     };
 
-    let globalMeasureBy: "tokens" | "cost" | "requests" = "tokens";
+    let globalMeasureBy: "tokens" | "cost" | "requests" | "latency" = "tokens";
     let globalFilterTimeRange: { start: Date | null; end: Date | null } = {
         start: null,
         end: null,
@@ -68,12 +68,14 @@
         inputCost: number;
         outputCost: number;
         totalCost: number;
+        latency: number;
     }> = [];
     let donutChartData: Array<{
         name: string;
         requests: number;
         tokens: number;
         cost: number;
+        latency: number;
         value: number;
         percentage: number;
     }> = [];
@@ -251,7 +253,7 @@
             currentDate = moveToPreviousBucket(currentDate, timeRange);
         }
 
-        const buckets: { [key: string]: (typeof barChartData)[0] } = {};
+        const buckets: { [key: string]: (typeof barChartData)[0] & { latencySum: number, latencyCount: number } } = {};
         bucketsToCreate.forEach((key) => {
             buckets[key] = {
                 timestamp: key,
@@ -262,6 +264,9 @@
                 inputCost: 0,
                 outputCost: 0,
                 totalCost: 0,
+                latency: 0,
+                latencySum: 0,
+                latencyCount: 0,
             };
         });
 
@@ -279,10 +284,21 @@
                 buckets[bucketKey].inputCost += record.inputCost || 0;
                 buckets[bucketKey].outputCost += record.outputCost || 0;
                 buckets[bucketKey].totalCost += record.totalCost || 0;
+                
+                if (record.latency) {
+                    buckets[bucketKey].latencySum += record.latency;
+                    buckets[bucketKey].latencyCount++;
+                }
             }
         });
 
-        return bucketsToCreate.map((key) => buckets[key]);
+        return bucketsToCreate.map((key) => {
+            const bucket = buckets[key];
+            if (bucket.latencyCount > 0) {
+                bucket.latency = bucket.latencySum / bucket.latencyCount;
+            }
+            return bucket;
+        });
     }
 
     function aggregateForDonut(
@@ -291,7 +307,7 @@
         measureBy: string,
         filters: ReturnType<typeof getGlobalFilters>
     ) {
-        const groups: { [key: string]: (typeof donutChartData)[0] } = {};
+        const groups: { [key: string]: (typeof donutChartData)[0] & { latencySum: number, latencyCount: number } } = {};
 
         recs.forEach((record) => {
             let key: string;
@@ -321,6 +337,9 @@
                     requests: 0,
                     tokens: 0,
                     cost: 0,
+                    latency: 0,
+                    latencySum: 0,
+                    latencyCount: 0,
                     value: 0,
                     percentage: 0,
                 };
@@ -330,9 +349,22 @@
             groups[key].tokens +=
                 (record.inputTokens || 0) + (record.outputTokens || 0);
             groups[key].cost += record.totalCost || 0;
+            
+            if (record.latency) {
+                groups[key].latencySum += record.latency;
+                groups[key].latencyCount++;
+            }
         });
 
         let data = Object.values(groups);
+        
+        // Calculate average latency for each group
+        data.forEach(item => {
+            if (item.latencyCount > 0) {
+                item.latency = item.latencySum / item.latencyCount;
+            }
+        });
+
         const total = data.reduce((sum, item) => {
             switch (measureBy) {
                 case "tokens":
@@ -341,6 +373,8 @@
                     return sum + item.cost;
                 case "requests":
                     return sum + item.requests;
+                case "latency":
+                    return sum + item.latency;
                 default:
                     return sum + item.tokens;
             }
@@ -360,6 +394,9 @@
                     case "requests":
                         value = item.requests;
                         break;
+                    case "latency":
+                        value = item.latency;
+                        break;
                 }
                 return {
                     ...item,
@@ -367,6 +404,7 @@
                     percentage: total > 0 ? (value / total) * 100 : 0,
                 };
             })
+            .filter((item) => item.value > 0)
             .sort((a, b) => b.value - a.value);
 
         // Create "Other" category if there are more than 8 items
@@ -382,9 +420,16 @@
                 ),
                 tokens: otherItems.reduce((sum, item) => sum + item.tokens, 0),
                 cost: otherItems.reduce((sum, item) => sum + item.cost, 0),
+                latency: 0, // Calculated below
+                latencySum: otherItems.reduce((sum, item) => sum + item.latencySum, 0),
+                latencyCount: otherItems.reduce((sum, item) => sum + item.latencyCount, 0),
                 value: 0,
                 percentage: 0,
             };
+
+            if (otherCategory.latencyCount > 0) {
+                otherCategory.latency = otherCategory.latencySum / otherCategory.latencyCount;
+            }
 
             // Calculate the value for the "Other" category based on measureBy
             switch (measureBy) {
@@ -396,6 +441,9 @@
                     break;
                 case "requests":
                     otherCategory.value = otherCategory.requests;
+                    break;
+                case "latency":
+                    otherCategory.value = otherCategory.latency;
                     break;
             }
 
@@ -515,6 +563,7 @@
                     <option value="tokens">{$language.tokens}</option>
                     <option value="cost">{$language.cost}</option>
                     <option value="requests">{$language.requests}</option>
+                    <option value="latency">{$language.latency}</option>
                 </select>
             </div>
 

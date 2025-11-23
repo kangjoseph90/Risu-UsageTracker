@@ -1,7 +1,7 @@
 <script lang="ts">
     import { onMount, onDestroy } from "svelte";
     import { fade } from "svelte/transition";
-    import { formatNumber } from "../../util";
+    import { formatNumber, formatLatency } from "../../util";
     import DollarDisplay from "./DollarDisplay.svelte";
     import { language } from "../../lang";
 
@@ -14,8 +14,9 @@
         inputCost: number;
         outputCost: number;
         totalCost: number;
+        latency: number;
     }>;
-    export let measureBy: "tokens" | "cost" | "requests";
+    export let measureBy: "tokens" | "cost" | "requests" | "latency";
     export let timeRange: string;
 
     let scrollContainer: HTMLDivElement;
@@ -54,6 +55,9 @@
                     break;
                 case "requests":
                     value = bucket.requests;
+                    break;
+                case "latency":
+                    value = bucket.latency;
                     break;
             }
             max = Math.max(max, value);
@@ -179,7 +183,7 @@
                 {#each yGridLines as gridValue}
                     {@const y =
                         chartHeight - (gridValue / maxValue) * chartHeight}
-                    {@const label = formatNumber(gridValue)}
+                    {@const label = measureBy === 'latency' ? formatLatency(gridValue) : formatNumber(gridValue)}
                     <text
                         x={yAxisWidth - 10}
                         y={y + 3}
@@ -343,6 +347,41 @@
                                 fill="transparent"
                             />
                         </g>
+                    {:else if measureBy === "latency"}
+                        {@const height =
+                            (bucket.latency / maxValue) * chartHeight}
+                        {@const y = chartHeight - height}
+                        <!-- svelte-ignore a11y-no-static-element-interactions -->
+                        <g
+                            on:mouseenter={(e) =>
+                                handleBarInteraction(e, bucket, index)}
+                            on:mousemove={handleBarMove}
+                            on:mouseleave={handleBarLeave}
+                            on:touchstart={(e) =>
+                                handleBarInteraction(e, bucket, index)}
+                            on:touchend={handleBarLeave}
+                            style="cursor: pointer;"
+                        >
+                            {#if height > 0}
+                                <rect
+                                    {x}
+                                    {y}
+                                    width={barWidth}
+                                    {height}
+                                    fill="#10b981"
+                                    rx="2"
+                                    opacity={hoveredIndex === index ? 1 : 0.9}
+                                    style="transition: opacity 150ms;"
+                                />
+                            {/if}
+                            <rect
+                                {x}
+                                y={0}
+                                width={barWidth}
+                                height={chartHeight}
+                                fill="transparent"
+                            />
+                        </g>
                     {:else}
                         {@const height =
                             (bucket.requests / maxValue) * chartHeight}
@@ -419,10 +458,15 @@
                 <span class="w-3 h-3 bg-orange-500 rounded"></span>
                 <span>{$language.outputCostLabel}</span>
             </div>
-        {:else}
+        {:else if measureBy === "requests"}
             <div class="flex items-center gap-1">
                 <span class="w-3 h-3 bg-blue-500 rounded"></span>
                 <span>{$language.requests}</span>
+            </div>
+        {:else if measureBy === "latency"}
+            <div class="flex items-center gap-1">
+                <span class="w-3 h-3 bg-emerald-500 rounded"></span>
+                <span>{$language.latency}</span>
             </div>
         {/if}
     </div>
@@ -470,6 +514,9 @@
                     />
                 </div>
                 <div>{$language.requests}: {tooltipData.requests}</div>
+                {#if tooltipData.latency > 0}
+                    <div>{$language.latency}: {formatLatency(tooltipData.latency)}</div>
+                {/if}
             </div>
         </div>
     {/if}

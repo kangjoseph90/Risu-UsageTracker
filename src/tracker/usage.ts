@@ -9,13 +9,14 @@ import { ModeTracker } from "./mode";
 import { calculateCost, getRequestUrl, isLLMRequest } from "../util";
 import { ProviderManager } from "../manager/provider";
 
-function getUsageRecord(type: RequestType, modelId: string, url: string, usageInfo: UsageInfo, priceInfo: PriceInfo): UsageRecord {
+function getUsageRecord(type: RequestType, modelId: string, url: string, usageInfo: UsageInfo, priceInfo: PriceInfo, latency?: number): UsageRecord {
     const costInfo: CostInfo = calculateCost(usageInfo, priceInfo);
     const record: UsageRecord = {
         timestamp: new Date().toISOString(),
         model: modelId,
         url: url,
         requestType: type,
+        latency: latency,
         ...usageInfo,
         ...costInfo,
     };
@@ -25,7 +26,7 @@ function getUsageRecord(type: RequestType, modelId: string, url: string, usageIn
 export class UsageTracker {
     private modeTracker: ModeTracker = new ModeTracker();
     private fetchWrapper: FetchWrapper = new FetchWrapper();
-    private requestInfoMap: Map<RequestData, RequestType> = new Map();
+    private requestInfoMap: Map<RequestData, { type: RequestType, startTime: number }> = new Map();
     private onRequest: OnRequestCallback;
     private onResponse: OnResponseCallback;
 
@@ -43,15 +44,18 @@ export class UsageTracker {
         }
 
         const type = this.modeTracker.getCurrentMode();
-        this.requestInfoMap.set(requestData, type);
+        this.requestInfoMap.set(requestData, { type, startTime: Date.now() });
     }
 
     private processResponse: OnResponseCallback = (requestData: RequestData, response: Response, data?: string) => {
         // LLM 요청만 추적됨
-        const type = this.requestInfoMap.get(requestData);
-        if (!type) return;
+        const info = this.requestInfoMap.get(requestData);
+        if (!info) return;
         
         this.requestInfoMap.delete(requestData);
+
+        const { type, startTime } = info;
+        const latency = Date.now() - startTime;
 
         const url = getRequestUrl(requestData);
         if (!url) return;
@@ -62,13 +66,13 @@ export class UsageTracker {
         const modelId: string | null = format.getModelId();
         const usageInfo: UsageInfo | null = format.getUsageInfo();
 
-        Logger.log(`Got usage info:\n type: ${type}\n modelId: ${modelId}\n url: ${url}\n inputTokens: ${usageInfo?.inputTokens}\n cachedInputTokens: ${usageInfo?.cachedInputTokens}\n outputTokens: ${usageInfo?.outputTokens}`);
+        Logger.log(`Got usage info:\n type: ${type}\n modelId: ${modelId}\n url: ${url}\n inputTokens: ${usageInfo?.inputTokens}\n cachedInputTokens: ${usageInfo?.cachedInputTokens}\n outputTokens: ${usageInfo?.outputTokens}\n latency: ${latency}ms`);
 
         if (!modelId || !usageInfo) return;
 
         const provider = ProviderManager.getProvider(url);
         const priceInfo: PriceInfo = PriceManager.getModelPrice(modelId, provider);
-        const record: UsageRecord = getUsageRecord(type, modelId, url, usageInfo, priceInfo);
+        const record: UsageRecord = getUsageRecord(type, modelId, url, usageInfo, priceInfo, latency);
 
         UsageManager.addRecord(record);
     }

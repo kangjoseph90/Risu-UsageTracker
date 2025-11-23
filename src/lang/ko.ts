@@ -181,4 +181,5 @@ export const languageKo = {
     updateSuccess: "업데이트가 완료되었습니다",
     updateFailed: "업데이트에 실패했습니다",
     duplicatePluginsWarning: "중복 플러그인 발견: {{plugins}}",
+    latency: "지연 시간",
 }

@@ -3,6 +3,7 @@
     import type { UsageRecord } from "../../types";
     import { RequestType } from "../../types";
     import { language } from "../../lang";
+    import { formatLatency } from "../../util";
 
     /**
      * Props
@@ -29,13 +30,6 @@
      */
     function handleDelete() {
         dispatch("delete", record);
-    }
-
-    /**
-     * Format cost value
-     */
-    function formatCost(value?: number): string {
-        return (value ?? 0).toFixed(4);
     }
 </script>
 
@@ -66,6 +60,11 @@
                 ).toLocaleString()}
             </div>
         </div>
+    </td>
+    <td class="px-4 py-2 text-sm whitespace-nowrap">
+        <span class="text-zinc-300 text-xs">
+            {formatLatency(record.latency)}
+        </span>
     </td>
     <td class="px-4 py-2 text-sm whitespace-nowrap">
         <div class="space-y-0.5">

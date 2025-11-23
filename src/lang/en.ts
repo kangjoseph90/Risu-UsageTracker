@@ -181,4 +181,5 @@ export const languageEn = {
     updateSuccess: "Update completed successfully",
     updateFailed: "Failed to update",
     duplicatePluginsWarning: "Found duplicate plugins: {{plugins}}",
+    latency: "Latency",
 };

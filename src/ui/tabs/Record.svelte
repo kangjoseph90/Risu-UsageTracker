@@ -392,6 +392,12 @@
                             scope="col"
                             class="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-zinc-400 whitespace-nowrap"
                         >
+                            {$language.latency}
+                        </th>
+                        <th
+                            scope="col"
+                            class="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-zinc-400 whitespace-nowrap"
+                        >
                             {$language.tokens}
                         </th>
                         <th

@@ -65,6 +65,7 @@ interface UsageRecord extends UsageInfo, CostInfo {
     model: string,
     url: string,
     requestType: RequestType,
+    latency?: number;
 }
 
 interface UsageDB {

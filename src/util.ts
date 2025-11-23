@@ -15,10 +15,19 @@ export {
     parseBody,
     calculateCost,
     formatNumber,
+    formatLatency,
     downloadFile,
     readFileAsText,
     movePluginToTop,
     checkDuplicate,
+}
+
+function formatLatency(ms?: number): string {
+    if (ms === undefined) return "-";
+    if (ms >= 1000) {
+        return (ms / 1000).toFixed(2) + "s";
+    }
+    return Math.round(ms) + "ms";
 }
 
 async function checkDuplicate(): Promise<boolean> {
