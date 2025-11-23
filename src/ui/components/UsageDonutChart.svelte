@@ -145,7 +145,7 @@
                     <path
                         d={createSegmentPath(startAngle, angle, index)}
                         fill={colors[index % colors.length]}
-                        opacity={hoveredIndex === index ? 1 : 0.9}
+                        opacity={0.9}
                         on:mouseenter={(e) =>
                             handleSegmentInteraction(e, item, index)}
                         on:mousemove={handleSegmentMove}
@@ -153,7 +153,7 @@
                         on:touchstart={(e) =>
                             handleSegmentInteraction(e, item, index)}
                         on:touchend={handleSegmentLeave}
-                        style="cursor: pointer; transition: opacity 150ms;"
+                        style="cursor: pointer;"
                     />
                 {/each}
             </svg>
@@ -208,7 +208,6 @@
         <div
             class="fixed z-[9999] rounded-md bg-gray-900 px-3 py-2 text-xs font-medium text-white shadow-lg pointer-events-none"
             style="top: {tooltipY}px; left: {tooltipX}px; transform: translate(12px, -50%);"
-            transition:fade={{ duration: 150 }}
         >
             <div class="font-semibold mb-1 text-zinc-100">
                 {tooltipData.name}

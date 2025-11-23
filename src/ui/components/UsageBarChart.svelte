@@ -1,6 +1,5 @@
 <script lang="ts">
     import { onMount, onDestroy } from "svelte";
-    import { fade } from "svelte/transition";
     import { formatNumber, formatLatency } from "../../util";
     import DollarDisplay from "./DollarDisplay.svelte";
     import { language } from "../../lang";
@@ -119,7 +118,6 @@
 
     function scrollToEnd() {
         if (scrollContainer) {
-            // 다음 프레임에서 스크롤 실행
             requestAnimationFrame(() => {
                 if (scrollContainer) {
                     scrollContainer.scrollLeft =
@@ -260,8 +258,7 @@
                                     height={outputHeight}
                                     fill="#f97316"
                                     rx="2"
-                                    opacity={hoveredIndex === index ? 1 : 0.9}
-                                    style="transition: opacity 150ms;"
+                                    opacity={0.9}
                                 />
                             {/if}
                             {#if inputHeight > 0}
@@ -272,8 +269,7 @@
                                     height={inputHeight}
                                     fill="#8b5cf6"
                                     rx="2"
-                                    opacity={hoveredIndex === index ? 1 : 0.9}
-                                    style="transition: opacity 150ms;"
+                                    opacity={0.9}
                                 />
                             {/if}
                             {#if cachedHeight > 0}
@@ -284,8 +280,7 @@
                                     height={cachedHeight}
                                     fill="#3b82f6"
                                     rx="2"
-                                    opacity={hoveredIndex === index ? 1 : 0.9}
-                                    style="transition: opacity 150ms;"
+                                    opacity={0.9}
                                 />
                             {/if}
                             <rect
@@ -323,8 +318,7 @@
                                     height={outputCostHeight}
                                     fill="#f97316"
                                     rx="2"
-                                    opacity={hoveredIndex === index ? 1 : 0.9}
-                                    style="transition: opacity 150ms;"
+                                    opacity={0.9}
                                 />
                             {/if}
                             {#if inputCostHeight > 0}
@@ -335,8 +329,7 @@
                                     height={inputCostHeight}
                                     fill="#8b5cf6"
                                     rx="2"
-                                    opacity={hoveredIndex === index ? 1 : 0.9}
-                                    style="transition: opacity 150ms;"
+                                    opacity={0.9}
                                 />
                             {/if}
                             <rect
@@ -370,8 +363,7 @@
                                     {height}
                                     fill="#10b981"
                                     rx="2"
-                                    opacity={hoveredIndex === index ? 1 : 0.9}
-                                    style="transition: opacity 150ms;"
+                                    opacity={0.9}
                                 />
                             {/if}
                             <rect
@@ -405,8 +397,7 @@
                                     {height}
                                     fill="#3b82f6"
                                     rx="2"
-                                    opacity={hoveredIndex === index ? 1 : 0.9}
-                                    style="transition: opacity 150ms;"
+                                    opacity={0.9}
                                 />
                             {/if}
                             <rect
@@ -430,6 +421,21 @@
                         {formatBucketLabel(bucket.timestamp, timeRange)}
                     </text>
                 {/each}
+
+                <!-- Optimized Hover Indicator (Single Line) -->
+                {#if hoveredIndex !== null}
+                    {@const x = spacing + hoveredIndex * (barWidth + spacing) + barWidth / 2}
+                    <line
+                        x1={x}
+                        y1={0}
+                        x2={x}
+                        y2={chartHeight}
+                        stroke="#71717a"
+                        stroke-width="1"
+                        stroke-dasharray="4,4"
+                        style="pointer-events: none;"
+                    />
+                {/if}
             </svg>
         </div>
     </div>
@@ -476,7 +482,6 @@
         <div
             class="fixed z-[9999] rounded-md bg-gray-900 px-3 py-2 text-xs font-medium text-white shadow-lg pointer-events-none"
             style="top: {tooltipY}px; left: {tooltipX}px; transform: translate(12px, -50%);"
-            transition:fade={{ duration: 150 }}
         >
             <div class="font-semibold mb-1 text-zinc-100">
                 {tooltipData.timestamp}
