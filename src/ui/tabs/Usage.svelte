@@ -10,6 +10,7 @@
     import DollarDisplay from "../components/DollarDisplay.svelte";
     import RecordFilters from "../components/RecordFilters.svelte";
     import { formatString, language, type Language } from "../../lang";
+    import { formatLatency } from "../../util";
 
     export let key: number = 0;
 
@@ -666,7 +667,7 @@
                             class="p-3 rounded-lg bg-zinc-800 border border-zinc-700/60 hover:border-zinc-600/60 transition-colors"
                         >
                             <div
-                                class="flex justify-between items-start overflow-hidden"
+                                class="flex space-x-1 justify-between items-start overflow-hidden"
                             >
                                 <div class="flex-1 min-w-0">
                                     <div
@@ -687,7 +688,11 @@
                                         class="text-xs text-zinc-400 whitespace-nowrap overflow-hidden text-ellipsis"
                                     >
                                         {record.requestType ||
-                                            RequestType.Unknown} • {dateStr}
+                                            RequestType.Unknown}
+                                        {#if record.latency}
+                                            • {formatLatency(record.latency)}
+                                        {/if}
+                                        • {dateStr}
                                     </div>
                                 </div>
                                 <div
