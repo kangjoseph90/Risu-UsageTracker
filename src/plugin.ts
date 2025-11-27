@@ -5,6 +5,7 @@ export {
     RISU_ARGS, 
     DB_ARG, 
     ERROR_DB_ARG,
+    SCREEN_TIME_DB_ARG,
     PRICE_ARG,
     PRICE_TEMP_ARG,
     PROVIDER_MAP_ARG,
@@ -62,6 +63,20 @@ const ERROR_DB_ARG = 'error_db'
 
 /*
 {
+    records: {
+        [date: string]: {
+            date: string;
+            activeSeconds: number;
+            idleSeconds: number;
+        }
+    };
+    lastUpdated: string;
+}
+*/
+const SCREEN_TIME_DB_ARG = 'screen_time_db'
+
+/*
+{
     [provider: string]: {
         [modelId: string]: {
             inputPrice: number;        // per 1M tokens
@@ -98,6 +113,7 @@ const LANGUAGE_ARG = 'language'
 const RISU_ARGS: RisuArgs = {
     [DB_ARG]: RisuArgType.String,
     [ERROR_DB_ARG]: RisuArgType.String,
+    [SCREEN_TIME_DB_ARG]: RisuArgType.String,
     [PRICE_ARG]: RisuArgType.String,
     [PRICE_TEMP_ARG]: RisuArgType.String,
     [PROVIDER_MAP_ARG]: RisuArgType.String,

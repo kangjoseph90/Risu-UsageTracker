@@ -2,11 +2,13 @@
     import { onMount } from "svelte";
     import { UsageManager } from "../../manager/usage";
     import { ProviderManager } from "../../manager/provider";
+    import { ScreenTimeManager } from "../../manager/screentime";
     import type { UsageRecord, UsageFilter } from "../../types";
     import { RequestType } from "../../types";
     import UsageStatistics from "../components/UsageStatistics.svelte";
     import UsageBarChart from "../components/UsageBarChart.svelte";
     import UsageDonutChart from "../components/UsageDonutChart.svelte";
+    import UsageHeatmap from "../components/UsageHeatmap.svelte";
     import DollarDisplay from "../components/DollarDisplay.svelte";
     import RecordFilters from "../components/RecordFilters.svelte";
     import { formatString, language, type Language } from "../../lang";
@@ -81,6 +83,10 @@
         percentage: number;
     }> = [];
 
+    // Heatmap state
+    let heatmapMeasureBy = "activeScreenTime";
+    let heatmapData: { [date: string]: number } = {};
+
     onMount(() => {
         refreshData();
     });
@@ -90,6 +96,7 @@
         calculateStatistics();
         updateFilterOptions();
         updateAllCharts();
+        updateHeatmapData();
     }
 
     function calculateStatistics() {
@@ -237,6 +244,48 @@
             filters.measureBy,
             filters
         );
+
+        // Update heatmap if measure type depends on filtered records
+        updateHeatmapData(filteredRecords);
+    }
+
+    function updateHeatmapData(filteredRecords?: UsageRecord[]) {
+        heatmapData = {};
+
+        if (heatmapMeasureBy.includes('ScreenTime')) {
+             const screenRecords = ScreenTimeManager.getRecords();
+             screenRecords.forEach(rec => {
+                 let value = 0;
+                 if (heatmapMeasureBy === 'activeScreenTime') {
+                     value = rec.activeSeconds;
+                 } else if (heatmapMeasureBy === 'idleScreenTime') {
+                     value = rec.idleSeconds;
+                 } else if (heatmapMeasureBy === 'totalScreenTime') {
+                     value = rec.activeSeconds + rec.idleSeconds;
+                 }
+                 if (value > 0) {
+                     heatmapData[rec.date] = value;
+                 }
+             });
+        } else {
+             // For usage metrics, we aggregate by day
+             const recordsToUse = filteredRecords || UsageManager.getRecords([]);
+
+             recordsToUse.forEach(rec => {
+                 const dateKey = rec.timestamp.substring(0, 10); // YYYY-MM-DD
+                 if (!heatmapData[dateKey]) heatmapData[dateKey] = 0;
+
+                 if (heatmapMeasureBy === 'tokens') {
+                     heatmapData[dateKey] += (rec.inputTokens || 0) + (rec.outputTokens || 0);
+                 } else if (heatmapMeasureBy === 'cost') {
+                     heatmapData[dateKey] += rec.totalCost || 0;
+                 } else if (heatmapMeasureBy === 'requests') {
+                     heatmapData[dateKey] += 1;
+                 }
+             });
+        }
+        // Force reactivity assignment
+        heatmapData = {...heatmapData};
     }
 
     function aggregateByTimeRange(
@@ -586,6 +635,34 @@
         <!-- Statistics Summary -->
         <div class="p-3">
             <UsageStatistics {stats} />
+        </div>
+
+        <!-- Heatmap -->
+        <div class="p-3">
+             <div class="mb-3 flex justify-between items-center">
+                <h3 class="text-sm font-semibold text-zinc-100">
+                    {$language.heatmap}
+                </h3>
+                <select
+                    bind:value={heatmapMeasureBy}
+                    on:change={() => updateHeatmapData()}
+                    class="bg-zinc-800 text-zinc-200 border border-zinc-700/60 rounded px-2 py-1 text-xs"
+                >
+                    <option value="activeScreenTime">{$language.activeScreenTime}</option>
+                    <option value="idleScreenTime">{$language.idleScreenTime}</option>
+                    <option value="totalScreenTime">{$language.totalScreenTime}</option>
+                    <option value="tokens">{$language.tokens}</option>
+                    <option value="cost">{$language.cost}</option>
+                    <option value="requests">{$language.requests}</option>
+                </select>
+            </div>
+            <div class="p-4 rounded-lg bg-zinc-800 border border-zinc-700/60 overflow-hidden">
+                <UsageHeatmap
+                    data={heatmapData}
+                    measureBy={heatmapMeasureBy}
+                    colorScale={heatmapMeasureBy === 'cost' ? 'purple' : heatmapMeasureBy.includes('ScreenTime') ? 'green' : 'blue'}
+                />
+            </div>
         </div>
 
         <!-- Bar Chart -->

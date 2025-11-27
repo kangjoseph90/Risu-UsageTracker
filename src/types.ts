@@ -13,6 +13,8 @@ export type {
     UsageDB,
     ErrorRecord,
     ErrorDB,
+    ScreenTimeRecord,
+    ScreenTimeDB,
     UsageFilter,
     OnRequestCallback,
     OnResponseCallback,
@@ -86,6 +88,17 @@ interface ErrorRecord {
 
 interface ErrorDB {
     records: ErrorRecord[];
+    lastUpdated: string;
+}
+
+interface ScreenTimeRecord {
+    date: string; // YYYY-MM-DD
+    activeSeconds: number;
+    idleSeconds: number;
+}
+
+interface ScreenTimeDB {
+    records: { [date: string]: ScreenTimeRecord };
     lastUpdated: string;
 }
 

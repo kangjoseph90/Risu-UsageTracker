@@ -75,38 +75,82 @@ enum ReplacerType {
     AfterRequest = 'afterRequest',
 }
 
-const rawAPI = {
-    //@ts-ignore
-    risuFetch,
-    //@ts-ignore
-    nativeFetch,
-    //@ts-ignore
-    getArg,
-    //@ts-ignore
-    setArg,
-    //@ts-ignore
-    getChar,
-    //@ts-ignore
-    setChar,
-    //@ts-ignore
-    addProvider,
-    //@ts-ignore
-    addRisuScriptHandler,
-    //@ts-ignore
-    removeRisuScriptHandler,
-    //@ts-ignore
-    addRisuReplacer,
-    //@ts-ignore
-    removeRisuReplacer,
-    //@ts-ignore
-    onUnload,
-    //@ts-ignore
-    getDatabase,
-    //@ts-ignore
-    setDatabaseLite,
-    //@ts-ignore
-    loadPlugins,
+// Mock implementation for development
+const storage = typeof localStorage !== 'undefined' ? localStorage : { getItem: () => null, setItem: () => {} };
+
+const mockAPI = {
+    risuFetch: async () => ({ ok: true, data: {}, headers: {}, status: 200 }),
+    nativeFetch: async () => new Response(),
+    getArg: (name: string) => {
+        // Remove PLUGIN_NAME:: prefix for local storage
+        const key = name.split('::').pop() || name;
+        return storage.getItem(key) || "";
+    },
+    setArg: (name: string, value: any) => {
+        const key = name.split('::').pop() || name;
+        storage.setItem(key, String(value));
+    },
+    getChar: () => ({}),
+    setChar: () => {},
+    addProvider: () => {},
+    addRisuScriptHandler: () => {},
+    removeRisuScriptHandler: () => {},
+    addRisuReplacer: () => {},
+    removeRisuReplacer: () => {},
+    onUnload: (cb: any) => { (window as any)._onUnload = cb; },
+    getDatabase: () => ({}),
+    setDatabaseLite: () => {},
+    loadPlugins: () => {},
 }
+
+const getRawAPI = () => {
+    // Check for risuFetch on window or globalThis
+    const g = typeof globalThis !== 'undefined' ? globalThis : (typeof window !== 'undefined' ? window : {});
+
+    if (typeof (g as any).risuFetch !== 'undefined') {
+        return {
+            //@ts-ignore
+            risuFetch: (g as any).risuFetch,
+            //@ts-ignore
+            nativeFetch: (g as any).nativeFetch,
+            //@ts-ignore
+            getArg: (g as any).getArg,
+            //@ts-ignore
+            setArg: (g as any).setArg,
+            //@ts-ignore
+            getChar: (g as any).getChar,
+            //@ts-ignore
+            setChar: (g as any).setChar,
+            //@ts-ignore
+            addProvider: (g as any).addProvider,
+            //@ts-ignore
+            addRisuScriptHandler: (g as any).addRisuScriptHandler,
+            //@ts-ignore
+            removeRisuScriptHandler: (g as any).removeRisuScriptHandler,
+            //@ts-ignore
+            addRisuReplacer: (g as any).addRisuReplacer,
+            //@ts-ignore
+            removeRisuReplacer: (g as any).removeRisuReplacer,
+            //@ts-ignore
+            onUnload: (g as any).onUnload,
+            //@ts-ignore
+            getDatabase: (g as any).getDatabase,
+            //@ts-ignore
+            setDatabaseLite: (g as any).setDatabaseLite,
+            //@ts-ignore
+            loadPlugins: (g as any).loadPlugins,
+        };
+    } else {
+        return mockAPI;
+    }
+}
+
+// Ensure lazy loading of API to avoid init issues
+const apiProxy = new Proxy({}, {
+    get: (_target, prop) => {
+        return (getRawAPI() as any)[prop];
+    }
+});
 
 function getFullName(name: string) {
     return `${PLUGIN_NAME}::${name}`
@@ -128,63 +172,62 @@ function getFullName(name: string) {
  */
 class RisuAPI {
     static risuFetch(url: string, args?: GlobalFetchArgs): Promise<GlobalFetchResult> {
-        return rawAPI.risuFetch(url, args);
+        return getRawAPI().risuFetch(url, args);
     }   
     static nativeFetch(url: string, args: NativeFetchArgs): Promise<Response> {
-        return rawAPI.nativeFetch(url, args);
+        return getRawAPI().nativeFetch(url, args);
     }
     static getArg(name: string): string | number | undefined {
         if(RISU_ARGS[name] === undefined) return;
         switch(RISU_ARGS[name]) {
             case RisuArgType.Int:
-                return Number(rawAPI.getArg(getFullName(name)));
+                return Number(getRawAPI().getArg(getFullName(name)));
             case RisuArgType.String:
-                return String(rawAPI.getArg(getFullName(name)));
+                return String(getRawAPI().getArg(getFullName(name)));
         }
     }
     static setArg(name: string, value: string | number) {
         if(RISU_ARGS[name] === undefined) return;
         switch(RISU_ARGS[name]) {
             case RisuArgType.Int:
-                rawAPI.setArg(getFullName(name), Number(value));
+                getRawAPI().setArg(getFullName(name), Number(value));
                 break;
             case RisuArgType.String:
-                rawAPI.setArg(getFullName(name), String(value));
+                getRawAPI().setArg(getFullName(name), String(value));
                 break;
         }
     }
     static getChar(): any {
-        return rawAPI.getChar();
+        return getRawAPI().getChar();
     }
     static setChar(char: any) {
-        rawAPI.setChar(char);
+        getRawAPI().setChar(char);
     }
     static addProvider(name: string, func: (arg: PluginV2ProviderArgument, abortSignal?: AbortSignal) => Promise<{ success: boolean, content: string }>, options?: PluginV2ProviderOptions) {
-        rawAPI.addProvider(name, func, options);
+        getRawAPI().addProvider(name, func, options);
     }
     static addRisuScriptHandler(mode: ScriptMode, func: EditFunction) {
-        rawAPI.addRisuScriptHandler(mode, func);
+        getRawAPI().addRisuScriptHandler(mode, func);
     }
     static removeRisuScriptHandler(mode: ScriptMode, func: EditFunction) {
-        rawAPI.removeRisuScriptHandler(mode, func);
+        getRawAPI().removeRisuScriptHandler(mode, func);
     }
     static addRisuReplacer(type: ReplacerType, func: ReplacerFunction) {
-        rawAPI.addRisuReplacer(type, func);
+        getRawAPI().addRisuReplacer(type, func);
     }
     static removeRisuReplacer(type: ReplacerType, func: ReplacerFunction) {
-        rawAPI.removeRisuReplacer(type, func);
+        getRawAPI().removeRisuReplacer(type, func);
     }
     static onUnload(callback: () => void) {
-        rawAPI.onUnload(callback);
+        getRawAPI().onUnload(callback);
     }
     static getDatabase() {
-        return rawAPI.getDatabase();
+        return getRawAPI().getDatabase();
     }
     static setDatabaseLite(db: any) {
-        rawAPI.setDatabaseLite(db);
+        getRawAPI().setDatabaseLite(db);
     }
     static loadPlugins() {
-        rawAPI.loadPlugins();
+        getRawAPI().loadPlugins();
     }
 }
-

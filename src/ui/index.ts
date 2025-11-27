@@ -1,5 +1,7 @@
 import OpenButton from './OpenButton.svelte';
 import { Popup } from './popup';
+
+// Mock UI for dev mode
 export class UI {
     private readonly OPEN_BUTTON_ID = 'usage-tracker-openbutton';
 
@@ -10,8 +12,31 @@ export class UI {
 
 
     constructor() {
-        this.initialize();
-        this.addPopup();
+        // Check if dev mode
+        if (typeof (globalThis as any).risuFetch === 'undefined') {
+            this.initDevMode();
+        } else {
+            this.initialize();
+            this.addPopup();
+        }
+    }
+
+    // Direct initialization for development environment without RisuAI UI structure
+    initDevMode() {
+        const app = document.querySelector('#app');
+        if (app) {
+            // In dev mode, mount the Popup directly to #app and ensure it's open
+            this.popupContainer = document.createElement('div');
+            this.popupContainer.id = 'usage-tracker-container';
+            app.appendChild(this.popupContainer);
+            this.popupComponent = new Popup({
+                target: this.popupContainer,
+            });
+            // Force open the popup in dev mode
+            // We might need to expose a method in Popup to open it,
+            // or trigger the event.
+            // Looking at Popup implementation might help.
+        }
     }
 
     addPopup() {

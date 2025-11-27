@@ -185,4 +185,13 @@ export const languageKo = {
     error: "에러",
     errorTab: "에러 로그",
     statusCode: "상태 코드",
+    activeScreenTime: "활성 스크린 타임",
+    idleScreenTime: "유휴 스크린 타임",
+    totalScreenTime: "총 스크린 타임",
+    heatmap: "사용량 히트맵",
+    more: "많음",
+    less: "적음",
+    active: "활성",
+    idle: "유휴",
+    total: "전체",
 }

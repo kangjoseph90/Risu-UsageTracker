@@ -185,4 +185,13 @@ export const languageEn = {
     error: "Error",
     errorTab: "Error Log",
     statusCode: "Status Code",
+    activeScreenTime: "Active Screen Time",
+    idleScreenTime: "Idle Screen Time",
+    totalScreenTime: "Total Screen Time",
+    heatmap: "Usage Heatmap",
+    more: "More",
+    less: "Less",
+    active: "Active",
+    idle: "Idle",
+    total: "Total",
 };
