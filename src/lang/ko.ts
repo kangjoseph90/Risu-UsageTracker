@@ -182,6 +182,7 @@ export const languageKo = {
     updateFailed: "업데이트에 실패했습니다",
     duplicatePluginsWarning: "중복 플러그인 발견: {{plugins}}",
     latency: "지연 시간",
+    tps: "TPS",
     error: "에러",
     errorTab: "에러 로그",
     statusCode: "상태 코드",

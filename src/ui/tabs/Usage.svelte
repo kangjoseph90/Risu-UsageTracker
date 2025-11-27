@@ -24,7 +24,7 @@
         totalOutputTokens: 0,
     };
 
-    let globalMeasureBy: "tokens" | "cost" | "requests" | "latency" = "tokens";
+    let globalMeasureBy: "tokens" | "cost" | "requests" | "latency" | "tps" = "tokens";
     let globalFilterTimeRange: { start: Date | null; end: Date | null } = {
         start: null,
         end: null,
@@ -70,6 +70,7 @@
         outputCost: number;
         totalCost: number;
         latency: number;
+        tps: number;
     }> = [];
     let donutChartData: Array<{
         name: string;
@@ -77,6 +78,7 @@
         tokens: number;
         cost: number;
         latency: number;
+        tps: number;
         value: number;
         percentage: number;
     }> = [];
@@ -254,7 +256,7 @@
             currentDate = moveToPreviousBucket(currentDate, timeRange);
         }
 
-        const buckets: { [key: string]: (typeof barChartData)[0] & { latencySum: number, latencyCount: number } } = {};
+        const buckets: { [key: string]: (typeof barChartData)[0] & { latencySum: number, latencyCount: number, tpsSum: number, tpsCount: number } } = {};
         bucketsToCreate.forEach((key) => {
             buckets[key] = {
                 timestamp: key,
@@ -266,8 +268,11 @@
                 outputCost: 0,
                 totalCost: 0,
                 latency: 0,
+                tps: 0,
                 latencySum: 0,
                 latencyCount: 0,
+                tpsSum: 0,
+                tpsCount: 0,
             };
         });
 
@@ -289,6 +294,12 @@
                 if (record.latency) {
                     buckets[bucketKey].latencySum += record.latency;
                     buckets[bucketKey].latencyCount++;
+
+                    if (record.outputTokens > 0) {
+                        const tps = record.outputTokens / (record.latency / 1000);
+                        buckets[bucketKey].tpsSum += tps;
+                        buckets[bucketKey].tpsCount++;
+                    }
                 }
             }
         });
@@ -297,6 +308,9 @@
             const bucket = buckets[key];
             if (bucket.latencyCount > 0) {
                 bucket.latency = bucket.latencySum / bucket.latencyCount;
+            }
+            if (bucket.tpsCount > 0) {
+                bucket.tps = bucket.tpsSum / bucket.tpsCount;
             }
             return bucket;
         });
@@ -308,7 +322,7 @@
         measureBy: string,
         filters: ReturnType<typeof getGlobalFilters>
     ) {
-        const groups: { [key: string]: (typeof donutChartData)[0] & { latencySum: number, latencyCount: number } } = {};
+        const groups: { [key: string]: (typeof donutChartData)[0] & { latencySum: number, latencyCount: number, tpsSum: number, tpsCount: number } } = {};
 
         recs.forEach((record) => {
             let key: string;
@@ -339,8 +353,11 @@
                     tokens: 0,
                     cost: 0,
                     latency: 0,
+                    tps: 0,
                     latencySum: 0,
                     latencyCount: 0,
+                    tpsSum: 0,
+                    tpsCount: 0,
                     value: 0,
                     percentage: 0,
                 };
@@ -354,15 +371,24 @@
             if (record.latency) {
                 groups[key].latencySum += record.latency;
                 groups[key].latencyCount++;
+
+                if (record.outputTokens > 0) {
+                    const tps = record.outputTokens / (record.latency / 1000);
+                    groups[key].tpsSum += tps;
+                    groups[key].tpsCount++;
+                }
             }
         });
 
         let data = Object.values(groups);
         
-        // Calculate average latency for each group
+        // Calculate average latency and tps for each group
         data.forEach(item => {
             if (item.latencyCount > 0) {
                 item.latency = item.latencySum / item.latencyCount;
+            }
+            if (item.tpsCount > 0) {
+                item.tps = item.tpsSum / item.tpsCount;
             }
         });
 
@@ -376,6 +402,8 @@
                     return sum + item.requests;
                 case "latency":
                     return sum + item.latency;
+                case "tps":
+                    return sum + item.tps;
                 default:
                     return sum + item.tokens;
             }
@@ -397,6 +425,9 @@
                         break;
                     case "latency":
                         value = item.latency;
+                        break;
+                    case "tps":
+                        value = item.tps;
                         break;
                 }
                 return {
@@ -422,14 +453,20 @@
                 tokens: otherItems.reduce((sum, item) => sum + item.tokens, 0),
                 cost: otherItems.reduce((sum, item) => sum + item.cost, 0),
                 latency: 0, // Calculated below
+                tps: 0, // Calculated below
                 latencySum: otherItems.reduce((sum, item) => sum + item.latencySum, 0),
                 latencyCount: otherItems.reduce((sum, item) => sum + item.latencyCount, 0),
+                tpsSum: otherItems.reduce((sum, item) => sum + item.tpsSum, 0),
+                tpsCount: otherItems.reduce((sum, item) => sum + item.tpsCount, 0),
                 value: 0,
                 percentage: 0,
             };
 
             if (otherCategory.latencyCount > 0) {
                 otherCategory.latency = otherCategory.latencySum / otherCategory.latencyCount;
+            }
+            if (otherCategory.tpsCount > 0) {
+                otherCategory.tps = otherCategory.tpsSum / otherCategory.tpsCount;
             }
 
             // Calculate the value for the "Other" category based on measureBy
@@ -445,6 +482,9 @@
                     break;
                 case "latency":
                     otherCategory.value = otherCategory.latency;
+                    break;
+                case "tps":
+                    otherCategory.value = otherCategory.tps;
                     break;
             }
 
@@ -565,6 +605,7 @@
                     <option value="cost">{$language.cost}</option>
                     <option value="requests">{$language.requests}</option>
                     <option value="latency">{$language.latency}</option>
+                    <option value="tps">{$language.tps}</option>
                 </select>
             </div>
 
@@ -691,6 +732,12 @@
                                             RequestType.Unknown}
                                         {#if record.latency}
                                             • {formatLatency(record.latency)}
+                                            {#if record.outputTokens}
+                                                • {(
+                                                    record.outputTokens /
+                                                    (record.latency / 1000)
+                                                ).toFixed(2)} TPS
+                                            {/if}
                                         {/if}
                                         • {dateStr}
                                     </div>
