@@ -1,5 +1,7 @@
 import OpenButton from './OpenButton.svelte';
 import { Popup } from './popup';
+import BudgetAlert from './components/BudgetAlert.svelte';
+
 export class UI {
     private readonly OPEN_BUTTON_ID = 'usage-tracker-openbutton';
 
@@ -7,6 +9,7 @@ export class UI {
     private openButtonComponent: OpenButton | null = null;
     private popupContainer: HTMLDivElement | null = null;
     private popupComponent: Popup | null = null;
+    private budgetAlertComponent: BudgetAlert | null = null;
 
 
     constructor() {
@@ -21,12 +24,19 @@ export class UI {
         this.popupComponent = new Popup({
             target: this.popupContainer,
         });
+        this.budgetAlertComponent = new BudgetAlert({
+            target: this.popupContainer,
+        });
     }
 
     removePopup() {
         if (this.popupComponent) {
             this.popupComponent.$destroy();
             this.popupComponent = null;
+        }
+        if (this.budgetAlertComponent) {
+            this.budgetAlertComponent.$destroy();
+            this.budgetAlertComponent = null;
         }
         if (this.popupContainer) {
             this.popupContainer.remove();

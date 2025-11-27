@@ -3,6 +3,7 @@ import { RisuAPI } from "../api";
 import type { UsageRecord, UsageDB, UsageFilter, PriceInfo, CostInfo } from "../types";
 import { calculateCost, debounce } from "../util";
 import { ProviderManager } from "./provider";
+import { BudgetMonitor } from "./budget_monitor";
 
 export class UsageManager {
     private static cachedDB: UsageDB = {
@@ -34,6 +35,7 @@ export class UsageManager {
         this.cachedDB.records.push(record);
         this.cachedDB.lastUpdated = new Date().toISOString();
         this.debouncedSave();
+        BudgetMonitor.processRecord(record);
     }
 
     static removeRecord(record: UsageRecord): boolean {

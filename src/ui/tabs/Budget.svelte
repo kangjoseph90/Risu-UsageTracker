@@ -21,6 +21,7 @@
     let newRuleName = "";
     let newRulePeriod = BudgetPeriod.Monthly;
     let newRuleLimit = 100;
+    let newRuleNotifyThreshold = 80;
     let newRuleModel = "";
     let newRuleProvider = "";
     let newRuleRequestType = "";
@@ -29,6 +30,7 @@
     let editingRuleId: string | null = null;
     let editingRuleName = "";
     let editingRuleLimit = 0;
+    let editingRuleNotifyThreshold = 80;
     let editingRulePeriod = BudgetPeriod.Monthly;
     let editingRuleModel = "";
     let editingRuleProvider = "";
@@ -151,6 +153,7 @@
             name: newRuleName,
             period: newRulePeriod,
             limit: newRuleLimit,
+            notifyThreshold: newRuleNotifyThreshold,
             model: newRuleModel || undefined,
             provider: newRuleProvider || undefined,
             requestType: newRuleRequestType || undefined,
@@ -160,6 +163,7 @@
         newRuleName = "";
         newRulePeriod = BudgetPeriod.Monthly;
         newRuleLimit = 100;
+        newRuleNotifyThreshold = 80;
         newRuleModel = "";
         newRuleProvider = "";
         newRuleRequestType = "";
@@ -179,6 +183,7 @@
         editingRuleId = rule.id;
         editingRuleName = rule.name;
         editingRuleLimit = rule.limit;
+        editingRuleNotifyThreshold = rule.notifyThreshold ?? 80;
         editingRulePeriod = rule.period;
         editingRuleModel = rule.model || "";
         editingRuleProvider = rule.provider || "";
@@ -189,6 +194,7 @@
         editingRuleId = null;
         editingRuleName = "";
         editingRuleLimit = 0;
+        editingRuleNotifyThreshold = 80;
         editingRulePeriod = BudgetPeriod.Monthly;
         editingRuleModel = "";
         editingRuleProvider = "";
@@ -203,6 +209,7 @@
                 ...rule,
                 name: editingRuleName,
                 limit: editingRuleLimit,
+                notifyThreshold: editingRuleNotifyThreshold,
                 period: editingRulePeriod,
                 model: editingRuleModel || undefined,
                 provider: editingRuleProvider || undefined,
@@ -267,6 +274,25 @@
                                 id="newRuleName"
                                 bind:value={newRuleName}
                                 placeholder={$language.ruleNamePlaceholder}
+                                class="bg-zinc-700 text-zinc-200 border border-zinc-700/60 rounded px-2 py-1 text-xs w-full"
+                            />
+                        </div>
+
+                        <!-- Alert Threshold -->
+                        <div class="flex flex-col gap-1">
+                            <label
+                                for="newRuleNotifyThreshold"
+                                class="text-zinc-400 text-xs whitespace-nowrap"
+                                >Alert %</label
+                            >
+                            <input
+                                type="number"
+                                id="newRuleNotifyThreshold"
+                                bind:value={newRuleNotifyThreshold}
+                                placeholder="80"
+                                min="0"
+                                max="1000"
+                                step="1"
                                 class="bg-zinc-700 text-zinc-200 border border-zinc-700/60 rounded px-2 py-1 text-xs w-full"
                             />
                         </div>
@@ -436,6 +462,12 @@
                             scope="col"
                             class="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-zinc-400 whitespace-nowrap"
                         >
+                            Alert %
+                        </th>
+                        <th
+                            scope="col"
+                            class="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-zinc-400 whitespace-nowrap"
+                        >
                             {$language.filters}
                         </th>
                         <th
@@ -505,6 +537,22 @@
                                     />
                                 {:else}
                                     <DollarDisplay amount={rule.limit} />
+                                {/if}
+                            </td>
+                            <td
+                                class="px-4 py-2 text-sm text-zinc-200 whitespace-nowrap"
+                            >
+                                {#if editingRuleId === rule.id}
+                                    <input
+                                        type="number"
+                                        bind:value={editingRuleNotifyThreshold}
+                                        class="bg-zinc-700 text-zinc-100 px-2 py-1 rounded text-sm w-full"
+                                        min="0"
+                                        max="1000"
+                                        step="1"
+                                    />
+                                {:else}
+                                    <span class="text-zinc-400">{rule.notifyThreshold ?? 80}%</span>
                                 {/if}
                             </td>
                             <td class="px-4 py-2 text-sm whitespace-nowrap">

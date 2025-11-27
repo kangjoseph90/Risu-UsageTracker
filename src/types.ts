@@ -108,6 +108,7 @@ interface BudgetRule {
     name: string,
     period: BudgetPeriod,
     limit: number,
+    notifyThreshold?: number, // Percentage to notify (default 80?)
     model?: string, // Optional filter for specific model
     provider?: string, // Optional filter for specific provider
     requestType?: string, // Optional filter for specific request type

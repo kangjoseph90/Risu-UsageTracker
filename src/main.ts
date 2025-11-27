@@ -6,9 +6,11 @@ import { UI } from "./ui";
 import { movePluginToTop, checkDuplicate } from './util';
 import { UpdateManager } from './manager/update';
 import { initManagers } from './manager';
+import { BudgetMonitor } from './manager/budget_monitor';
 
 // Initialize all managers
 initManagers();
+BudgetMonitor.init();
 
 const usageTracker = new UsageTracker();
 const ui = new UI();
