@@ -732,12 +732,6 @@
                                             RequestType.Unknown}
                                         {#if record.latency}
                                             • {formatLatency(record.latency)}
-                                            {#if record.outputTokens}
-                                                • {(
-                                                    record.outputTokens /
-                                                    (record.latency / 1000)
-                                                ).toFixed(2)} TPS
-                                            {/if}
                                         {/if}
                                         • {dateStr}
                                     </div>

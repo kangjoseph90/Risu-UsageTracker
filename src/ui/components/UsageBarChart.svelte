@@ -14,8 +14,9 @@
         outputCost: number;
         totalCost: number;
         latency: number;
+        tps: number;
     }>;
-    export let measureBy: "tokens" | "cost" | "requests" | "latency";
+    export let measureBy: "tokens" | "cost" | "requests" | "latency" | "tps";
     export let timeRange: string;
 
     let scrollContainer: HTMLDivElement;
@@ -58,6 +59,9 @@
                 case "latency":
                     value = bucket.latency;
                     break;
+                case "tps":
+                    value = bucket.tps;
+                    break;
             }
             max = Math.max(max, value);
         });
@@ -66,6 +70,8 @@
 
     function calculateGridLines(maxVal: number): number[] {
         if (maxVal === 0) return [0];
+        // Handle TPS or small numbers correctly
+        if (maxVal < 0.1) return [0, maxVal];
 
         const exponent = Math.floor(Math.log10(maxVal));
         const mantissa = maxVal / Math.pow(10, exponent);
@@ -181,7 +187,7 @@
                 {#each yGridLines as gridValue}
                     {@const y =
                         chartHeight - (gridValue / maxValue) * chartHeight}
-                    {@const label = measureBy === 'latency' ? formatLatency(gridValue) : formatNumber(gridValue)}
+                    {@const label = measureBy === 'latency' ? formatLatency(gridValue) : (measureBy === 'tps' ? gridValue.toFixed(2) : formatNumber(gridValue))}
                     <text
                         x={yAxisWidth - 10}
                         y={y + 3}
@@ -279,6 +285,40 @@
                                     width={barWidth}
                                     height={cachedHeight}
                                     fill="#3b82f6"
+                                    rx="2"
+                                    opacity={0.9}
+                                />
+                            {/if}
+                            <rect
+                                {x}
+                                y={0}
+                                width={barWidth}
+                                height={chartHeight}
+                                fill="transparent"
+                            />
+                        </g>
+                    {:else if measureBy === "tps"}
+                        {@const height =
+                            (bucket.tps / maxValue) * chartHeight}
+                        {@const y = chartHeight - height}
+                        <!-- svelte-ignore a11y-no-static-element-interactions -->
+                        <g
+                            on:mouseenter={(e) =>
+                                handleBarInteraction(e, bucket, index)}
+                            on:mousemove={handleBarMove}
+                            on:mouseleave={handleBarLeave}
+                            on:touchstart={(e) =>
+                                handleBarInteraction(e, bucket, index)}
+                            on:touchend={handleBarLeave}
+                            style="cursor: pointer;"
+                        >
+                            {#if height > 0}
+                                <rect
+                                    {x}
+                                    {y}
+                                    width={barWidth}
+                                    {height}
+                                    fill="#f472b6"
                                     rx="2"
                                     opacity={0.9}
                                 />
@@ -474,6 +514,11 @@
                 <span class="w-3 h-3 bg-emerald-500 rounded"></span>
                 <span>{$language.latency}</span>
             </div>
+        {:else if measureBy === "tps"}
+            <div class="flex items-center gap-1">
+                <span class="w-3 h-3 bg-pink-400 rounded"></span>
+                <span>{$language.tps}</span>
+            </div>
         {/if}
     </div>
 
@@ -521,6 +566,9 @@
                 <div>{$language.requests}: {tooltipData.requests}</div>
                 {#if tooltipData.latency > 0}
                     <div>{$language.latency}: {formatLatency(tooltipData.latency)}</div>
+                {/if}
+                {#if tooltipData.tps > 0}
+                    <div>{$language.tps}: {tooltipData.tps.toFixed(2)}</div>
                 {/if}
             </div>
         </div>

@@ -11,6 +11,7 @@
         tokens: number;
         cost: number;
         latency?: number;
+        tps?: number;
         value: number;
         percentage: number;
     }>;
@@ -192,6 +193,10 @@
                             <span class="text-white font-medium"
                                 >{formatLatency(item.value)}</span
                             >
+                        {:else if measureBy === "tps"}
+                            <span class="text-white font-medium"
+                                >{item.value.toFixed(2)}</span
+                            >
                         {:else}
                             <span class="text-white font-medium"
                                 >{item.value}</span
@@ -227,6 +232,9 @@
                 <div>{$language.requests}: {tooltipData.requests}</div>
                 {#if tooltipData.latency && tooltipData.latency > 0}
                     <div>{$language.latency}: {formatLatency(tooltipData.latency)}</div>
+                {/if}
+                {#if tooltipData.tps && tooltipData.tps > 0}
+                    <div>{$language.tps}: {tooltipData.tps.toFixed(2)}</div>
                 {/if}
             </div>
         </div>
