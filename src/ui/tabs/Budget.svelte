@@ -3,10 +3,11 @@
     import { BudgetManager } from "../../manager/budget";
     import { UsageManager } from "../../manager/usage";
     import { ProviderManager } from "../../manager/provider";
+    import { BudgetMonitor } from "../../manager/budget_monitor";
     import type { BudgetRule, UsageRecord } from "../../types";
     import { BudgetPeriod, RequestType } from "../../types";
     import DollarDisplay from "../components/DollarDisplay.svelte";
-    import { Plus, Check, X, Pencil, Trash, ChevronDown } from "lucide-svelte";
+    import { Plus, Check, X, Pencil, Trash, ChevronDown, Settings } from "lucide-svelte";
     import { confirm } from "../popup";
     import { language } from "../../lang";
 
@@ -17,11 +18,14 @@
 
     let isAddRuleExpanded = false;
 
+    // Global Alert Settings
+    let alertEnabled = false;
+    let alertThreshold = 80;
+
     // Filter states for new rule
     let newRuleName = "";
     let newRulePeriod = BudgetPeriod.Monthly;
     let newRuleLimit = 100;
-    let newRuleNotifyThreshold = 80;
     let newRuleModel = "";
     let newRuleProvider = "";
     let newRuleRequestType = "";
@@ -30,7 +34,6 @@
     let editingRuleId: string | null = null;
     let editingRuleName = "";
     let editingRuleLimit = 0;
-    let editingRuleNotifyThreshold = 80;
     let editingRulePeriod = BudgetPeriod.Monthly;
     let editingRuleModel = "";
     let editingRuleProvider = "";
@@ -55,15 +58,26 @@
 
     onMount(async () => {
         await refreshData();
+        await loadSettings();
     });
 
     $: if (key) {
         refreshData();
+        loadSettings();
     }
 
     async function refreshData() {
         rules = await BudgetManager.getRules();
         allRecords = UsageManager.getRecords([]);
+    }
+
+    async function loadSettings() {
+        alertEnabled = await BudgetMonitor.getAlertEnabled();
+        alertThreshold = await BudgetMonitor.getAlertThreshold();
+    }
+
+    async function updateSettings() {
+        await BudgetMonitor.setAlertSettings(alertEnabled, alertThreshold);
     }
 
     function getUniqueModels(records: UsageRecord[]): string[] {
@@ -153,7 +167,6 @@
             name: newRuleName,
             period: newRulePeriod,
             limit: newRuleLimit,
-            notifyThreshold: newRuleNotifyThreshold,
             model: newRuleModel || undefined,
             provider: newRuleProvider || undefined,
             requestType: newRuleRequestType || undefined,
@@ -163,7 +176,6 @@
         newRuleName = "";
         newRulePeriod = BudgetPeriod.Monthly;
         newRuleLimit = 100;
-        newRuleNotifyThreshold = 80;
         newRuleModel = "";
         newRuleProvider = "";
         newRuleRequestType = "";
@@ -183,7 +195,6 @@
         editingRuleId = rule.id;
         editingRuleName = rule.name;
         editingRuleLimit = rule.limit;
-        editingRuleNotifyThreshold = rule.notifyThreshold ?? 80;
         editingRulePeriod = rule.period;
         editingRuleModel = rule.model || "";
         editingRuleProvider = rule.provider || "";
@@ -194,7 +205,6 @@
         editingRuleId = null;
         editingRuleName = "";
         editingRuleLimit = 0;
-        editingRuleNotifyThreshold = 80;
         editingRulePeriod = BudgetPeriod.Monthly;
         editingRuleModel = "";
         editingRuleProvider = "";
@@ -209,7 +219,6 @@
                 ...rule,
                 name: editingRuleName,
                 limit: editingRuleLimit,
-                notifyThreshold: editingRuleNotifyThreshold,
                 period: editingRulePeriod,
                 model: editingRuleModel || undefined,
                 provider: editingRuleProvider || undefined,
@@ -274,25 +283,6 @@
                                 id="newRuleName"
                                 bind:value={newRuleName}
                                 placeholder={$language.ruleNamePlaceholder}
-                                class="bg-zinc-700 text-zinc-200 border border-zinc-700/60 rounded px-2 py-1 text-xs w-full"
-                            />
-                        </div>
-
-                        <!-- Alert Threshold -->
-                        <div class="flex flex-col gap-1">
-                            <label
-                                for="newRuleNotifyThreshold"
-                                class="text-zinc-400 text-xs whitespace-nowrap"
-                                >Alert %</label
-                            >
-                            <input
-                                type="number"
-                                id="newRuleNotifyThreshold"
-                                bind:value={newRuleNotifyThreshold}
-                                placeholder="80"
-                                min="0"
-                                max="1000"
-                                step="1"
                                 class="bg-zinc-700 text-zinc-200 border border-zinc-700/60 rounded px-2 py-1 text-xs w-full"
                             />
                         </div>
@@ -423,6 +413,40 @@
                     {sortedRules.length} / {rules.length}
                 </span>
             </div>
+
+            <!-- Global Alert Settings -->
+            <div class="flex items-center gap-3 text-xs bg-zinc-800/50 px-2 py-1 rounded border border-zinc-700/40">
+                <div class="flex items-center gap-1.5">
+                     <input
+                        type="checkbox"
+                        id="alertEnabled"
+                        bind:checked={alertEnabled}
+                        on:change={updateSettings}
+                        class="form-checkbox rounded bg-zinc-700 border-zinc-600 text-blue-500 focus:ring-0 focus:ring-offset-0 w-3.5 h-3.5"
+                    />
+                    <label for="alertEnabled" class="text-zinc-300 cursor-pointer select-none">
+                        Alert
+                    </label>
+                </div>
+
+                <div class="w-px h-4 bg-zinc-700/60"></div>
+
+                <div class="flex items-center gap-1.5">
+                    <label for="alertThreshold" class="text-zinc-400 whitespace-nowrap">
+                        Threshold %:
+                    </label>
+                    <input
+                        type="number"
+                        id="alertThreshold"
+                        bind:value={alertThreshold}
+                        on:change={updateSettings}
+                        min="1"
+                        max="1000"
+                        class="bg-zinc-700 text-zinc-200 border border-zinc-600 rounded px-1 py-0.5 text-xs w-12 text-center"
+                        disabled={!alertEnabled}
+                    />
+                </div>
+            </div>
         </div>
     </div>
 
@@ -457,12 +481,6 @@
                             class="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-zinc-400 whitespace-nowrap"
                         >
                             {$language.limit}
-                        </th>
-                        <th
-                            scope="col"
-                            class="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-zinc-400 whitespace-nowrap"
-                        >
-                            Alert %
                         </th>
                         <th
                             scope="col"
@@ -537,22 +555,6 @@
                                     />
                                 {:else}
                                     <DollarDisplay amount={rule.limit} />
-                                {/if}
-                            </td>
-                            <td
-                                class="px-4 py-2 text-sm text-zinc-200 whitespace-nowrap"
-                            >
-                                {#if editingRuleId === rule.id}
-                                    <input
-                                        type="number"
-                                        bind:value={editingRuleNotifyThreshold}
-                                        class="bg-zinc-700 text-zinc-100 px-2 py-1 rounded text-sm w-full"
-                                        min="0"
-                                        max="1000"
-                                        step="1"
-                                    />
-                                {:else}
-                                    <span class="text-zinc-400">{rule.notifyThreshold ?? 80}%</span>
                                 {/if}
                             </td>
                             <td class="px-4 py-2 text-sm whitespace-nowrap">

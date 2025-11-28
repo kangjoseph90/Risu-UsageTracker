@@ -49,6 +49,7 @@ export class UsageManager {
             this.cachedDB.records.splice(index, 1);
             this.cachedDB.lastUpdated = new Date().toISOString();
             this.debouncedSave();
+            BudgetMonitor.onRecordRemoved(record);
             return true;
         }
         return false;

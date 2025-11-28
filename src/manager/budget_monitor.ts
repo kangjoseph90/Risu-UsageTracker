@@ -4,6 +4,8 @@ import { BudgetPeriod, RequestType } from '../types';
 import { BudgetManager } from './budget';
 import { UsageManager } from './usage';
 import { ProviderManager } from './provider';
+import { RisuAPI } from '../api';
+import { BUDGET_ALERT_ENABLED_ARG, BUDGET_ALERT_THRESHOLD_ARG } from '../plugin';
 
 interface MonitorState {
     rule: BudgetRule;
@@ -29,9 +31,39 @@ export class BudgetMonitor {
     // Reactive store for UI
     public static alerts: Writable<AlertState[]> = writable([]);
 
+    private static alertEnabled = false;
+    private static alertThreshold = 80;
+
     static async init() {
+        await this.loadSettings();
         // Initial build
         await this.rebuildAll();
+    }
+
+    private static async loadSettings() {
+        const enabled = RisuAPI.getArg(BUDGET_ALERT_ENABLED_ARG);
+        this.alertEnabled = enabled === 'true';
+
+        const threshold = RisuAPI.getArg(BUDGET_ALERT_THRESHOLD_ARG);
+        if (threshold) {
+            this.alertThreshold = Number(threshold);
+        }
+    }
+
+    static async getAlertEnabled(): Promise<boolean> {
+        return this.alertEnabled;
+    }
+
+    static async getAlertThreshold(): Promise<number> {
+        return this.alertThreshold;
+    }
+
+    static async setAlertSettings(enabled: boolean, threshold: number) {
+        this.alertEnabled = enabled;
+        this.alertThreshold = threshold;
+        RisuAPI.setArg(BUDGET_ALERT_ENABLED_ARG, enabled ? 'true' : 'false');
+        RisuAPI.setArg(BUDGET_ALERT_THRESHOLD_ARG, String(threshold));
+        this.updateAlerts();
     }
 
     static async rebuildAll() {
@@ -199,12 +231,15 @@ export class BudgetMonitor {
     }
 
     private static updateAlerts() {
+        if (!this.alertEnabled) {
+            this.alerts.set([]);
+            return;
+        }
+
         const activeAlerts: AlertState[] = [];
 
         this.monitors.forEach(monitor => {
-            const threshold = monitor.rule.notifyThreshold ?? 80; // Default 80%
-
-            if (monitor.percentage >= threshold) {
+            if (monitor.percentage >= this.alertThreshold) {
                 let level: 'warning' | 'danger' | 'critical' = 'warning';
                 if (monitor.percentage >= 100) level = 'critical';
                 else if (monitor.percentage >= 90) level = 'danger';
@@ -248,5 +283,14 @@ export class BudgetMonitor {
             this.monitors.delete(ruleId);
             this.updateAlerts();
         }
+    }
+
+    static onRecordRemoved(record: UsageRecord) {
+        // Since we don't know which monitor has this record in its queue easily (without searching all queues),
+        // and removing a record is a rare operation, we can simply rebuild the monitors.
+        // Or we can iterate all monitors and try to remove the record if it exists in the queue.
+
+        // Optimisation: Rebuild is safest to ensure consistency.
+        this.rebuildAll();
     }
 }

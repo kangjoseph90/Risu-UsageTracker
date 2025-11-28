@@ -10,6 +10,8 @@ export {
     PROVIDER_MAP_ARG,
     LANGUAGE_ARG,
     BUDGET_RULE_ARG,
+    BUDGET_ALERT_ENABLED_ARG,
+    BUDGET_ALERT_THRESHOLD_ARG,
     RisuArgType
 };
 
@@ -95,6 +97,16 @@ LanguageType // 'en' | 'ko'
 */
 const LANGUAGE_ARG = 'language'
 
+/*
+boolean
+*/
+const BUDGET_ALERT_ENABLED_ARG = 'budget_alert_enabled';
+
+/*
+number
+*/
+const BUDGET_ALERT_THRESHOLD_ARG = 'budget_alert_threshold';
+
 const RISU_ARGS: RisuArgs = {
     [DB_ARG]: RisuArgType.String,
     [ERROR_DB_ARG]: RisuArgType.String,
@@ -103,6 +115,8 @@ const RISU_ARGS: RisuArgs = {
     [PROVIDER_MAP_ARG]: RisuArgType.String,
     [BUDGET_RULE_ARG]: RisuArgType.String,
     [LANGUAGE_ARG]: RisuArgType.String,
+    [BUDGET_ALERT_ENABLED_ARG]: RisuArgType.String, // Stored as string "true"/"false"
+    [BUDGET_ALERT_THRESHOLD_ARG]: RisuArgType.String, // Stored as string number
 }
 
 /**
