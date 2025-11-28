@@ -158,14 +158,20 @@ export class PriceManager {
         let changed = false;
         
         if (this.cachedConfirmed[oldKey]) {
-            this.cachedConfirmed[newKey] = this.cachedConfirmed[oldKey];
+            this.cachedConfirmed[newKey] = {
+                ...this.cachedConfirmed[newKey],
+                ...this.cachedConfirmed[oldKey],
+            };
             delete this.cachedConfirmed[oldKey];
             this.debouncedSaveConfirmed();
             changed = true;
         }
 
         if (this.cachedTemporary[oldKey]) {
-            this.cachedTemporary[newKey] = this.cachedTemporary[oldKey];
+            this.cachedTemporary[newKey] = {
+                ...this.cachedTemporary[newKey],
+                ...this.cachedTemporary[oldKey],
+            };
             delete this.cachedTemporary[oldKey];
             this.debouncedSaveTemporary();
             changed = true;
