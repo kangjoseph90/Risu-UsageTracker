@@ -18,7 +18,8 @@ export type {
     OnResponseCallback,
     RequestData,
     ProviderMap,
-    BudgetRule
+    BudgetRule,
+    BudgetSettings
 };
 
 enum RequestType {
@@ -111,4 +112,9 @@ interface BudgetRule {
     model?: string, // Optional filter for specific model
     provider?: string, // Optional filter for specific provider
     requestType?: string, // Optional filter for specific request type
+}
+
+interface BudgetSettings {
+    warningEnabled: boolean,
+    threshold: number, // 0-100, default 80
 }

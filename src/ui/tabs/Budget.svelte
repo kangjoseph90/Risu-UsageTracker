@@ -1,10 +1,12 @@
 <script lang="ts">
     import { onMount, onDestroy } from "svelte";
-    import { BudgetManager } from "../../manager/budget";
+    import { BudgetManager } from "../../manager/budget/rule";
+    import { BudgetMonitor, type ExceededRuleInfo } from "../../manager/budget/monitor";
+    import { BudgetSettingsManager } from "../../manager/budget/settings";
     import { UsageManager } from "../../manager/usage";
     import { ProviderManager } from "../../manager/provider";
     import { EventManager, PluginEvent } from "../../manager/event";
-    import type { BudgetRule, UsageRecord } from "../../types";
+    import type { BudgetRule, UsageRecord, BudgetSettings } from "../../types";
     import { BudgetPeriod, RequestType } from "../../types";
     import DollarDisplay from "../components/DollarDisplay.svelte";
     import { Plus, Check, X, Pencil, Trash, ChevronDown } from "lucide-svelte";
@@ -12,7 +14,11 @@
     import { language } from "../../lang";
 
     let rules: BudgetRule[] = [];
+    let rulesWithUsage: ExceededRuleInfo[] = [];
     let allRecords: UsageRecord[] = [];
+    
+    // Settings state
+    let budgetSettings: BudgetSettings = BudgetSettingsManager.getSettings();
 
     let isAddRuleExpanded = false;
 
@@ -40,7 +46,6 @@
     $: uniqueModels = getUniqueModels(allRecords);
     $: uniqueProviders = getUniqueProviders();
     $: uniqueRequestTypes = getUniqueRequestTypes(allRecords);
-    $: rulesWithUsage = calculateRulesUsage(rules, allRecords);
     $: filteredRulesWithUsage = searchQuery.trim()
         ? rulesWithUsage.filter((r) =>
               r.rule.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -50,11 +55,10 @@
         (a, b) => b.percentage - a.percentage
     );
 
-    onMount(async () => {
-        await refreshData();
-        EventManager.on(PluginEvent.UsageAddRecord, refreshData);
-        EventManager.on(PluginEvent.UsageUpdateRecord, refreshData);
-        EventManager.on(PluginEvent.UsageRemoveRecord, refreshData);
+    onMount(() => {
+        refreshData();
+        EventManager.on(PluginEvent.BudgetStateChange, refreshData);
+        EventManager.on(PluginEvent.BudgetSettingsChange, refreshSettings);
         EventManager.on(PluginEvent.PriceUpdate, refreshData);
         EventManager.on(PluginEvent.BudgetAddRule, refreshData);
         EventManager.on(PluginEvent.BudgetUpdateRule, refreshData);
@@ -63,9 +67,8 @@
     });
 
     onDestroy(() => {
-        EventManager.off(PluginEvent.UsageAddRecord, refreshData);
-        EventManager.off(PluginEvent.UsageUpdateRecord, refreshData);
-        EventManager.off(PluginEvent.UsageRemoveRecord, refreshData);
+        EventManager.off(PluginEvent.BudgetStateChange, refreshData);
+        EventManager.off(PluginEvent.BudgetSettingsChange, refreshSettings);
         EventManager.off(PluginEvent.PriceUpdate, refreshData);
         EventManager.off(PluginEvent.BudgetAddRule, refreshData);
         EventManager.off(PluginEvent.BudgetUpdateRule, refreshData);
@@ -73,9 +76,29 @@
         EventManager.off(PluginEvent.GlobalRestore, refreshData);
     });
 
-    async function refreshData() {
-        rules = await BudgetManager.getRules();
+    function refreshData() {
+        rules = BudgetManager.getRules();
+        rulesWithUsage = BudgetMonitor.getAllRulesWithUsage();
         allRecords = UsageManager.getRecords([]);
+    }
+
+    function refreshSettings() {
+        budgetSettings = BudgetSettingsManager.getSettings();
+    }
+
+    function handleWarningEnabledChange(event: Event) {
+        const target = event.target as HTMLInputElement;
+        BudgetSettingsManager.setWarningEnabled(target.checked);
+    }
+
+    function handleThresholdChange(event: Event) {
+        const target = event.target as HTMLInputElement;
+        let value = Number(target.value);
+        // Normalize to 0-100
+        if (isNaN(value)) value = 0;
+        value = Math.max(0, Math.min(100, Math.round(value)));
+        target.value = String(value);
+        BudgetSettingsManager.setThreshold(value);
     }
 
     function getUniqueModels(records: UsageRecord[]): string[] {
@@ -98,55 +121,6 @@
         return Array.from(unique).sort();
     }
 
-    function calculateRuleUsage(
-        rule: BudgetRule,
-        records: UsageRecord[]
-    ): number {
-        const now = new Date();
-        let startTime: Date;
-
-        switch (rule.period) {
-            case BudgetPeriod.Daily:
-                startTime = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-                break;
-            case BudgetPeriod.Weekly:
-                startTime = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-                break;
-            case BudgetPeriod.Monthly:
-                startTime = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-                break;
-        }
-
-        return records
-            .filter((r) => {
-                const recordTime = new Date(r.timestamp);
-                if (recordTime <= startTime) return false;
-
-                // Apply filters
-                if (rule.model && r.model !== rule.model) return false;
-                if (rule.provider) {
-                    const recordProvider = ProviderManager.getProvider(r.url);
-                    if (recordProvider !== rule.provider) return false;
-                }
-                if (
-                    rule.requestType &&
-                    (r.requestType || RequestType.Unknown) !== rule.requestType
-                )
-                    return false;
-
-                return true;
-            })
-            .reduce((acc, r) => acc + r.totalCost, 0);
-    }
-
-    function calculateRulesUsage(rules: BudgetRule[], records: UsageRecord[]) {
-        return rules.map((rule) => {
-            const usage = calculateRuleUsage(rule, records);
-            const percentage = (usage / rule.limit) * 100;
-            return { rule, usage, percentage };
-        });
-    }
-
     function getPeriodLabel(period: BudgetPeriod): string {
         switch (period) {
             case BudgetPeriod.Daily:
@@ -158,10 +132,10 @@
         }
     }
 
-    async function handleAddRule() {
+    function handleAddRule() {
         if (!newRuleName || newRuleLimit <= 0) return;
 
-        await BudgetManager.addRule({
+        BudgetManager.addRule({
             name: newRuleName,
             period: newRulePeriod,
             limit: newRuleLimit,
@@ -183,7 +157,7 @@
 
     async function handleDeleteRule(ruleId: string) {
         if (await confirm($language.deleteRuleConfirm)) {
-            await BudgetManager.deleteRule(ruleId);
+            BudgetManager.deleteRule(ruleId);
         }
     }
 
@@ -207,11 +181,11 @@
         editingRuleRequestType = "";
     }
 
-    async function handleUpdateRule() {
+    function handleUpdateRule() {
         if (!editingRuleId || !editingRuleName || editingRuleLimit <= 0) return;
         const rule = rules.find((r) => r.id === editingRuleId);
         if (rule) {
-            await BudgetManager.updateRule({
+            BudgetManager.updateRule({
                 ...rule,
                 name: editingRuleName,
                 limit: editingRuleLimit,
@@ -392,7 +366,7 @@
     <div
         class="sticky top-0 z-10 bg-zinc-900 border-b border-zinc-700/60 px-3 py-3 flex-shrink-0 shadow-[0_4px_16px_0_rgba(0,0,0,0.25)]"
     >
-        <div class="flex flex-wrap flex-row justify-between items-center gap-3">
+        <div class="flex flex-wrap flex-row justify-between items-center gap-2 sm:gap-3">
             <!-- Search and Info Group -->
             <div class="flex items-center gap-2 text-xs">
                 <span class="text-zinc-400 hidden md:inline"
@@ -402,11 +376,44 @@
                     type="text"
                     bind:value={searchQuery}
                     placeholder={$language.search}
-                    class="bg-zinc-800 text-zinc-200 border border-zinc-700/60 rounded px-2 py-1 text-xs max-w-[200px] placeholder-zinc-500"
+                    class="bg-zinc-800 text-zinc-200 border border-zinc-700/60 rounded px-2 py-1 text-xs max-w-[120px] sm:max-w-[200px] placeholder-zinc-500"
                 />
-                <span class="text-zinc-500 text-xs">
+                <span class="text-zinc-500 text-xs hidden sm:inline">
                     {sortedRules.length} / {rules.length}
                 </span>
+            </div>
+
+            <!-- Warning Settings (Inline) -->
+            <div class="flex items-center gap-2 sm:gap-4 text-xs">
+                <!-- Budget Warning Toggle -->
+                <div class="flex items-center gap-1.5 sm:gap-2">
+                    <span class="text-zinc-400 whitespace-nowrap">{$language.budgetWarning}:</span>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input
+                            type="checkbox"
+                            checked={budgetSettings.warningEnabled}
+                            on:change={handleWarningEnabledChange}
+                            class="sr-only peer"
+                        />
+                        <div class="w-8 h-4 sm:w-9 sm:h-5 bg-zinc-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-3 after:w-3 sm:after:h-4 sm:after:w-4 after:transition-all peer-checked:bg-blue-500"></div>
+                    </label>
+                </div>
+
+                <!-- Usage % Input -->
+                <div class="flex items-center gap-1.5 sm:gap-2">
+                    <span class="text-zinc-400 whitespace-nowrap">{$language.usage}:</span>
+                    <div class="flex items-center space-x-1">
+                        <input
+                            type="number"
+                            value={budgetSettings.threshold}
+                            on:change={handleThresholdChange}
+                            on:blur={handleThresholdChange}
+                            min="0"
+                            max="100"
+                            class="bg-zinc-800 text-zinc-200 border border-zinc-700/60 rounded px-2 py-1 text-xs max-w-[60px] placeholder-zinc-500"
+                        /><span class="text-zinc-400 ml-0.5">%</span>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

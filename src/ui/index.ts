@@ -1,36 +1,51 @@
 import OpenButton from './OpenButton.svelte';
 import { Popup } from './popup';
+import { WarningIcon } from './warning';
+
 export class UI {
     private readonly OPEN_BUTTON_ID = 'usage-tracker-openbutton';
+    private readonly CONTAINER_ID = 'usage-tracker-container';
 
     private timeout: NodeJS.Timeout | null = null;
     private openButtonComponent: OpenButton | null = null;
-    private popupContainer: HTMLDivElement | null = null;
+    private container: HTMLDivElement | null = null;
     private popupComponent: Popup | null = null;
+    private warningIconComponent: WarningIcon | null = null;
 
 
     constructor() {
         this.initialize();
-        this.addPopup();
+        this.addContainer();
     }
 
-    addPopup() {
-        this.popupContainer = document.createElement('div');
-        this.popupContainer.id = 'usage-tracker-container';
-        document.body.appendChild(this.popupContainer);
+    addContainer() {
+        this.container = document.createElement('div');
+        this.container.id = this.CONTAINER_ID;
+        document.body.appendChild(this.container);
+        
+        // Add Popup component
         this.popupComponent = new Popup({
-            target: this.popupContainer,
+            target: this.container,
+        });
+        
+        // Add WarningIcon component
+        this.warningIconComponent = new WarningIcon({
+            target: this.container,
         });
     }
 
-    removePopup() {
+    removeContainer() {
         if (this.popupComponent) {
             this.popupComponent.$destroy();
             this.popupComponent = null;
         }
-        if (this.popupContainer) {
-            this.popupContainer.remove();
-            this.popupContainer = null;
+        if (this.warningIconComponent) {
+            this.warningIconComponent.$destroy();
+            this.warningIconComponent = null;
+        }
+        if (this.container) {
+            this.container.remove();
+            this.container = null;
         }
     }
     initialize() {
@@ -85,6 +100,6 @@ export class UI {
     destroy() {
         this.dispose();
         this.removeOpenButton();
-        this.removePopup();
+        this.removeContainer();
     }
 }

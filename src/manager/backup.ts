@@ -6,7 +6,7 @@ import { ProviderManager } from "./provider";
 import { PriceManager } from "./price";
 import { UsageManager } from "./usage";
 import { downloadFile, readFileAsText } from "../util";
-import { BudgetManager } from "./budget";
+import { BudgetManager } from "./budget/rule";
 import { ErrorManager } from "./error";
 import { EventManager, PluginEvent } from "./event";
 

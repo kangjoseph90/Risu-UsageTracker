@@ -186,4 +186,5 @@ export const languageEn = {
     error: "Error",
     errorTab: "Error Log",
     statusCode: "Status Code",
+    budgetWarning: "Budget Warning",
 };

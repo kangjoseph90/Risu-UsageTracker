@@ -1,8 +1,8 @@
-import type { BudgetRule } from '../types';
-import { RisuAPI } from '../api';
-import { BUDGET_RULE_ARG } from '../plugin';
-import { debounce } from '../util';
-import { EventManager, PluginEvent } from './event';
+import type { BudgetRule } from '../../types';
+import { RisuAPI } from '../../api';
+import { BUDGET_RULE_ARG } from '../../plugin';
+import { debounce } from '../../util';
+import { EventManager, PluginEvent } from '../event';
 
 export class BudgetManager {
     private static rules: BudgetRule[] = [];
@@ -37,12 +37,12 @@ export class BudgetManager {
         }
     }
 
-    static async getRules(): Promise<BudgetRule[]> {
+    static getRules(): BudgetRule[] {
         this.ensureInitialized();
         return this.rules;
     }
 
-    static async addRule(rule: Omit<BudgetRule, 'id'>): Promise<BudgetRule> {
+    static addRule(rule: Omit<BudgetRule, 'id'>): BudgetRule {
         this.ensureInitialized();
         const newRule = { 
             ...rule, 
@@ -57,7 +57,7 @@ export class BudgetManager {
         return newRule;
     }
 
-    static async updateRule(rule: BudgetRule): Promise<void> {
+    static updateRule(rule: BudgetRule): void {
         this.ensureInitialized();
         const index = this.rules.findIndex(r => r.id === rule.id);
         if (index !== -1) {
@@ -67,7 +67,7 @@ export class BudgetManager {
         }
     }
 
-    static async deleteRule(ruleId: string): Promise<void> {
+    static deleteRule(ruleId: string): void {
         this.ensureInitialized();
         this.rules = this.rules.filter(r => r.id !== ruleId);
         this.debouncedSave();

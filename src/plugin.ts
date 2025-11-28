@@ -10,6 +10,7 @@ export {
     PROVIDER_MAP_ARG,
     LANGUAGE_ARG,
     BUDGET_RULE_ARG,
+    BUDGET_SETTINGS_ARG,
     RisuArgType
 };
 
@@ -91,6 +92,14 @@ const PROVIDER_MAP_ARG = 'provider_map'
 const BUDGET_RULE_ARG = 'budget_rules'
 
 /*
+{
+    warningEnabled: boolean,
+    threshold: number, // 0-100
+}
+*/
+const BUDGET_SETTINGS_ARG = 'budget_settings'
+
+/*
 LanguageType // 'en' | 'ko'
 */
 const LANGUAGE_ARG = 'language'
@@ -102,6 +111,7 @@ const RISU_ARGS: RisuArgs = {
     [PRICE_TEMP_ARG]: RisuArgType.String,
     [PROVIDER_MAP_ARG]: RisuArgType.String,
     [BUDGET_RULE_ARG]: RisuArgType.String,
+    [BUDGET_SETTINGS_ARG]: RisuArgType.String,
     [LANGUAGE_ARG]: RisuArgType.String,
 }
 

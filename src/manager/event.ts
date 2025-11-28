@@ -9,6 +9,8 @@ export enum PluginEvent {
     BudgetAddRule = "budget:add_rule",
     BudgetUpdateRule = "budget:update_rule",
     BudgetRemoveRule = "budget:remove_rule",
+    BudgetStateChange = "budget:state_change", // When budget usage changes
+    BudgetSettingsChange = "budget:settings_change", // When budget settings change
     PriceUpdate = "price:update",
     ProviderUpdate = "provider:update",
     ProviderRename = "provider:rename",

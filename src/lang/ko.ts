@@ -186,4 +186,5 @@ export const languageKo = {
     error: "에러",
     errorTab: "에러 로그",
     statusCode: "상태 코드",
+    budgetWarning: "예산 경고",
 }
