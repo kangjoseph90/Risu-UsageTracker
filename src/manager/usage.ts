@@ -11,12 +11,24 @@ export class UsageManager {
         lastUpdated: new Date().toISOString()
     };
     private static readonly DEBOUNCE_WAIT = 500;
+    private static initialized = false;
+
+    static {
+        EventManager.on(PluginEvent.GlobalRestore, () => UsageManager.clear());
+        EventManager.on(PluginEvent.GlobalDestroy, () => UsageManager.clear());
+        EventManager.on(PluginEvent.PriceUpdate, (data: { provider: string, modelId: string, priceInfo: PriceInfo }) => {
+            UsageManager.updateCostsForModel(data.provider, data.modelId, data.priceInfo);
+        });
+    }
 
     private static debouncedSave = debounce(() => {
         RisuAPI.setArg(DB_ARG, JSON.stringify(UsageManager.cachedDB));
     }, UsageManager.DEBOUNCE_WAIT);
 
-    static init() {
+    private static init() {
+        if (this.initialized) {
+            return;
+        }
         try {
             const storedDB = RisuAPI.getArg(DB_ARG) as string;
             if (storedDB) {
@@ -30,12 +42,17 @@ export class UsageManager {
             };
         }
 
-        EventManager.on(PluginEvent.PriceUpdate, (data: { provider: string, modelId: string, priceInfo: PriceInfo }) => {
-            UsageManager.updateCostsForModel(data.provider, data.modelId, data.priceInfo);
-        });
+        this.initialized = true;
+    }
+
+    private static ensureInitialized() {
+        if (!this.initialized) {
+            this.init();
+        }
     }
 
     static addRecord(record: UsageRecord) {
+        this.ensureInitialized();
         this.cachedDB.records.push(record);
         this.cachedDB.lastUpdated = new Date().toISOString();
         this.debouncedSave();
@@ -43,6 +60,7 @@ export class UsageManager {
     }
 
     static removeRecord(record: UsageRecord): boolean {
+        this.ensureInitialized();
         const index = this.cachedDB.records.findIndex(r =>
             r.timestamp === record.timestamp &&
             r.model === record.model &&
@@ -60,6 +78,7 @@ export class UsageManager {
     }
 
     static getRecords(filter: UsageFilter[]): UsageRecord[] {
+        this.ensureInitialized();
         if (!this.cachedDB.records) return [];
         const filtered = this.cachedDB.records.filter((record: UsageRecord) =>
             filter.every(fn => fn(record))
@@ -68,10 +87,12 @@ export class UsageManager {
     }
 
     static getLastUpdated(): string {
+        this.ensureInitialized();
         return this.cachedDB.lastUpdated;
     }
 
     static updateCostsForModel(provider: string, modelId: string, newPrice: PriceInfo): number {
+        this.ensureInitialized();
         let updatedCount = 0;
 
         this.cachedDB.records.forEach(record => {
@@ -101,10 +122,12 @@ export class UsageManager {
     }
 
     static exportToJSON(records: UsageRecord[]): string {
+        this.ensureInitialized();
         return JSON.stringify(records, null, 2);
     }
 
     static exportToCSV(records: UsageRecord[]): string {
+        this.ensureInitialized();
         if (records.length === 0) {
             return '';
         }
@@ -138,5 +161,11 @@ export class UsageManager {
         }
 
         return csvRows.join('\\n');
+    }
+
+    static clear(): void {
+        this.debouncedSave.cancel();
+        this.initialized = false;
+        this.cachedDB = { records: [], lastUpdated: new Date().toISOString() };
     }
 }

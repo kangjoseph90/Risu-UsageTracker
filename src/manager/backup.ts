@@ -8,7 +8,6 @@ import { UsageManager } from "./usage";
 import { downloadFile, readFileAsText } from "../util";
 import { BudgetManager } from "./budget";
 import { ErrorManager } from "./error";
-import { initManagers } from ".";
 import { EventManager, PluginEvent } from "./event";
 
 interface BackupData {
@@ -119,7 +118,7 @@ export class BackupManager {
             }
         }
 
-        EventManager.emit(PluginEvent.GlobalInit);
+        EventManager.emit(PluginEvent.GlobalRestore);
     }
 
     static async hasBackup(): Promise<boolean> {

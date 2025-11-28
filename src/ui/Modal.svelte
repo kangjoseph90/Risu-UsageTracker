@@ -21,7 +21,6 @@
     import { BackupManager } from "../manager/backup";
     import { LanguageManager } from "../manager/language";
     import { language, LanguageType, LanguageTypeLabels } from "../lang";
-    import { createEventDispatcher } from "svelte";
     import { alert, confirm } from "./popup";
 
     export let onClose: () => void;
@@ -59,18 +58,10 @@
         document.removeEventListener("mousedown", handleDocumentClick);
     }
 
-    let refreshKey: number = 0;
     let currentLanguage: LanguageType = LanguageManager.getLanguage();
-
-    const dispatch = createEventDispatcher();
 
     function refreshTempIndicator() {
         hasTempPrice = PriceManager.hasTemporaryPrice();
-    }
-
-    function forceRefresh() {
-        refreshTempIndicator();
-        refreshKey++;
     }
 
     function changeLanguage(lang: LanguageType) {
@@ -96,7 +87,7 @@
             if (success) {
                 await alert($language.restoreSuccess);
                 currentLanguage = LanguageManager.getLanguage();
-                forceRefresh();
+                refreshTempIndicator();
             } else {
                 await alert($language.restoreFail);
             }
@@ -127,7 +118,7 @@
             if (success) {
                 await alert($language.restoreSuccess);
                 currentLanguage = LanguageManager.getLanguage();
-                forceRefresh();
+                refreshTempIndicator();
             } else {
                 await alert($language.restoreFail);
             }
@@ -383,17 +374,17 @@
             <!-- Body Container -->
             <div class="flex-1 overflow-y-auto min-h-0 pt-2">
                 {#if currentTab === "usage"}
-                    <Usage key={refreshKey} />
+                    <Usage />
                 {:else if currentTab === "price"}
-                    <Price key={refreshKey} on:change={refreshTempIndicator} />
+                    <Price on:change={refreshTempIndicator} />
                 {:else if currentTab === "provider"}
-                    <Provider key={refreshKey} />
+                    <Provider />
                 {:else if currentTab === "record"}
-                    <Record key={refreshKey} />
+                    <Record />
                 {:else if currentTab === "budget"}
-                    <Budget key={refreshKey} />
+                    <Budget />
                 {:else if currentTab === "error"}
-                    <Error key={refreshKey} />
+                    <Error />
                 {/if}
             </div>
         </div>

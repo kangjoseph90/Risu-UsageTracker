@@ -1,6 +1,7 @@
 import { RisuAPI } from '../api'
 import { LANGUAGE_ARG } from '../plugin'
 import { setLanguage, LanguageType } from '../lang'
+import { EventManager, PluginEvent } from './event';
 
 /**
  * init,
@@ -8,6 +9,11 @@ import { setLanguage, LanguageType } from '../lang'
  * getLanguage
  */
 export class LanguageManager {
+    static {
+        EventManager.on(PluginEvent.GlobalInit, () => LanguageManager.init());
+        EventManager.on(PluginEvent.GlobalRestore, () => LanguageManager.init());
+    }
+
     static init() {
         const lang = RisuAPI.getArg(LANGUAGE_ARG);
         if (lang && Object.values(LanguageType).includes(lang as LanguageType)) {

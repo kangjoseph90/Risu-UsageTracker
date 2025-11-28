@@ -9,6 +9,12 @@ export class PriceManager {
     private static cachedConfirmed: ProviderPrice = {};
     private static cachedTemporary: ProviderPrice = {};
     private static readonly DEBOUNCE_WAIT = 500;
+    private static initialized = false;
+
+    static {
+        EventManager.on(PluginEvent.GlobalRestore, () => PriceManager.clear());
+        EventManager.on(PluginEvent.GlobalDestroy, () => PriceManager.clear());
+    }
 
     private static debouncedSaveConfirmed = debounce(() => {
         RisuAPI.setArg(PRICE_ARG, JSON.stringify(PriceManager.cachedConfirmed));
@@ -18,7 +24,10 @@ export class PriceManager {
         RisuAPI.setArg(PRICE_TEMP_ARG, JSON.stringify(PriceManager.cachedTemporary));
     }, PriceManager.DEBOUNCE_WAIT);
 
-    static init() {
+    private static init() {
+        if (this.initialized) {
+            return;
+        }
         try {
             const confirmed = RisuAPI.getArg(PRICE_ARG) as string;
             this.cachedConfirmed = confirmed ? JSON.parse(confirmed) : {};
@@ -32,12 +41,17 @@ export class PriceManager {
             this.cachedTemporary = {};
         }
 
-        EventManager.on(PluginEvent.ProviderRename, (data: { oldName: string, newName: string }) => {
-            PriceManager.renameProvider(data.oldName, data.newName);
-        });
+        this.initialized = true;
+    }
+
+    private static ensureInitialized() {
+        if (!this.initialized) {
+            this.init();
+        }
     }
 
     static getModelPrice(modelId: string, provider: string): PriceInfo {
+        this.ensureInitialized();
         const priceData = { ...this.cachedConfirmed, ...this.cachedTemporary };
 
         const savedPrice = priceData[provider];
@@ -61,10 +75,12 @@ export class PriceManager {
     }
 
     static setTemporaryPrice(modelId: string, provider: string, priceInfo: PriceInfo): void {
+        this.ensureInitialized();
         this.setTemporaryPriceWithRetroactive(modelId, provider, priceInfo, true);
     }
 
     static setTemporaryPriceWithRetroactive(modelId: string, provider: string, priceInfo: PriceInfo, applyRetroactive: boolean): void {
+        this.ensureInitialized();
         if (!this.cachedTemporary[provider]) {
             this.cachedTemporary[provider] = {};
         }
@@ -76,10 +92,12 @@ export class PriceManager {
     }
 
     static setConfirmedPrice(modelId: string, provider: string, priceInfo: PriceInfo): void {
+        this.ensureInitialized();
         this.setConfirmedPriceWithRetroactive(modelId, provider, priceInfo, true);
     }
 
     static setConfirmedPriceWithRetroactive(modelId: string, provider: string, priceInfo: PriceInfo, applyRetroactive: boolean): void {
+        this.ensureInitialized();
         if (!this.cachedConfirmed[provider]) {
             this.cachedConfirmed[provider] = {};
         }
@@ -91,52 +109,78 @@ export class PriceManager {
     }
 
     static removeTemporaryModel(modelId: string, provider: string): boolean {
+        this.ensureInitialized();
         if (this.cachedTemporary[provider] && this.cachedTemporary[provider][modelId]) {
             delete this.cachedTemporary[provider][modelId];
             if (Object.keys(this.cachedTemporary[provider]).length === 0) {
                 delete this.cachedTemporary[provider];
             }
             this.debouncedSaveTemporary();
+            EventManager.emit(PluginEvent.PriceUpdate, { provider, modelId, priceInfo: null });
             return true;
         }
         return false;
     }
 
     static removeConfirmedModel(modelId: string, provider: string): boolean {
+        this.ensureInitialized();
         if (this.cachedConfirmed[provider] && this.cachedConfirmed[provider][modelId]) {
             delete this.cachedConfirmed[provider][modelId];
             if (Object.keys(this.cachedConfirmed[provider]).length === 0) {
                 delete this.cachedConfirmed[provider];
             }
             this.debouncedSaveConfirmed();
+            EventManager.emit(PluginEvent.PriceUpdate, { provider, modelId, priceInfo: null });
             return true;
         }
         return false;
     }
 
     static hasTemporaryPrice(): boolean {
+        this.ensureInitialized();
         return Object.keys(this.cachedTemporary).length > 0;
     }
 
     static getTemporaryPrice(): ProviderPrice {
+        this.ensureInitialized();
         return this.cachedTemporary;
     }
 
     static getConfirmedPrice(): ProviderPrice {
+        this.ensureInitialized();
         return this.cachedConfirmed;
     }
 
     static renameProvider(oldKey: string, newKey: string): void {
+        if (oldKey === newKey) return;
+        
+        this.ensureInitialized();
+        let changed = false;
+        
         if (this.cachedConfirmed[oldKey]) {
             this.cachedConfirmed[newKey] = this.cachedConfirmed[oldKey];
             delete this.cachedConfirmed[oldKey];
             this.debouncedSaveConfirmed();
+            changed = true;
         }
 
         if (this.cachedTemporary[oldKey]) {
             this.cachedTemporary[newKey] = this.cachedTemporary[oldKey];
             delete this.cachedTemporary[oldKey];
             this.debouncedSaveTemporary();
+            changed = true;
         }
+        
+        if (changed) {
+            EventManager.emit(PluginEvent.PriceUpdate, { provider: newKey, modelId: null, priceInfo: null });
+        }
+    }
+    
+    static clear(): void {
+        this.debouncedSaveConfirmed.cancel();
+        this.debouncedSaveTemporary.cancel();
+        this.initialized = false;
+        this.cachedConfirmed = {};
+        this.cachedTemporary = {};
     }
 }

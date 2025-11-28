@@ -12,8 +12,6 @@
     import { downloadFile } from "../../util";
     import { alert, confirm } from "../popup";
 
-    export let key: number = 0;
-
     let allRecords: UsageRecord[] = [];
     let filteredRecords: UsageRecord[] = [];
     let selectedRecords = new Set<UsageRecord>();
@@ -66,17 +64,17 @@
         EventManager.on(PluginEvent.UsageAddRecord, refreshData);
         EventManager.on(PluginEvent.UsageUpdateRecord, refreshData);
         EventManager.on(PluginEvent.UsageRemoveRecord, refreshData);
+        EventManager.on(PluginEvent.PriceUpdate, refreshData);
+        EventManager.on(PluginEvent.GlobalRestore, refreshData);
     });
 
     onDestroy(() => {
         EventManager.off(PluginEvent.UsageAddRecord, refreshData);
         EventManager.off(PluginEvent.UsageUpdateRecord, refreshData);
         EventManager.off(PluginEvent.UsageRemoveRecord, refreshData);
+        EventManager.off(PluginEvent.PriceUpdate, refreshData);
+        EventManager.off(PluginEvent.GlobalRestore, refreshData);
     });
-
-    $: if (key) {
-        refreshData();
-    }
 
     function refreshData() {
         allRecords = UsageManager.getRecords([]);
@@ -226,7 +224,6 @@
         const success = UsageManager.removeRecord(record);
         if (success) {
             clearSelection();
-            refreshData();
         } else {
             await alert($language.failToDelete);
         }
@@ -254,7 +251,6 @@
         });
         await alert(deletedText);
         clearSelection();
-        refreshData();
     }
 
     function goToPage(page: number) {

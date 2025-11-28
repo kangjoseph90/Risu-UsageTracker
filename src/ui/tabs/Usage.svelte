@@ -13,8 +13,6 @@
     import { formatString, language, type Language } from "../../lang";
     import { formatLatency } from "../../util";
 
-    export let key: number = 0;
-
     let records: UsageRecord[] = [];
 
     let stats = {
@@ -37,10 +35,6 @@
     let uniqueModels: string[] = [];
     let uniqueProviders: string[] = [];
     let uniqueRequestTypes: string[] = [];
-
-    $: if (key) {
-        refreshData();
-    }
 
     $: if ($language) {
         // Update donut chart when language changes to ensure "Other" label is translated
@@ -89,12 +83,16 @@
         EventManager.on(PluginEvent.UsageAddRecord, refreshData);
         EventManager.on(PluginEvent.UsageUpdateRecord, refreshData);
         EventManager.on(PluginEvent.UsageRemoveRecord, refreshData);
+        EventManager.on(PluginEvent.PriceUpdate, refreshData);
+        EventManager.on(PluginEvent.GlobalRestore, refreshData);
     });
 
     onDestroy(() => {
         EventManager.off(PluginEvent.UsageAddRecord, refreshData);
         EventManager.off(PluginEvent.UsageUpdateRecord, refreshData);
         EventManager.off(PluginEvent.UsageRemoveRecord, refreshData);
+        EventManager.off(PluginEvent.PriceUpdate, refreshData);
+        EventManager.off(PluginEvent.GlobalRestore, refreshData);
     });
 
     function refreshData() {

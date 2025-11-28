@@ -11,8 +11,6 @@
     import { confirm } from "../popup";
     import { language } from "../../lang";
 
-    export let key: number = 0;
-
     let rules: BudgetRule[] = [];
     let allRecords: UsageRecord[] = [];
 
@@ -57,17 +55,23 @@
         EventManager.on(PluginEvent.UsageAddRecord, refreshData);
         EventManager.on(PluginEvent.UsageUpdateRecord, refreshData);
         EventManager.on(PluginEvent.UsageRemoveRecord, refreshData);
+        EventManager.on(PluginEvent.PriceUpdate, refreshData);
+        EventManager.on(PluginEvent.BudgetAddRule, refreshData);
+        EventManager.on(PluginEvent.BudgetUpdateRule, refreshData);
+        EventManager.on(PluginEvent.BudgetRemoveRule, refreshData);
+        EventManager.on(PluginEvent.GlobalRestore, refreshData);
     });
 
     onDestroy(() => {
         EventManager.off(PluginEvent.UsageAddRecord, refreshData);
         EventManager.off(PluginEvent.UsageUpdateRecord, refreshData);
         EventManager.off(PluginEvent.UsageRemoveRecord, refreshData);
+        EventManager.off(PluginEvent.PriceUpdate, refreshData);
+        EventManager.off(PluginEvent.BudgetAddRule, refreshData);
+        EventManager.off(PluginEvent.BudgetUpdateRule, refreshData);
+        EventManager.off(PluginEvent.BudgetRemoveRule, refreshData);
+        EventManager.off(PluginEvent.GlobalRestore, refreshData);
     });
-
-    $: if (key) {
-        refreshData();
-    }
 
     async function refreshData() {
         rules = await BudgetManager.getRules();
@@ -175,13 +179,11 @@
         newRuleRequestType = "";
 
         isAddRuleExpanded = false;
-        await refreshData();
     }
 
     async function handleDeleteRule(ruleId: string) {
         if (await confirm($language.deleteRuleConfirm)) {
             await BudgetManager.deleteRule(ruleId);
-            await refreshData();
         }
     }
 
@@ -218,7 +220,6 @@
                 provider: editingRuleProvider || undefined,
                 requestType: editingRuleRequestType || undefined,
             });
-            await refreshData();
         }
         cancelEditing();
     }

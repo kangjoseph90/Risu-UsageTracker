@@ -1,11 +1,10 @@
 <script lang="ts">
-    import { onMount } from "svelte";
+    import { onMount, onDestroy } from "svelte";
     import { ProviderManager } from "../../manager/provider";
+    import { EventManager, PluginEvent } from "../../manager/event";
     import { formatString, language, type Language } from "../../lang";
     import { Plus, Check, X, Pencil, Trash } from "lucide-svelte";
     import { alert, confirm, prompt } from "../popup";
-
-    export let key: number = 0;
 
     let providerMap: Record<string, string> = {};
     let entries: [string, string][] = [];
@@ -16,11 +15,16 @@
 
     onMount(() => {
         refreshData();
+        EventManager.on(PluginEvent.ProviderUpdate, refreshData);
+        EventManager.on(PluginEvent.ProviderRename, refreshData);
+        EventManager.on(PluginEvent.GlobalRestore, refreshData);
     });
 
-    $: if (key) {
-        refreshData();
-    }
+    onDestroy(() => {
+        EventManager.off(PluginEvent.ProviderUpdate, refreshData);
+        EventManager.off(PluginEvent.ProviderRename, refreshData);
+        EventManager.off(PluginEvent.GlobalRestore, refreshData);
+    });
 
     function refreshData() {
         providerMap = ProviderManager.getAllProviders();
@@ -35,7 +39,6 @@
         if (!provider) return;
 
         ProviderManager.setProvider(url, provider);
-        refreshData();
     }
 
     function startEditingProvider(url: string, currentProvider: string) {
@@ -47,7 +50,6 @@
         const newProvider = editProviderInput.trim();
         if (newProvider && newProvider !== providerMap[url]) {
             ProviderManager.setProvider(url, newProvider);
-            refreshData();
         }
         editingState = null;
         editProviderInput = "";
@@ -66,9 +68,7 @@
         if (!confirmed) return;
 
         const success = ProviderManager.removeProvider(url);
-        if (success) {
-            refreshData();
-        } else {
+        if (!success) {
             await alert($language.failToDeleteMapping);
         }
     }

@@ -9,10 +9,13 @@ export enum PluginEvent {
     BudgetAddRule = "budget:add_rule",
     BudgetUpdateRule = "budget:update_rule",
     BudgetRemoveRule = "budget:remove_rule",
-    GlobalInit = "global:init",
-    LanguageChange = "language:change",
     PriceUpdate = "price:update",
+    ProviderUpdate = "provider:update",
     ProviderRename = "provider:rename",
+    GlobalInit = "global:init", // On plugin initialization
+    GlobalRestore = "global:restore", // On settings restore  
+    GlobalDestroy = "global:destroy", // On plugin uninstall or destroy
+    LanguageChange = "language:change",
 }
 
 type EventHandler<T = any> = (data: T) => void;
@@ -45,5 +48,10 @@ export class EventManager {
                 }
             });
         }
+    }
+
+    public static close(): void {
+        EventManager.emit(PluginEvent.GlobalDestroy);
+        EventManager.listeners.clear();
     }
 }

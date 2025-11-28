@@ -11,8 +11,6 @@
     import RecordFilters from "../components/RecordFilters.svelte";
     import ErrorLineChart from "../components/ErrorLineChart.svelte";
 
-    export let key: number = 0;
-
     let allRecords: ErrorRecord[] = [];
     let filteredRecords: ErrorRecord[] = [];
     let selectedRecords = new Set<ErrorRecord>();
@@ -69,16 +67,14 @@
         refreshData();
         EventManager.on(PluginEvent.ErrorAddRecord, refreshData);
         EventManager.on(PluginEvent.ErrorRemoveRecord, refreshData);
+        EventManager.on(PluginEvent.GlobalRestore, refreshData);
     });
 
     onDestroy(() => {
         EventManager.off(PluginEvent.ErrorAddRecord, refreshData);
         EventManager.off(PluginEvent.ErrorRemoveRecord, refreshData);
+        EventManager.off(PluginEvent.GlobalRestore, refreshData);
     });
-
-    $: if (key) {
-        refreshData();
-    }
 
     function refreshData() {
         allRecords = ErrorManager.getRecords();
@@ -180,7 +176,6 @@
     async function deleteRecord(record: ErrorRecord) {
         if (await confirm($language.deleteRecordConfirm)) {
             ErrorManager.removeRecord(record);
-            refreshData();
         }
     }
 
@@ -199,7 +194,6 @@
             const deletedText = formatString($language.deletedRecords, { count: deletedCount });
             await alert(deletedText);
             clearSelection();
-            refreshData();
         }
     }
 

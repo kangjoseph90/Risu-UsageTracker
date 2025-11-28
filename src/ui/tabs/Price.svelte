@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { onMount, createEventDispatcher } from "svelte";
+    import { onMount, onDestroy, createEventDispatcher } from "svelte";
     import { PriceManager } from "../../manager/price";
     import { ProviderManager } from "../../manager/provider";
     import { EventManager, PluginEvent } from "../../manager/event";
@@ -15,8 +15,6 @@
     } from "lucide-svelte";
     import { formatString, language } from "../../lang";
     import { alert, confirm, prompt } from "../popup";
-
-    export let key: number = 0;
 
     const dispatch = createEventDispatcher();
 
@@ -45,11 +43,16 @@
 
     onMount(() => {
         refreshData();
+        EventManager.on(PluginEvent.PriceUpdate, refreshData);
+        EventManager.on(PluginEvent.ProviderRename, refreshData);
+        EventManager.on(PluginEvent.GlobalRestore, refreshData);
     });
 
-    $: if (key) {
-        refreshData();
-    }
+    onDestroy(() => {
+        EventManager.off(PluginEvent.PriceUpdate, refreshData);
+        EventManager.off(PluginEvent.ProviderRename, refreshData);
+        EventManager.off(PluginEvent.GlobalRestore, refreshData);
+    });
 
     function refreshData() {
         confirmedPrices = PriceManager.getConfirmedPrice();
@@ -79,11 +82,12 @@
     function confirmProviderEdit(oldProvider: string) {
         const newProvider = editProviderInput.trim();
         if (newProvider && newProvider !== oldProvider) {
-            EventManager.emit(PluginEvent.ProviderRename, { oldName: oldProvider, newName: newProvider });
+            // Rename in both price data and provider mapping
+            PriceManager.renameProvider(oldProvider, newProvider);
+            ProviderManager.renameProvider(oldProvider, newProvider);
         }
         editingState = null;
         editProviderInput = "";
-        refreshData();
         dispatch("change");
     }
 
@@ -175,7 +179,6 @@
             cachedInputPrice: "0",
             outputPrice: "0",
         };
-        refreshData();
         dispatch("change");
     }
 
@@ -184,7 +187,6 @@
         if (tempPrice) {
             PriceManager.setConfirmedPrice(modelId, provider, tempPrice);
             PriceManager.removeTemporaryModel(modelId, provider);
-            refreshData();
             dispatch("change");
         }
     }
@@ -199,7 +201,6 @@
         } else {
             PriceManager.removeConfirmedModel(modelId, provider);
         }
-        refreshData();
         dispatch("change");
     }
 
@@ -238,7 +239,6 @@
             } else {
                 PriceManager.setConfirmedPrice(modelId, provider, updatedPrice);
             }
-            refreshData();
             dispatch("change");
         }
     }
@@ -274,7 +274,6 @@
             } else {
                 PriceManager.setConfirmedPrice(modelId, provider, updatedPrice);
             }
-            refreshData();
             dispatch("change");
         }
     }
@@ -314,7 +313,6 @@
         };
 
         PriceManager.setTemporaryPrice(modelId, provider, initialPrice);
-        refreshData();
         dispatch("change");
     }
 

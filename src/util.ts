@@ -103,19 +103,31 @@ function readFileAsText(file: File): Promise<string> {
     });
 }
 
+type DebouncedFunction<T extends (...args: any[]) => void> = {
+    (...args: Parameters<T>): void;
+    cancel: () => void;
+};
+
 function debounce<T extends (...args: any[]) => void>(
     func: T,
     wait: number
-): (...args: Parameters<T>) => void {
+): DebouncedFunction<T> {
     let timeout: number | undefined;
 
-    return function(this: ThisParameterType<T>, ...args: Parameters<T>): void {
+    const debounced = function(this: ThisParameterType<T>, ...args: Parameters<T>): void {
         const context = this;
         clearTimeout(timeout);
         timeout = window.setTimeout(() => {
             func.apply(context, args);
         }, wait);
+    } as DebouncedFunction<T>;
+
+    debounced.cancel = function(): void {
+        clearTimeout(timeout);
+        timeout = undefined;
     };
+
+    return debounced;
 }
 
 function parseRequestType(mode: string): RequestType {

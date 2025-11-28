@@ -5,10 +5,9 @@ import { RisuAPI } from "./api";
 import { UI } from "./ui";
 import { movePluginToTop, checkDuplicate } from './util';
 import { UpdateManager } from './manager/update';
-import { initManagers } from './manager';
+import { EventManager, PluginEvent } from './manager/event';
 
-// Initialize all managers
-initManagers();
+EventManager.emit(PluginEvent.GlobalInit);
 
 const usageTracker = new UsageTracker();
 const ui = new UI();
@@ -16,6 +15,7 @@ const ui = new UI();
 RisuAPI.onUnload(() => {
     usageTracker.destroy();
     ui.destroy();
+    EventManager.close();
 });
 
 
