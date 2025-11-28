@@ -2,8 +2,8 @@ import { PRICE_ARG, PRICE_TEMP_ARG } from "../plugin";
 import { DEFAULT_PRICE } from "../consts/price";
 import { RisuAPI } from "../api";
 import type { PriceInfo, ProviderPrice } from "../types";
-import { UsageManager } from "./usage";
 import { debounce } from "../util";
+import { EventManager, PluginEvent } from "./event";
 
 export class PriceManager {
     private static cachedConfirmed: ProviderPrice = {};
@@ -31,6 +31,10 @@ export class PriceManager {
         } catch (e) {
             this.cachedTemporary = {};
         }
+
+        EventManager.on(PluginEvent.ProviderRename, (data: { oldName: string, newName: string }) => {
+            PriceManager.renameProvider(data.oldName, data.newName);
+        });
     }
 
     static getModelPrice(modelId: string, provider: string): PriceInfo {
@@ -67,7 +71,7 @@ export class PriceManager {
         this.cachedTemporary[provider][modelId] = priceInfo;
         this.debouncedSaveTemporary();
         if (applyRetroactive) {
-            UsageManager.updateCostsForModel(provider, modelId, priceInfo);
+            EventManager.emit(PluginEvent.PriceUpdate, { provider, modelId, priceInfo });
         }
     }
 
@@ -82,7 +86,7 @@ export class PriceManager {
         this.cachedConfirmed[provider][modelId] = priceInfo;
         this.debouncedSaveConfirmed();
         if (applyRetroactive) {
-            UsageManager.updateCostsForModel(provider, modelId, priceInfo);
+            EventManager.emit(PluginEvent.PriceUpdate, { provider, modelId, priceInfo });
         }
     }
 

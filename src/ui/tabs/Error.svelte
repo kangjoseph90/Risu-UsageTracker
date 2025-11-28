@@ -1,6 +1,7 @@
 <script lang="ts">
-    import { onMount } from "svelte";
+    import { onMount, onDestroy } from "svelte";
     import { ErrorManager } from "../../manager/error";
+    import { EventManager, PluginEvent } from "../../manager/event";
     import type { ErrorRecord } from "../../types";
     import { RequestType } from "../../types";
     import { language, formatString } from "../../lang";
@@ -66,6 +67,13 @@
 
     onMount(() => {
         refreshData();
+        EventManager.on(PluginEvent.ErrorAddRecord, refreshData);
+        EventManager.on(PluginEvent.ErrorRemoveRecord, refreshData);
+    });
+
+    onDestroy(() => {
+        EventManager.off(PluginEvent.ErrorAddRecord, refreshData);
+        EventManager.off(PluginEvent.ErrorRemoveRecord, refreshData);
     });
 
     $: if (key) {

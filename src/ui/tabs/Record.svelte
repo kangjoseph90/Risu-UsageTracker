@@ -1,7 +1,8 @@
 <script lang="ts">
-    import { onMount } from "svelte";
+    import { onMount, onDestroy } from "svelte";
     import { UsageManager } from "../../manager/usage";
     import { ProviderManager } from "../../manager/provider";
+    import { EventManager, PluginEvent } from "../../manager/event";
     import type { UsageRecord } from "../../types";
     import { RequestType } from "../../types";
     import { formatString, language } from "../../lang";
@@ -62,6 +63,15 @@
 
     onMount(() => {
         refreshData();
+        EventManager.on(PluginEvent.UsageAddRecord, refreshData);
+        EventManager.on(PluginEvent.UsageUpdateRecord, refreshData);
+        EventManager.on(PluginEvent.UsageRemoveRecord, refreshData);
+    });
+
+    onDestroy(() => {
+        EventManager.off(PluginEvent.UsageAddRecord, refreshData);
+        EventManager.off(PluginEvent.UsageUpdateRecord, refreshData);
+        EventManager.off(PluginEvent.UsageRemoveRecord, refreshData);
     });
 
     $: if (key) {

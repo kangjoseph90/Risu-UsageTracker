@@ -2,6 +2,7 @@ import { ERROR_DB_ARG } from "../plugin";
 import { RisuAPI } from "../api";
 import type { ErrorRecord, ErrorDB } from "../types";
 import { debounce } from "../util";
+import { EventManager, PluginEvent } from "./event";
 
 export class ErrorManager {
     private static cachedDB: ErrorDB = {
@@ -32,6 +33,7 @@ export class ErrorManager {
         this.cachedDB.records.push(record);
         this.cachedDB.lastUpdated = new Date().toISOString();
         this.debouncedSave();
+        EventManager.emit(PluginEvent.ErrorAddRecord, record);
     }
 
     static removeRecord(record: ErrorRecord): boolean {
@@ -47,6 +49,7 @@ export class ErrorManager {
             this.cachedDB.records.splice(index, 1);
             this.cachedDB.lastUpdated = new Date().toISOString();
             this.debouncedSave();
+            EventManager.emit(PluginEvent.ErrorRemoveRecord, record);
             return true;
         }
         return false;

@@ -2,6 +2,7 @@
     import { onMount, createEventDispatcher } from "svelte";
     import { PriceManager } from "../../manager/price";
     import { ProviderManager } from "../../manager/provider";
+    import { EventManager, PluginEvent } from "../../manager/event";
     import type { ProviderPrice, PriceInfo } from "../../types";
     import PriceField from "../components/PriceField.svelte";
     import {
@@ -78,8 +79,7 @@
     function confirmProviderEdit(oldProvider: string) {
         const newProvider = editProviderInput.trim();
         if (newProvider && newProvider !== oldProvider) {
-            PriceManager.renameProvider(oldProvider, newProvider);
-            ProviderManager.renameProvider(oldProvider, newProvider);
+            EventManager.emit(PluginEvent.ProviderRename, { oldName: oldProvider, newName: newProvider });
         }
         editingState = null;
         editProviderInput = "";

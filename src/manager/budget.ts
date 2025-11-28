@@ -2,6 +2,7 @@ import type { BudgetRule } from '../types';
 import { RisuAPI } from '../api';
 import { BUDGET_RULE_ARG } from '../plugin';
 import { debounce } from '../util';
+import { EventManager, PluginEvent } from './event';
 
 export class BudgetManager {
     private static rules: BudgetRule[] = [];
@@ -34,6 +35,7 @@ export class BudgetManager {
         };
         this.rules.push(newRule);
         this.debouncedSave();
+        EventManager.emit(PluginEvent.BudgetAddRule, newRule);
         return newRule;
     }
 
@@ -42,12 +44,14 @@ export class BudgetManager {
         if (index !== -1) {
             this.rules[index] = rule;
             this.debouncedSave();
+            EventManager.emit(PluginEvent.BudgetUpdateRule, rule);
         }
     }
 
     static async deleteRule(ruleId: string): Promise<void> {
         this.rules = this.rules.filter(r => r.id !== ruleId);
         this.debouncedSave();
+        EventManager.emit(PluginEvent.BudgetRemoveRule, ruleId);
     }
 }
 

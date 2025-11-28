@@ -3,6 +3,7 @@ import { getDefaultProvider } from "../consts/provider";
 import { RisuAPI } from "../api";
 import type { ProviderMap } from "../types";
 import { debounce } from "../util";
+import { EventManager, PluginEvent } from "./event";
 
 export class ProviderManager {
     private static cachedMap: ProviderMap = {};
@@ -19,6 +20,10 @@ export class ProviderManager {
         } catch (e) {
             this.cachedMap = {};
         }
+
+        EventManager.on(PluginEvent.ProviderRename, (data: { oldName: string, newName: string }) => {
+            ProviderManager.renameProvider(data.oldName, data.newName);
+        });
     }
 
     static getProvider(url: string): string {

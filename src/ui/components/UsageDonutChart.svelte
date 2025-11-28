@@ -15,7 +15,7 @@
         value: number;
         percentage: number;
     }>;
-    export let measureBy: "tokens" | "cost" | "requests" | "latency";
+    export let measureBy: "tokens" | "cost" | "requests" | "latency" | "tps";
 
     const size = 200;
     const center = size / 2;

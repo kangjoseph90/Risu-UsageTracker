@@ -3,6 +3,7 @@ import { RisuAPI } from "../api";
 import type { UsageRecord, UsageDB, UsageFilter, PriceInfo, CostInfo } from "../types";
 import { calculateCost, debounce } from "../util";
 import { ProviderManager } from "./provider";
+import { EventManager, PluginEvent } from "./event";
 
 export class UsageManager {
     private static cachedDB: UsageDB = {
@@ -28,12 +29,17 @@ export class UsageManager {
                 lastUpdated: new Date().toISOString()
             };
         }
+
+        EventManager.on(PluginEvent.PriceUpdate, (data: { provider: string, modelId: string, priceInfo: PriceInfo }) => {
+            UsageManager.updateCostsForModel(data.provider, data.modelId, data.priceInfo);
+        });
     }
 
     static addRecord(record: UsageRecord) {
         this.cachedDB.records.push(record);
         this.cachedDB.lastUpdated = new Date().toISOString();
         this.debouncedSave();
+        EventManager.emit(PluginEvent.UsageAddRecord, record);
     }
 
     static removeRecord(record: UsageRecord): boolean {
@@ -47,6 +53,7 @@ export class UsageManager {
             this.cachedDB.records.splice(index, 1);
             this.cachedDB.lastUpdated = new Date().toISOString();
             this.debouncedSave();
+            EventManager.emit(PluginEvent.UsageRemoveRecord, record);
             return true;
         }
         return false;
@@ -87,6 +94,7 @@ export class UsageManager {
         if (updatedCount > 0) {
             this.cachedDB.lastUpdated = new Date().toISOString();
             this.debouncedSave();
+            EventManager.emit(PluginEvent.UsageUpdateRecord, { provider, modelId, newPrice });
         }
 
         return updatedCount;

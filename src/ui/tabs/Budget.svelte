@@ -1,8 +1,9 @@
 <script lang="ts">
-    import { onMount } from "svelte";
+    import { onMount, onDestroy } from "svelte";
     import { BudgetManager } from "../../manager/budget";
     import { UsageManager } from "../../manager/usage";
     import { ProviderManager } from "../../manager/provider";
+    import { EventManager, PluginEvent } from "../../manager/event";
     import type { BudgetRule, UsageRecord } from "../../types";
     import { BudgetPeriod, RequestType } from "../../types";
     import DollarDisplay from "../components/DollarDisplay.svelte";
@@ -53,6 +54,15 @@
 
     onMount(async () => {
         await refreshData();
+        EventManager.on(PluginEvent.UsageAddRecord, refreshData);
+        EventManager.on(PluginEvent.UsageUpdateRecord, refreshData);
+        EventManager.on(PluginEvent.UsageRemoveRecord, refreshData);
+    });
+
+    onDestroy(() => {
+        EventManager.off(PluginEvent.UsageAddRecord, refreshData);
+        EventManager.off(PluginEvent.UsageUpdateRecord, refreshData);
+        EventManager.off(PluginEvent.UsageRemoveRecord, refreshData);
     });
 
     $: if (key) {

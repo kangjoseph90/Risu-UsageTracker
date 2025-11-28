@@ -9,6 +9,7 @@ import { downloadFile, readFileAsText } from "../util";
 import { BudgetManager } from "./budget";
 import { ErrorManager } from "./error";
 import { initManagers } from ".";
+import { EventManager, PluginEvent } from "./event";
 
 interface BackupData {
     version: string;
@@ -118,7 +119,7 @@ export class BackupManager {
             }
         }
 
-        initManagers();
+        EventManager.emit(PluginEvent.GlobalInit);
     }
 
     static async hasBackup(): Promise<boolean> {
