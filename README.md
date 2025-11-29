@@ -1,65 +1,85 @@
+# Risu Usage Tracker
 
-# Usage Tracker Plugin for RisuAI
-
-This project is a plugin for RisuAI that tracks API usage, cost, and provider information for LLM requests. It is designed to be imported as a pre-built JavaScript file and used directly in the RisuAI environment.
+This is an API usage tracking and management plugin for RisuAI. It automatically tracks and visualizes costs, token usage, and errors for LLM requests.
 
 ## Features
 
-- Tracks LLM API usage, including model, provider, and cost per request
-- Supports multiple providers (OpenAI, Anthropic, Google, Azure, etc.)
-- UI for viewing usage statistics, price management, and provider mapping
-- Backup and restore of all usage and price data via browser IndexedDB
-- Automatic cost calculation based on token usage and provider/model pricing
-- Easily extendable for new providers and models
+### Usage Dashboard
+
+-   **Real-time Statistics**: View total cost, request count, and token usage (input/output/cached) at a glance.
+-   **Charts**:
+    -   **Bar Chart**: Visualize usage trends from 5-minute intervals up to monthly views.
+    -   **Donut Chart**: Analyze usage distribution by model, provider, and request type.
+-   **Filtering**: Filter data by date, model, provider, and request type.
+
+### Price Management
+
+-   **Price Tracking**:
+    -   **Confirmed Prices**: Manage verified model prices.
+    -   **Temporary Prices**: Automatically track prices for new or unknown models with warning indicators.
+-   **Flexible Editing**: Freely edit input, output, and cached token prices for each model.
+-   **Retroactive Application**: Choose whether to apply price changes to past usage records when updating pricing information.
+
+### Budget Management
+
+-   **Budget Rules**: Create custom budget rules based on model, provider, or request type.
+-   **Period Settings**: Set budget limits for Daily, Weekly, or Monthly periods.
+-   **Budget Warnings**:
+    -   Automatically send warning notifications when a specific percentage (e.g., 90%) of the budget is reached.
+    -   Visually monitor budget consumption through progress bars.
+
+### Record Management
+
+-   **Detailed Logs**: Record timestamp, model, provider, latency, token count, and cost for every API request.
+-   **Data Export**: Export recorded data to **JSON** or **CSV** files.
+-   **Data Management**: Delete unnecessary records individually or in bulk.
+
+### Provider Management
+
+-   **URL Mapping**: Map complex API URLs to human-readable provider names (e.g., OpenAI, Anthropic).
+-   **Custom Providers**: Manually modify or add provider names.
+
+### Error Tracking
+
+-   **Error Logs**: Record status codes and timestamps for failed API requests.
+-   **Frequency Analysis**: View error frequency over time charts to identify when issues occur.
+
+### System & Convenience
+
+-   **Auto Update**: Automatically check for the latest version at startup and update with a single click while preserving settings.
+-   **Backup & Restore**: Backup and restore all data to/from browser storage or files.
+-   **Multi-language Support**: Supports multiple languages including English and Korean.
+
+---
 
 ## Installation & Build
 
-1. **Install dependencies:**
-  ```sh
-  npm install
-  ```
-2. **Build the plugin:**
-  ```sh
-  npm run build
-  ```
-  The output will be in `dist/usage-tracker.js`.
+This plugin is designed to run directly within the RisuAI environment.
 
-3. **Import in RisuAI:**
-  Import the built `usage-tracker.js` file directly into your RisuAI environment as a plugin.
+### 1. Install Dependencies
 
-## Usage
+Run the following command in the project directory to install necessary packages.
 
-- The plugin automatically tracks LLM API requests and responses.
-- A floating button is injected into the RisuAI UI for opening the usage statistics modal.
-- The modal provides tabs for usage statistics, price management, provider mapping, and raw record viewing.
-- All data is stored using RisuAPI arguments and can be backed up/restored via the UI.
+```sh
+npm install
+```
 
-## Architecture Overview
+### 2. Build Plugin
 
-- **src/main.ts**: Entry point. Initializes the `UsageTracker` and UI, and registers cleanup on unload.
-- **src/tracker/usage.ts**: Core logic for tracking requests, extracting usage/cost, and recording data.
-- **src/manager/**: Handles persistent storage and management of usage records, price info, and provider mapping.
-- **src/ui/**: Svelte-based UI components for statistics, price, provider, and record management.
-- **src/format/**: Format detection and parsing for different LLM API providers.
-- **src/api.ts**: RisuAPI integration for argument storage, provider registration, and plugin lifecycle.
-- **src/plugin.ts**: Plugin metadata, argument definitions, and constants.
+Build the plugin using the following command.
 
-## Data Model
+```sh
+npm run build
+```
 
-- **Usage Records**: Timestamp, model, provider, URL, request type, token usage, and calculated cost.
-- **Price Info**: Per-model, per-provider pricing (input, output, cached input).
-- **Provider Map**: Maps API URLs to provider names.
+Once the build is complete, a `dist/risu-usage-tracker.js` file will be generated.
 
-## Backup & Restore
+### 3. Apply to RisuAI
 
-- All plugin data can be backed up to and restored from browser IndexedDB via the UI.
-- Backup includes all usage, price, and provider mapping data.
+Load the generated `dist/risu-usage-tracker.js` file in RisuAI's plugin settings or copy its content to apply.
 
-## Customization
-
-- To add new providers or models, update the price and provider constants in `src/consts/price.ts` and `src/consts/provider.ts`.
-- Extend format detection in `src/format/` for new API response formats.
+---
 
 ## License
 
-This project is proprietary and intended for use with RisuAI only.
+This project is licensed under the **MIT License**, allowing free use, modification, and distribution.
